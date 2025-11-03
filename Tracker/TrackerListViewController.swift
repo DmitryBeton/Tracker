@@ -8,6 +8,9 @@
 import UIKit
 
 final class TrackerListViewController: UIViewController {
+    // MARK: - Properties
+    var categories: [TrackerCategory] = []
+    var completedTrackers: [TrackerRecord] = []
     
     // MARK: - UI Elements
     private let dizzyImage: UIImageView = {
