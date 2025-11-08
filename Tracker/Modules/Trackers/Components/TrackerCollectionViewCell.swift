@@ -81,15 +81,12 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     
     func updateCompletionState(isCompleted: Bool) {
         if isCompleted {
-            // Выполнено: кнопка полупрозрачная с галочкой
             doneButton.backgroundColor = cellColor.withAlphaComponent(0.3)
             doneButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
-            doneButton.tintColor = cellColor // Цвет иконки совпадает с цветом трекера
+
         } else {
-            // Не выполнено: кнопка непрозрачная с плюсом
             doneButton.backgroundColor = cellColor
             doneButton.setImage(UIImage(systemName: "plus"), for: .normal)
-            doneButton.tintColor = .white // Белая иконка на цветном фоне
         }
     }
 

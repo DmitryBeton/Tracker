@@ -8,6 +8,7 @@
 import UIKit
 
 final class TrackersPresenter: TrackersPresenterProtocol {
+    // MARK: - Private properties
     private weak var view: TrackersViewProtocol?
     private let repository: TrackerRepositoryProtocol
 
@@ -15,6 +16,7 @@ final class TrackersPresenter: TrackersPresenterProtocol {
     private var completedRecords: [TrackerRecord] = []
     private var selectedDate = Date()
 
+    // MARK: - Lifecycle
     init(view: TrackersViewProtocol, repository: TrackerRepositoryProtocol) {
         self.view = view
         self.repository = repository
@@ -27,6 +29,7 @@ final class TrackersPresenter: TrackersPresenterProtocol {
 
     }
 
+    // MARK: - Public methods
     func didSelectDate(_ date: Date) {
         selectedDate = date
         displayTrackers(for: date)
@@ -34,15 +37,6 @@ final class TrackersPresenter: TrackersPresenterProtocol {
 
     func didTapAddButton() {
         print("➕ Add button tapped")
-    }
-
-    private func displayTrackers(for date: Date) {
-        let visible = repository.filteredCategories(for: date, from: categories)
-        if visible.isEmpty {
-            view?.showEmptyState()
-        } else {
-            view?.updateCategories(visible)
-        }
     }
 
     func configureCell(_ cell: TrackerCollectionViewCell, with tracker: Tracker) {
@@ -55,12 +49,27 @@ final class TrackersPresenter: TrackersPresenterProtocol {
         }
     }
 
+    // MARK: - Private methods
+    private func displayTrackers(for date: Date) {
+        let visible = repository.filteredCategories(for: date, from: categories)
+        if visible.isEmpty {
+            view?.showEmptyState()
+        } else {
+            view?.updateCategories(visible)
+        }
+    }
+
     private func toggleTrackerCompletion(for trackerId: UUID) {
+        guard Date() > selectedDate else {
+            view?.showFutureDateRestriction()
+            return
+        }
+
         if let index = completedRecords.firstIndex(where: { $0.id == trackerId && Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }) {
             completedRecords.remove(at: index)
         } else {
             completedRecords.append(TrackerRecord(id: trackerId, date: selectedDate))
         }
-        view?.updateCompletedRecords(completedRecords)
+        view?.updateSingleTracker(trackerId, completedRecords: completedRecords)
     }
 }
