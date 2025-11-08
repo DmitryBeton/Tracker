@@ -52,10 +52,13 @@ final class TrackersPresenter: TrackersPresenterProtocol {
     // MARK: - Private methods
     private func displayTrackers(for date: Date) {
         let visible = repository.filteredCategories(for: date, from: categories)
+
         if visible.isEmpty {
+            view?.updateCategories([])
             view?.showEmptyState()
         } else {
             view?.updateCategories(visible)
+            view?.hideEmptyState()
         }
     }
 
