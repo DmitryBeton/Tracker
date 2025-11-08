@@ -16,21 +16,27 @@ final class TabBarController: UITabBarController {
     }
     
     private func setupViewControllers() {
-        let trackerListViewController = TrackerListViewController()
-        trackerListViewController.tabBarItem = UITabBarItem(
+        let trackerViewController = TrackersViewController()
+        let repository = MockTrackersRepository() // или твой реальный репозиторий
+        let presenter = TrackersPresenter(view: trackerViewController, repository: repository)
+        trackerViewController.configure(with: presenter)
+
+        let trackerNavigationController = UINavigationController(rootViewController: trackerViewController)
+        trackerNavigationController.tabBarItem = UITabBarItem(
             title: "Трекеры",
             image: UIImage(resource: .tabTracker),
             tag: 1
         )
-        
+
         let statisticsViewController = StatisticsViewController()
-        statisticsViewController.tabBarItem = UITabBarItem(
+        let statisticsNavigationController = UINavigationController(rootViewController: statisticsViewController)
+        statisticsNavigationController.tabBarItem = UITabBarItem(
             title: "Статистика",
             image: UIImage(resource: .tabStatistic),
             tag: 2
         )
-        
-        viewControllers = [trackerListViewController, statisticsViewController]
+
+        viewControllers = [trackerNavigationController, statisticsNavigationController]
     }
     
     private func setupTabBar() {

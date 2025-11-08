@@ -5,16 +5,16 @@
 //  Created by Дмитрий Чалов on 03.11.2025.
 //
 
-import Foundation
+import UIKit
 
 struct Tracker {
     let id: UUID
     let name: String
-    let color: String
+    let color: UIColor
     let emoji: String
     let schedule: TrackerSchedule?
     
-    init(id: UUID = UUID(), name: String, color: String, emoji: String, schedule: TrackerSchedule? = nil) {
+    init(id: UUID = UUID(), name: String, color: UIColor, emoji: String, schedule: TrackerSchedule? = nil) {
         self.id = id
         self.name = name
         self.color = color
