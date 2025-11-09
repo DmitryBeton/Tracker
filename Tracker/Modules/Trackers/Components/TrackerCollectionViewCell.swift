@@ -10,13 +10,13 @@ import UIKit
 final class TrackerCollectionViewCell: UICollectionViewCell {
     // MARK: - Properties
     private var trackerId: UUID?
-    private var cellColor: UIColor = .ypWhite
     var onDoneButtonTapped: ((UUID) -> Void)?
     
     // MARK: - UI Elements
     private let coloredView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
+        view.layer.cornerRadius = 16
         return view
     }()
     
@@ -42,13 +42,13 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         return label
     }()
     
-    private let doneButton: UIButton = {
+    private lazy var doneButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(systemName: "plus"), for: .normal)
         button.tintColor = .ypWhite
         button.layer.cornerRadius = 16
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(nil, action: #selector(didTapDoneButton), for: .touchUpInside)
+        button.addTarget(self, action: #selector(didTapDoneButton), for: .touchUpInside)
         return button
     }()
     
@@ -66,27 +66,40 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     // MARK: - Public Methods
     func configure(with tracker: Tracker, completedDays: Int = 0, isCompletedToday: Bool) {
         trackerId = tracker.id
-        cellColor = tracker.color
+        
         descriptionLabel.text = tracker.name
-        coloredView.backgroundColor = cellColor
-        doneButton.backgroundColor = cellColor
+        
+        coloredView.backgroundColor = tracker.color
+        doneButton.backgroundColor = tracker.color
         
         emojiImage.image = UIImage(named: tracker.emoji)
-        countLabel.text = "\(completedDays) дней"
         
-        coloredView.layer.cornerRadius = 16
+        countLabel.text = "\(completedDays) \(dayWord(for: completedDays))"
         
         updateCompletionState(isCompleted: isCompletedToday)
     }
-    
-    func updateCompletionState(isCompleted: Bool) {
+
+    // MARK: - Private methods
+    private func updateCompletionState(isCompleted: Bool) {
         if isCompleted {
-            doneButton.backgroundColor = cellColor.withAlphaComponent(0.3)
+            doneButton.backgroundColor = coloredView.backgroundColor?.withAlphaComponent(0.3)
             doneButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
 
         } else {
-            doneButton.backgroundColor = cellColor
+            doneButton.backgroundColor = coloredView.backgroundColor
             doneButton.setImage(UIImage(systemName: "plus"), for: .normal)
+        }
+    }
+
+    private func dayWord(for count: Int) -> String {
+        let n = abs(count) % 100
+        if n >= 11 && n <= 19 {
+            return "дней"
+        }
+        switch n % 10 {
+        case 1: return "день"
+        case 2, 3, 4: return "дня"
+        default: return "дней"
         }
     }
 
