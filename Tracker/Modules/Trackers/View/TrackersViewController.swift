@@ -43,8 +43,6 @@ final class TrackersViewController: UIViewController {
         super.viewDidLoad( )
         setupUI()
         presenter?.viewDidLoad()
-        
-        print("VIEW viewDidLoad called")
     }
     
     func configure(with presenter: TrackersPresenterProtocol) {
@@ -98,6 +96,9 @@ final class TrackersViewController: UIViewController {
         datePicker.datePickerMode = .date
         datePicker.addTarget(self, action: #selector(dateChanged), for: .valueChanged)
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
+        
+        navigationItem.searchController = UISearchController()
+        navigationItem.searchController?.searchBar.placeholder = "Поиск"
     }
 
     // MARK: - Actions

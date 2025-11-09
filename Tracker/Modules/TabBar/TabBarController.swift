@@ -17,7 +17,7 @@ final class TabBarController: UITabBarController {
     
     private func setupViewControllers() {
         let trackerViewController = TrackersViewController()
-        let repository = MockTrackersRepository() // или твой реальный репозиторий
+        let repository = MockTrackersRepository()
         let presenter = TrackersPresenter(view: trackerViewController, repository: repository)
         trackerViewController.configure(with: presenter)
 

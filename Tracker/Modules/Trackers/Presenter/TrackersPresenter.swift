@@ -25,8 +25,6 @@ final class TrackersPresenter: TrackersPresenterProtocol {
     func viewDidLoad() {
         categories = repository.fetchCategories()
         displayTrackers(for: selectedDate)
-        print("PRESENTER viewDidLoad called")
-
     }
 
     // MARK: - Public methods
