@@ -33,8 +33,8 @@ final class TrackersPresenter: TrackersPresenterProtocol {
         displayTrackers(for: date)
     }
 
-    func didTapAddButton() {
-        print("➕ Add button tapped")
+    func didTapAddTracker() {
+        view?.showCreateTrackerScreen()
     }
 
     func configureCell(_ cell: TrackerCollectionViewCell, with tracker: Tracker) {

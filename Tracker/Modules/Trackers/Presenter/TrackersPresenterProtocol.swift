@@ -10,6 +10,6 @@ import Foundation
 protocol TrackersPresenterProtocol {
     func viewDidLoad()
     func didSelectDate(_ date: Date)
-    func didTapAddButton()
+    func didTapAddTracker()
     func configureCell(_ cell: TrackerCollectionViewCell, with tracker: Tracker)
 }

@@ -103,7 +103,7 @@ final class TrackersViewController: UIViewController {
 
     // MARK: - Actions
     @objc private func addTapped() {
-        presenter?.didTapAddButton()
+        presenter?.didTapAddTracker()
     }
     
     @objc private func dateChanged() {
@@ -154,6 +154,14 @@ extension TrackersViewController: TrackersViewProtocol {
     func hideEmptyState() {
         dizzyImage.isHidden = true
         label.isHidden = true
+    }
+    
+    func showCreateTrackerScreen() {
+        let createVC = CreateTrackerViewController()
+        createVC.title = "Новая привычка"
+
+        let navVC = UINavigationController(rootViewController: createVC)
+        present(navVC, animated: true)
     }
 }
 
