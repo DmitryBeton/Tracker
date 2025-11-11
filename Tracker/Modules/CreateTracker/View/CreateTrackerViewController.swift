@@ -9,6 +9,7 @@ import UIKit
 
 final class CreateTrackerViewController: UIViewController {
     // MARK: - Properties
+    private var presenter: CreateTrackerPresenterProtocol?
     private let tableViewItems = ["Категории", "Расписание"]
     
     // MARK: - UI Elements
@@ -62,10 +63,15 @@ final class CreateTrackerViewController: UIViewController {
         setupConstraints()
     }
     
+    func configure(with presenter: CreateTrackerPresenterProtocol) {
+        self.presenter = presenter
+    }
+
     // MARK: - Setup UI
     private func setupUI() {
         title = "Новая привычка"
-        
+        view.backgroundColor = .ypWhite
+
         tableView.delegate = self
         tableView.dataSource = self
         
@@ -105,20 +111,20 @@ final class CreateTrackerViewController: UIViewController {
 // MARK: - CreateTrackerViewProtocol
 extension CreateTrackerViewController: CreateTrackerViewProtocol {
     func showCategorySelection() {
-        print("👉 Переход к экрану категорий")
         // presenter?.didTapCategory()
     }
     
     func showScheduleSelection() {
-        print("👉 Переход к экрану расписания")
-        // presenter?.didTapSchedule()
+        let createVC = ScheduleViewController()
+        createVC.title = "Расписание"
+
+        let navVC = UINavigationController(rootViewController: createVC)
+        present(navVC, animated: true)
+
+//         presenter?.didTapSchedule()
     }
     
     func closeCreateTracker() {
-        
-    }
-    
-    func showNameRequiredError() {
         
     }
 }

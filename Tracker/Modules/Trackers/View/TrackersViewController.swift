@@ -40,7 +40,7 @@ final class TrackersViewController: UIViewController {
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
-        super.viewDidLoad( )
+        super.viewDidLoad()
         setupUI()
         presenter?.viewDidLoad()
     }
