@@ -6,9 +6,12 @@
 //
 
 import UIKit
+import Logging
 
 final class TrackersViewController: UIViewController {
     // MARK: - Private properties
+    private let logger = Logger(label: "TrackersViewController")
+    
     private var presenter: TrackersPresenterProtocol?
     private var visibleCategories: [TrackerCategory] = []
     
@@ -43,10 +46,12 @@ final class TrackersViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         presenter?.viewDidLoad()
+        logger.info("✅ Главный экран трекеров готов к работе")
     }
     
     func configure(with presenter: TrackersPresenterProtocol) {
         self.presenter = presenter
+        logger.info("🎯 Presenter сконфигурирован для TrackersViewController")
     }
 
     // MARK: - UI Setup
@@ -99,6 +104,7 @@ final class TrackersViewController: UIViewController {
         
         navigationItem.searchController = UISearchController()
         navigationItem.searchController?.searchBar.placeholder = "Поиск"
+        navigationItem.hidesSearchBarWhenScrolling = false
     }
 
     // MARK: - Actions
@@ -113,6 +119,7 @@ final class TrackersViewController: UIViewController {
 
 // MARK: - TrackersViewProtocol
 extension TrackersViewController: TrackersViewProtocol {
+    // алерт "Нельзя отмечать трекеры на будущие даты."
     func showFutureDateRestriction() {
         let alert = UIAlertController(
             title: "Недоступно",
@@ -123,7 +130,9 @@ extension TrackersViewController: TrackersViewProtocol {
         present(alert, animated: true)
     }
 
+    // Обновляет 1 трекер
     func updateSingleTracker(_ trackerId: UUID, completedRecords: [TrackerRecord]) {
+        logger.debug("🔁 Обновление одного трекера: \(trackerId)")
         self.visibleCategories.enumerated().forEach { sectionIndex, category in
             if let rowIndex = category.trackers.firstIndex(where: { $0.id == trackerId }) {
                 let indexPath = IndexPath(item: rowIndex, section: sectionIndex)
@@ -136,14 +145,13 @@ extension TrackersViewController: TrackersViewProtocol {
         }
     }
 
+    // Обновляет отображаемые категории
     func updateCategories(_ categories: [TrackerCategory]) {
         visibleCategories = categories
+        logger.info("📊 Обновление категорий: стало \(visibleCategories.count). Всего трекеров: \(visibleCategories.flatMap { $0.trackers }.count)")
+
         collectionView.reloadData()
         hideEmptyState()
-    }
-
-    func updateCompletedRecords(_ records: [TrackerRecord]) {
-        collectionView.reloadData()
     }
 
     func showEmptyState() {
@@ -159,7 +167,18 @@ extension TrackersViewController: TrackersViewProtocol {
     func showCreateTrackerScreen() {
         let createVC = CreateTrackerViewController()
         createVC.title = "Новая привычка"
-
+        
+        let presenter = CreateTrackerPresenter(
+            view: createVC,
+            repository: MockTrackersRepository(),
+            onCreateTracker: { [weak self] newTracker in
+                self?.logger.info("🔄 Получен новый трекер из CreateTracker: '\(newTracker.name)'")
+                // Передаем созданный трекер в основной презентер
+                self?.presenter?.createNewTracker(newTracker)
+            }
+        )
+        createVC.configure(with: presenter)
+        
         let navVC = UINavigationController(rootViewController: createVC)
         present(navVC, animated: true)
     }

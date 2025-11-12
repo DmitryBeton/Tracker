@@ -6,10 +6,19 @@
 //
 
 import UIKit
+import Logging
+
+protocol ScheduleViewControllerDelegate: AnyObject {
+    func didSelectSchedule(_ schedule: TrackerSchedule)
+}
 
 final class ScheduleViewController: UIViewController {
+    // MARK: - Dependencies
+    private let logger = Logger(label: "ScheduleViewController")
+    weak var delegate: ScheduleViewControllerDelegate?
+
     // MARK: - Properties
-    private let selectedDays: [Bool] = []
+    private var selectedDays: [Bool] = Array(repeating: false, count: 7)
     private let tableViewData: [String] = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
     
     // MARK: - UI Elements
@@ -20,6 +29,7 @@ final class ScheduleViewController: UIViewController {
         button.backgroundColor = .ypBlack
         button.translatesAutoresizingMaskIntoConstraints = false
         button.layer.cornerRadius = 16
+        button.addTarget(self, action: #selector(doneTapped), for: .touchUpInside)
         return button
     }()
     
@@ -27,7 +37,7 @@ final class ScheduleViewController: UIViewController {
         let tableView = UITableView()
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.isScrollEnabled = false
-        tableView.sectionIndexBackgroundColor = .ypBackground
+        tableView.backgroundColor = .ypWhite
         tableView.tableFooterView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.size.width, height: 1))
         return tableView
     }()
@@ -35,19 +45,19 @@ final class ScheduleViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         setupUI()
         setupConstraints()
+        logger.info("✅ Экран расписания готов к работе.")
     }
     
     // MARK: - Setup UI
     private func setupUI() {
+        title = "Расписание"
         view.backgroundColor = .ypWhite
         
         view.addSubview(button)
         view.addSubview(tableView)
         
-        tableView.delegate = self
         tableView.dataSource = self
     }
     
@@ -62,21 +72,35 @@ final class ScheduleViewController: UIViewController {
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             tableView.heightAnchor.constraint(equalToConstant: 525)
-
         ])
     }
-    
+
     // MARK: - Actions
-    @objc
+    @objc // изменяет состояние switch вкл/выкл
     private func switchChanged(_ sender: UISwitch) {
-        print("Switch number: \(sender.tag) is now \(sender.isOn)")
+        selectedDays[sender.tag] = sender.isOn
+        logger.debug("🔘 Изменен переключатель для '\(selectedDays[sender.tag])': \(!sender.isOn) -> \(sender.isOn)")
+        logger.trace("📊 Текущее состояние дней: \(selectedDays)")
     }
-
-}
-
-// MARK: - ScheduleViewProtocol
-extension ScheduleViewController: ScheduleViewProtocol {
     
+    @objc // создает расписание и передает его в CreateTrackerViewController, после чего скрывает экран
+    private func doneTapped() {
+        logger.info("✅ Пользователь нажал 'Готово'.")
+        let schedule = TrackerSchedule(
+            monday: selectedDays[0],
+            tuesday: selectedDays[1],
+            wednesday: selectedDays[2],
+            thursday: selectedDays[3],
+            friday: selectedDays[4],
+            saturday: selectedDays[5],
+            sunday: selectedDays[6]
+        )
+        logger.debug("📅 Создано расписание: \(schedule.displayText)")
+        logger.info("🔄 Передача расписания делегату.")
+        delegate?.didSelectSchedule(schedule)
+        dismiss(animated: true)
+        logger.info("🔒 Экран расписания закрывается")
+    }
 }
 
 // MARK: - UITableViewDataSource
@@ -96,17 +120,14 @@ extension ScheduleViewController: UITableViewDataSource {
         
         let switcher = UISwitch()
         switcher.tag = indexPath.row
+        switcher.isOn = selectedDays[indexPath.row]
         switcher.addTarget(self, action: #selector(switchChanged(_:)), for: .valueChanged)
 
         cell.accessoryView = switcher
-
         cell.textLabel?.text = tableViewData[indexPath.row]
         cell.backgroundColor = .ypBackground
-        
-        cell.accessoryType = .checkmark
-
-        cell.layer.masksToBounds = true
         cell.selectionStyle = .none
+        cell.layer.masksToBounds = true
 
         if indexPath.row == 0 {
             cell.layer.cornerRadius = 16
@@ -114,6 +135,8 @@ extension ScheduleViewController: UITableViewDataSource {
         } else if indexPath.row == tableViewData.count - 1 {
             cell.layer.cornerRadius = 16
             cell.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+        } else {
+            cell.layer.cornerRadius = 0
         }
 
         return cell
@@ -122,10 +145,4 @@ extension ScheduleViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 75
     }
-
-}
-
-// MARK: - UITableViewDelegate
-extension ScheduleViewController: UITableViewDelegate {
-    
 }

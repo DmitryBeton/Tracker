@@ -80,6 +80,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
 
     // MARK: - Private methods
+    // Обновляет состояние кнопки выполнения трекера
     private func updateCompletionState(isCompleted: Bool) {
         if isCompleted {
             doneButton.backgroundColor = coloredView.backgroundColor?.withAlphaComponent(0.3)
@@ -91,6 +92,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         }
     }
 
+    // Правильно склоняет слово "день"
     private func dayWord(for count: Int) -> String {
         let n = abs(count) % 100
         if n >= 11 && n <= 19 {
@@ -104,7 +106,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
 
     // MARK: - Actions
-    @objc
+    @objc // Отмечает выполнение трекера
     private func didTapDoneButton() {
         guard let trackerId = trackerId else { return }
         onDoneButtonTapped?(trackerId)

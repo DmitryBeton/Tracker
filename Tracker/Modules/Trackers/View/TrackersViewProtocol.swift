@@ -10,12 +10,8 @@ import Foundation
 protocol TrackersViewProtocol: AnyObject {
     func updateSingleTracker(_ trackerId: UUID, completedRecords: [TrackerRecord])
     func updateCategories(_ categories: [TrackerCategory])
-    func updateCompletedRecords(_ records: [TrackerRecord])
-    
     func showEmptyState()
     func hideEmptyState()
-    
     func showFutureDateRestriction()
-    
     func showCreateTrackerScreen()
 }

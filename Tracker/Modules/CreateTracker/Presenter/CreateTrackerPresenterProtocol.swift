@@ -6,9 +6,6 @@
 //
 
 protocol CreateTrackerPresenterProtocol {
-    func didTapCancel()
     func didTapCreate(name: String, schedule: TrackerSchedule?)
-    func didTapCategory()
-    func didTapSchedule()
 }
 

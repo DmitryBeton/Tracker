@@ -10,4 +10,5 @@ import Foundation
 protocol TrackerRepositoryProtocol {
     func fetchCategories() -> [TrackerCategory]
     func filteredCategories(for date: Date, from categories: [TrackerCategory]) -> [TrackerCategory]
+    func addTracker(_ tracker: Tracker, toCategory title: String)
 }

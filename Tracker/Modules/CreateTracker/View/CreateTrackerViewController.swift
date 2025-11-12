@@ -6,14 +6,20 @@
 //
 
 import UIKit
+import Logging
 
 final class CreateTrackerViewController: UIViewController {
-    // MARK: - Properties
+    // MARK: - Dependencies
     private var presenter: CreateTrackerPresenterProtocol?
-    private let tableViewItems = ["Категории", "Расписание"]
+    private let logger = Logger(label: "CreateTrackerViewController")
+
+    // MARK: - Properties
+    private let tableViewItems = ["Категория", "Расписание"]
+    private var selectedSchedule: TrackerSchedule?
+    private var trackerName: String = ""
     
     // MARK: - UI Elements
-    private let textField: UITextField = {
+    private lazy var textField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Введите название трекера"
         textField.translatesAutoresizingMaskIntoConstraints = false
@@ -21,6 +27,9 @@ final class CreateTrackerViewController: UIViewController {
         textField.layer.cornerRadius = 16
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 0))
         textField.leftViewMode = .always
+        textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+        textField.returnKeyType = .done
+        textField.enablesReturnKeyAutomatically = true
         return textField
     }()
     
@@ -29,13 +38,11 @@ final class CreateTrackerViewController: UIViewController {
         tableView.isScrollEnabled = false
         tableView.sectionIndexBackgroundColor = .ypBackground
         tableView.translatesAutoresizingMaskIntoConstraints = false
-
         tableView.tableFooterView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.size.width, height: 1))
-
         return tableView
     }()
     
-    private let cancelButton: UIButton = {
+    private lazy var cancelButton: UIButton = {
         let button = UIButton()
         button.setTitle("Отменить", for: .normal)
         button.setTitleColor(UIColor.ypRed, for: .normal)
@@ -44,27 +51,34 @@ final class CreateTrackerViewController: UIViewController {
         button.backgroundColor = .clear
         button.layer.cornerRadius = 16
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
         return button
     }()
     
-    private let addButton: UIButton = {
+    private lazy var addButton: UIButton = {
         let button = UIButton()
         button.setTitle("Создать", for: .normal)
-        button.tintColor = .ypWhite
+        button.setTitleColor(.ypWhite, for: .normal)
         button.backgroundColor = .ypGray
         button.layer.cornerRadius = 16
+        button.isEnabled = false
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(createTapped), for: .touchUpInside)
         return button
     }()
 
     // MARK: - Lifecycle
     override func viewDidLoad() {
+        logger.info("🔄 Экран создания трекера загружается")
         setupUI()
         setupConstraints()
+        setupGestureRecognizer()
+        logger.info("✅ Экран создания трекера готов к работе")
     }
     
     func configure(with presenter: CreateTrackerPresenterProtocol) {
         self.presenter = presenter
+        logger.info("🎯 Presenter сконфигурирован")
     }
 
     // MARK: - Setup UI
@@ -83,6 +97,16 @@ final class CreateTrackerViewController: UIViewController {
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
+            textField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
+            textField.heightAnchor.constraint(equalToConstant: 75),
+            textField.widthAnchor.constraint(equalToConstant: 343),
+            textField.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+
+            tableView.topAnchor.constraint(equalTo: textField.bottomAnchor, constant: 24),
+            tableView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            tableView.widthAnchor.constraint(equalToConstant: 343),
+            tableView.heightAnchor.constraint(equalToConstant: 150),
+            
             cancelButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             cancelButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
             cancelButton.widthAnchor.constraint(equalToConstant: 166),
@@ -92,40 +116,81 @@ final class CreateTrackerViewController: UIViewController {
             addButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
             addButton.widthAnchor.constraint(equalToConstant: 161),
             addButton.heightAnchor.constraint(equalToConstant: 60),
-            
-            textField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
-            textField.heightAnchor.constraint(equalToConstant: 75),
-            textField.widthAnchor.constraint(equalToConstant: 343),
-            textField.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-
-
-            tableView.topAnchor.constraint(equalTo: textField.bottomAnchor, constant: 24),
-            tableView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            tableView.widthAnchor.constraint(equalToConstant: 343),
-            tableView.heightAnchor.constraint(equalToConstant: 150)
-
         ])
+    }
+    
+    private func setupGestureRecognizer() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+    
+    // MARK: - Private methods
+    // Обновление состояния кнопки (ВКЛ, если заполнены все поля)
+    private func updateCreateButtonState() {
+        let isEnabled = !trackerName.isEmpty && selectedSchedule != nil
+        addButton.isEnabled = isEnabled
+        addButton.backgroundColor = isEnabled ? .ypBlack : .ypGray
+    }
+
+    // MARK: - Actions
+    // Закрывает клавиатуру по нажатию на экран
+    @objc
+    private func handleTap() {
+        logger.trace("👆 Пользователь тапнул по экрану для скрытия клавиатуры")
+        view.endEditing(true)
+    }
+
+    // Сохраненяет название трекера из TextField
+    @objc
+    private func textFieldDidChange() {
+        trackerName = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        updateCreateButtonState()
+    }
+    
+    // Закрывает экран создания трекера
+    @objc
+    private func cancelTapped() {
+        logger.info("❌ Пользователь отменил создание трекера")
+        dismiss(animated: true)
+    }
+
+    // говорит presentr'y о создании трекера
+    @objc
+    private func createTapped() {
+        logger.info("🎯 Пользователь нажал кнопку 'Создать'. Имя: '\(trackerName)', расписание: \(selectedSchedule?.displayText ?? "нет")")
+        presenter?.didTapCreate(name: trackerName, schedule: selectedSchedule)
     }
 }
 
 // MARK: - CreateTrackerViewProtocol
 extension CreateTrackerViewController: CreateTrackerViewProtocol {
     func showCategorySelection() {
-        // presenter?.didTapCategory()
+        logger.info("📂 Запрос на показ экрана категорий (ЗАГЛУШКА)")
     }
     
     func showScheduleSelection() {
-        let createVC = ScheduleViewController()
-        createVC.title = "Расписание"
-
-        let navVC = UINavigationController(rootViewController: createVC)
+        let scheduleVC = ScheduleViewController()
+        scheduleVC.delegate = self
+        let navVC = UINavigationController(rootViewController: scheduleVC)
         present(navVC, animated: true)
-
-//         presenter?.didTapSchedule()
+        logger.info("✅ Экран расписания представлен модально")
     }
     
     func closeCreateTracker() {
-        
+        logger.info("🔒 Закрытие экрана создания трекера")
+        dismiss(animated: true)
+    }
+}
+
+// MARK: - ScheduleViewControllerDelegate
+extension CreateTrackerViewController: ScheduleViewControllerDelegate {
+    // Сохраняет расписание, после чего обновляет состояние кнопки создания трекера и перезагружает таблицу
+    func didSelectSchedule(_ schedule: TrackerSchedule) {
+        logger.info("✅ Получено новое расписание от ScheduleViewController: '\(schedule.displayText)'")
+        selectedSchedule = schedule
+        updateCreateButtonState()
+        tableView.reloadData()
     }
 }
 
@@ -141,15 +206,23 @@ extension CreateTrackerViewController: UITableViewDataSource {
         if let reusedCell = tableView.dequeueReusableCell(withIdentifier: "cell") {
             cell = reusedCell
         } else {
-            cell = UITableViewCell(style: .default, reuseIdentifier: "cell")
+            cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
         }
         
         cell.textLabel?.text = tableViewItems[indexPath.row]
+        cell.detailTextLabel?.text = nil
+        cell.detailTextLabel?.textColor = .ypGray
         cell.backgroundColor = .ypBackground
         cell.accessoryType = .disclosureIndicator
         cell.layer.masksToBounds = true
         cell.layer.cornerRadius = 16
         cell.selectionStyle = .none
+
+        if indexPath.row == 1, let schedule = selectedSchedule {
+            cell.detailTextLabel?.text = schedule.displayText
+        } else if indexPath.row == 0 {
+            cell.detailTextLabel?.text = "Важные дела" // Фиксированная категория
+        }
 
         if indexPath.row == 0 {
             cell.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
@@ -162,23 +235,18 @@ extension CreateTrackerViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 75
     }
-
 }
 
 // MARK: - UITableViewDelegate
 extension CreateTrackerViewController: UITableViewDelegate {
-    func tableView(_ tableView: UITableView,
-                   didSelectRowAt indexPath: IndexPath) {
-        
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
         switch indexPath.row {
         case 0:
             showCategorySelection()
-            
         case 1:
             showScheduleSelection()
-            
         default:
             break
         }

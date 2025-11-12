@@ -12,4 +12,5 @@ protocol TrackersPresenterProtocol {
     func didSelectDate(_ date: Date)
     func didTapAddTracker()
     func configureCell(_ cell: TrackerCollectionViewCell, with tracker: Tracker)
+    func createNewTracker(_ tracker: Tracker)
 }

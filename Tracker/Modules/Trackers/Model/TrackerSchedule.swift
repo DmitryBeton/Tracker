@@ -13,14 +13,28 @@ struct TrackerSchedule {
     let friday: Bool
     let saturday: Bool
     let sunday: Bool
-    
-    init(monday: Bool, tuesday: Bool, wednesday: Bool, thursday: Bool, friday: Bool, saturday: Bool, sunday: Bool) {
-        self.monday = monday
-        self.tuesday = tuesday
-        self.wednesday = wednesday
-        self.thursday = thursday
-        self.friday = friday
-        self.saturday = saturday
-        self.sunday = sunday
+}
+
+extension TrackerSchedule {
+    var displayText: String {
+        let days = [
+            (monday, "Пн"),
+            (tuesday, "Вт"),
+            (wednesday, "Ср"),
+            (thursday, "Чт"),
+            (friday, "Пт"),
+            (saturday, "Сб"),
+            (sunday, "Вс")
+        ]
+        
+        let selectedDays = days.filter { $0.0 }.map { $0.1 }
+        
+        if selectedDays.count == 7 {
+            return "Каждый день"
+        } else if selectedDays.isEmpty {
+            return ""
+        } else {
+            return selectedDays.joined(separator: ", ")
+        }
     }
 }
