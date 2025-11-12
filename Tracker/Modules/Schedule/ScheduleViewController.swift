@@ -16,7 +16,7 @@ final class ScheduleViewController: UIViewController {
     // MARK: - Dependencies
     private let logger = Logger(label: "ScheduleViewController")
     weak var delegate: ScheduleViewControllerDelegate?
-
+    
     // MARK: - Properties
     private var selectedDays: [Bool] = Array(repeating: false, count: 7)
     private let tableViewData: [String] = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
@@ -68,14 +68,14 @@ final class ScheduleViewController: UIViewController {
             button.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
             button.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             button.heightAnchor.constraint(equalToConstant: 60),
-
+            
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             tableView.heightAnchor.constraint(equalToConstant: 525)
         ])
     }
-
+    
     // MARK: - Actions
     @objc // изменяет состояние switch вкл/выкл
     private func switchChanged(_ sender: UISwitch) {
@@ -123,13 +123,13 @@ extension ScheduleViewController: UITableViewDataSource {
         switcher.tag = indexPath.row
         switcher.isOn = selectedDays[indexPath.row]
         switcher.addTarget(self, action: #selector(switchChanged(_:)), for: .valueChanged)
-
+        
         cell.accessoryView = switcher
         cell.textLabel?.text = tableViewData[indexPath.row]
         cell.backgroundColor = .ypBackground
         cell.selectionStyle = .none
         cell.layer.masksToBounds = true
-
+        
         if indexPath.row == 0 {
             cell.layer.cornerRadius = 16
             cell.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
@@ -139,7 +139,7 @@ extension ScheduleViewController: UITableViewDataSource {
         } else {
             cell.layer.cornerRadius = 0
         }
-
+        
         return cell
     }
     

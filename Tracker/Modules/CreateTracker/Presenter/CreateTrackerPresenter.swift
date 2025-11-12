@@ -14,7 +14,6 @@ final class CreateTrackerPresenter {
     private weak var view: CreateTrackerViewProtocol?
     private let trackerRepository: TrackerRepositoryProtocol
     private let onCreateTracker: ((Tracker) -> Void)?
-
     
     // MARK: - Lifecycle
     init(view: CreateTrackerViewProtocol, repository: TrackerRepositoryProtocol, onCreateTracker: ((Tracker) -> Void)? = nil) {
@@ -29,7 +28,7 @@ final class CreateTrackerPresenter {
 extension CreateTrackerPresenter: CreateTrackerPresenterProtocol {
     func didTapCreate(name: String, schedule: TrackerSchedule?) {
         logger.info("🎯 Начало создания трекера. Имя: '\(name)', расписание: \(schedule != nil ? "установлено" : "не установлено")") // Проверка на nil, нужра для задания со зведочкой
-
+        
         guard !name.isEmpty, let schedule = schedule else { return }
         
         let colors: [UIColor] = [.ypBlue, .ypRed]
@@ -44,7 +43,7 @@ extension CreateTrackerPresenter: CreateTrackerPresenterProtocol {
         
         onCreateTracker?(newTracker)
         logger.debug("🔄 Трекер передан через колбэк")
-
+        
         view?.closeCreateTracker()
     }
 }

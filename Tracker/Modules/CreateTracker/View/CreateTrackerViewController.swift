@@ -12,7 +12,7 @@ final class CreateTrackerViewController: UIViewController {
     // MARK: - Dependencies
     private var presenter: CreateTrackerPresenterProtocol?
     private let logger = Logger(label: "CreateTrackerViewController")
-
+    
     // MARK: - Properties
     private let tableViewItems = ["Категория", "Расписание"]
     private var selectedSchedule: TrackerSchedule?
@@ -67,7 +67,7 @@ final class CreateTrackerViewController: UIViewController {
         button.addTarget(self, action: #selector(createTapped), for: .touchUpInside)
         return button
     }()
-
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         logger.info("🔄 Экран создания трекера загружается")
@@ -81,12 +81,12 @@ final class CreateTrackerViewController: UIViewController {
         self.presenter = presenter
         logger.info("🎯 Presenter сконфигурирован")
     }
-
+    
     // MARK: - Setup UI
     private func setupUI() {
         title = "Новая привычка"
         view.backgroundColor = .ypWhite
-
+        
         tableView.delegate = self
         tableView.dataSource = self
         
@@ -102,7 +102,7 @@ final class CreateTrackerViewController: UIViewController {
             textField.heightAnchor.constraint(equalToConstant: 75),
             textField.widthAnchor.constraint(equalToConstant: 343),
             textField.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-
+            
             tableView.topAnchor.constraint(equalTo: textField.bottomAnchor, constant: 24),
             tableView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             tableView.widthAnchor.constraint(equalToConstant: 343),
@@ -133,7 +133,7 @@ final class CreateTrackerViewController: UIViewController {
         addButton.isEnabled = isEnabled
         addButton.backgroundColor = isEnabled ? .ypBlack : .ypGray
     }
-
+    
     // MARK: - Actions
     // Закрывает клавиатуру по нажатию на экран
     @objc
@@ -141,7 +141,7 @@ final class CreateTrackerViewController: UIViewController {
         logger.trace("👆 Пользователь тапнул по экрану для скрытия клавиатуры")
         view.endEditing(true)
     }
-
+    
     // Сохраненяет название трекера из TextField
     @objc
     private func textFieldDidChange() {
@@ -155,7 +155,7 @@ final class CreateTrackerViewController: UIViewController {
         logger.info("❌ Пользователь отменил создание трекера")
         dismiss(animated: true)
     }
-
+    
     // говорит presentr'y о создании трекера
     @objc
     private func createTapped() {
@@ -227,13 +227,13 @@ extension CreateTrackerViewController: UITableViewDataSource {
         cell.layer.masksToBounds = true
         cell.layer.cornerRadius = 16
         cell.selectionStyle = .none
-
+        
         if indexPath.row == 1, let schedule = selectedSchedule {
             cell.detailTextLabel?.text = schedule.displayText
         } else if indexPath.row == 0 {
             cell.detailTextLabel?.text = "Важные дела" // Фиксированная категория
         }
-
+        
         if indexPath.row == 0 {
             cell.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         } else {

@@ -78,20 +78,20 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         
         updateCompletionState(isCompleted: isCompletedToday)
     }
-
+    
     // MARK: - Private methods
     // Обновляет состояние кнопки выполнения трекера
     private func updateCompletionState(isCompleted: Bool) {
         if isCompleted {
             doneButton.backgroundColor = coloredView.backgroundColor?.withAlphaComponent(0.3)
             doneButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
-
+            
         } else {
             doneButton.backgroundColor = coloredView.backgroundColor
             doneButton.setImage(UIImage(systemName: "plus"), for: .normal)
         }
     }
-
+    
     // Правильно склоняет слово "день"
     private func dayWord(for count: Int) -> String {
         let n = abs(count) % 100
@@ -104,7 +104,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         default: return "дней"
         }
     }
-
+    
     // MARK: - Actions
     @objc // Отмечает выполнение трекера
     private func didTapDoneButton() {

@@ -20,14 +20,14 @@ final class TabBarController: UITabBarController {
         let repository = MockTrackersRepository()
         let presenter = TrackersPresenter(view: trackerViewController, repository: repository)
         trackerViewController.configure(with: presenter)
-
+        
         let trackerNavigationController = UINavigationController(rootViewController: trackerViewController)
         trackerNavigationController.tabBarItem = UITabBarItem(
             title: "Трекеры",
             image: UIImage(resource: .tabTracker),
             tag: 1
         )
-
+        
         let statisticsViewController = StatisticsViewController()
         let statisticsNavigationController = UINavigationController(rootViewController: statisticsViewController)
         statisticsNavigationController.tabBarItem = UITabBarItem(
@@ -35,7 +35,7 @@ final class TabBarController: UITabBarController {
             image: UIImage(resource: .tabStatistic),
             tag: 2
         )
-
+        
         viewControllers = [trackerNavigationController, statisticsNavigationController]
     }
     

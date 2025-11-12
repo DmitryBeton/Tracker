@@ -53,7 +53,7 @@ final class TrackersViewController: UIViewController {
         self.presenter = presenter
         logger.info("🎯 Presenter сконфигурирован для TrackersViewController")
     }
-
+    
     // MARK: - UI Setup
     private func setupUI() {
         view.backgroundColor = .ypWhite
@@ -74,7 +74,7 @@ final class TrackersViewController: UIViewController {
             forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
             withReuseIdentifier: TrackerHeaderView.reuseIdentifier
         )
-
+        
         
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -106,7 +106,7 @@ final class TrackersViewController: UIViewController {
         navigationItem.searchController?.searchBar.placeholder = "Поиск"
         navigationItem.hidesSearchBarWhenScrolling = false
     }
-
+    
     // MARK: - Actions
     @objc private func addTapped() {
         presenter?.didTapAddTracker()
@@ -129,7 +129,7 @@ extension TrackersViewController: TrackersViewProtocol {
         alert.addAction(UIAlertAction(title: "ОК", style: .default))
         present(alert, animated: true)
     }
-
+    
     // Обновляет 1 трекер
     func updateSingleTracker(_ trackerId: UUID, completedRecords: [TrackerRecord]) {
         logger.debug("🔁 Обновление одного трекера: \(trackerId)")
@@ -144,21 +144,21 @@ extension TrackersViewController: TrackersViewProtocol {
             }
         }
     }
-
+    
     // Обновляет отображаемые категории
     func updateCategories(_ categories: [TrackerCategory]) {
         visibleCategories = categories
         logger.info("📊 Обновление категорий: стало \(visibleCategories.count). Всего трекеров: \(visibleCategories.flatMap { $0.trackers }.count)")
-
+        
         collectionView.reloadData()
         hideEmptyState()
     }
-
+    
     func showEmptyState() {
         dizzyImage.isHidden = false
         label.isHidden = false
     }
-
+    
     func hideEmptyState() {
         dizzyImage.isHidden = true
         label.isHidden = true
