@@ -59,6 +59,7 @@ final class ScheduleViewController: UIViewController {
         view.addSubview(tableView)
         
         tableView.dataSource = self
+        tableView.delegate = self
     }
     
     private func setupConstraints() {
@@ -145,4 +146,8 @@ extension ScheduleViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 75
     }
+}
+
+extension ScheduleViewController: UITableViewDelegate {
+    
 }
