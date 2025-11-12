@@ -29,6 +29,7 @@ final class CreateTrackerViewController: UIViewController {
         textField.leftViewMode = .always
         textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
         textField.returnKeyType = .done
+        textField.delegate = self
         textField.enablesReturnKeyAutomatically = true
         return textField
     }()
@@ -191,6 +192,15 @@ extension CreateTrackerViewController: ScheduleViewControllerDelegate {
         selectedSchedule = schedule
         updateCreateButtonState()
         tableView.reloadData()
+    }
+}
+
+// MARK: - UITextFieldDelegate
+extension CreateTrackerViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        logger.debug("⌨️ Пользователь нажал Done на клавиатуре")
+        textField.resignFirstResponder()
+        return true
     }
 }
 
