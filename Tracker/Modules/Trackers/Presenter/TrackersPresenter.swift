@@ -88,7 +88,7 @@ extension TrackersPresenter: TrackersPresenterProtocol {
     func createNewTracker(_ tracker: Tracker) { // TODO: В следующих спринтах добавить параметр category
         logger.info("🆕 Создание нового трекера: '\(tracker.name)'")
         
-        repository.addTracker(tracker, toCategory: "Важные дела")
+        repository.addTracker(tracker, toCategory: "Важное")
         
         categories = repository.fetchCategories()
         logger.debug("📊 Категории обновлены.")

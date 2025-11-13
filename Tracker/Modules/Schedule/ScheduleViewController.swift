@@ -38,7 +38,7 @@ final class ScheduleViewController: UIViewController {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.isScrollEnabled = false
         tableView.backgroundColor = .ypWhite
-        tableView.tableFooterView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.size.width, height: 1))
+//        tableView.tableFooterView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.size.width, height: 1))
         return tableView
     }()
     
@@ -54,6 +54,39 @@ final class ScheduleViewController: UIViewController {
     private func setupUI() {
         title = "Расписание"
         view.backgroundColor = .ypWhite
+        if let navigationController = navigationController {
+            let appearance = UINavigationBarAppearance()
+            appearance.configureWithOpaqueBackground()
+            appearance.backgroundColor = .ypWhite
+            
+            appearance.shadowColor = .clear
+
+            let titleFont = UIFont.systemFont(ofSize: 16, weight: .medium)
+            let paragraphStyle = NSMutableParagraphStyle()
+            paragraphStyle.minimumLineHeight = 22
+            paragraphStyle.maximumLineHeight = 22
+            paragraphStyle.alignment = .center
+            
+            appearance.titleTextAttributes = [
+                .foregroundColor: UIColor.ypBlack,
+                .font: titleFont,
+                .paragraphStyle: paragraphStyle
+            ]
+            
+            navigationController.navigationBar.standardAppearance = appearance
+            navigationController.navigationBar.scrollEdgeAppearance = appearance
+            navigationController.navigationBar.compactAppearance = appearance
+            
+            navigationItem.titleView = {
+                let label = UILabel()
+                label.text = "Расписание"
+                label.font = titleFont
+                label.textColor = .ypBlack
+                label.textAlignment = .center
+                return label
+            }()
+        }
+
         
         view.addSubview(button)
         view.addSubview(tableView)
@@ -122,6 +155,7 @@ extension ScheduleViewController: UITableViewDataSource {
         let switcher = UISwitch()
         switcher.tag = indexPath.row
         switcher.isOn = selectedDays[indexPath.row]
+        switcher.onTintColor = .ypBlue
         switcher.addTarget(self, action: #selector(switchChanged(_:)), for: .valueChanged)
         
         cell.accessoryView = switcher
@@ -130,6 +164,8 @@ extension ScheduleViewController: UITableViewDataSource {
         cell.selectionStyle = .none
         cell.layer.masksToBounds = true
         
+        cell.textLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
+
         if indexPath.row == 0 {
             cell.layer.cornerRadius = 16
             cell.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
@@ -144,10 +180,16 @@ extension ScheduleViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 75
+        75
     }
 }
 
 extension ScheduleViewController: UITableViewDelegate {
-    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+            if indexPath.row == tableViewData.count - 1 {
+                cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
+            } else {
+                cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+            }
+        }
 }

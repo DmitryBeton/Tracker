@@ -24,6 +24,15 @@ final class TrackersViewController: UIViewController {
         return cv
     }()
     
+    private let emptyStateView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.alignment = .center
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.isHidden = true
+        return stackView
+    }()
+
     private let dizzyImage: UIImageView = {
         let image = UIImageView(image: UIImage(resource: .dizzy))
         image.translatesAutoresizingMaskIntoConstraints = false
@@ -60,9 +69,10 @@ final class TrackersViewController: UIViewController {
         setupNavigation()
         
         view.addSubview(collectionView)
-        view.addSubview(dizzyImage)
-        view.addSubview(label)
-        
+        view.addSubview(emptyStateView)
+        emptyStateView.addSubview(dizzyImage)
+        emptyStateView.addSubview(label)
+
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.register(
@@ -82,21 +92,59 @@ final class TrackersViewController: UIViewController {
             collectionView.rightAnchor.constraint(equalTo: view.rightAnchor),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             
-            dizzyImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            dizzyImage.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -40),
+            emptyStateView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            emptyStateView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            
+            dizzyImage.topAnchor.constraint(equalTo: emptyStateView.topAnchor),
+            dizzyImage.centerXAnchor.constraint(equalTo: emptyStateView.centerXAnchor),
+            
             label.topAnchor.constraint(equalTo: dizzyImage.bottomAnchor, constant: 8),
-            label.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+            label.centerXAnchor.constraint(equalTo: emptyStateView.centerXAnchor),
         ])
     }
     
     private func setupNavigation() {
         title = "Трекеры"
         navigationController?.navigationBar.prefersLargeTitles = true
+
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = .ypWhite
         
-        let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addTapped))
-        addButton.tintColor = .ypBlack
+        appearance.shadowColor = .clear
+
+        appearance.titleTextAttributes = [
+            .foregroundColor: UIColor.ypBlack,
+            .font: UIFont.systemFont(ofSize: 17, weight: .bold)
+        ]
+        
+        appearance.largeTitleTextAttributes = [
+            .foregroundColor: UIColor.ypBlack,
+            .font: UIFont.systemFont(ofSize: 34, weight: .bold)
+        ]
+        
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        navigationController?.navigationBar.compactAppearance = appearance
+
+        let addImage = UIImage(
+            resource: .addTracker
+        )
+        
+        let addButton = UIBarButtonItem(
+            image: addImage,
+            style: .plain,
+            target: self,
+            action: #selector(addTapped)
+        )
+        
+        // Настройка цвета для светлой и темной темы
+        addButton.tintColor = UIColor { traitCollection in
+            return traitCollection.userInterfaceStyle == .dark ? .ypWhite : .ypBlack
+        }
+        
         navigationItem.leftBarButtonItem = addButton
-        
+
         datePicker.preferredDatePickerStyle = .compact
         datePicker.datePickerMode = .date
         datePicker.addTarget(self, action: #selector(dateChanged), for: .valueChanged)
@@ -155,13 +203,11 @@ extension TrackersViewController: TrackersViewProtocol {
     }
     
     func showEmptyState() {
-        dizzyImage.isHidden = false
-        label.isHidden = false
+        emptyStateView.isHidden = false
     }
     
     func hideEmptyState() {
-        dizzyImage.isHidden = true
-        label.isHidden = true
+        emptyStateView.isHidden = true
     }
     
     func showCreateTrackerScreen() {
