@@ -17,7 +17,8 @@ final class CreateTrackerViewController: UIViewController {
     private let tableViewItems = ["Категория", "Расписание"]
     private var selectedSchedule: TrackerSchedule?
     private var trackerName: String = ""
-    
+    private var tableViewTopConstraint: NSLayoutConstraint?
+
     // MARK: - UI Elements
     private lazy var textField: UITextField = {
         let textField = UITextField()
@@ -32,15 +33,26 @@ final class CreateTrackerViewController: UIViewController {
         textField.delegate = self
         textField.font = UIFont.systemFont(ofSize: 17, weight: .regular)
         textField.enablesReturnKeyAutomatically = true
+        textField.clearButtonMode = .whileEditing
         return textField
     }()
     
+    private lazy var warningLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Ограничение 38 символов"
+        label.textColor = .ypRed
+        label.font = UIFont.systemFont(ofSize: 17, weight: .regular)
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.isHidden = true
+        return label
+    }()
+
     private let tableView: UITableView = {
         let tableView = UITableView()
         tableView.isScrollEnabled = false
         tableView.sectionIndexBackgroundColor = .ypBackground
         tableView.translatesAutoresizingMaskIntoConstraints = false
-//        tableView.tableFooterView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.size.width, height: 1))
         return tableView
     }()
     
@@ -124,19 +136,26 @@ final class CreateTrackerViewController: UIViewController {
         tableView.dataSource = self
         
         view.addSubview(textField)
+        view.addSubview(warningLabel)
         view.addSubview(cancelButton)
         view.addSubview(addButton)
         view.addSubview(tableView)
     }
     
     private func setupConstraints() {
+        tableViewTopConstraint = tableView.topAnchor.constraint(equalTo: textField.bottomAnchor, constant: 24)
+        tableViewTopConstraint?.isActive = true
+        
         NSLayoutConstraint.activate([
             textField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
             textField.heightAnchor.constraint(equalToConstant: 75),
             textField.widthAnchor.constraint(equalToConstant: 343),
             textField.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
-            tableView.topAnchor.constraint(equalTo: textField.bottomAnchor, constant: 24),
+            warningLabel.topAnchor.constraint(equalTo: textField.bottomAnchor, constant: 8),
+            warningLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            warningLabel.heightAnchor.constraint(equalToConstant: 22),
+            
             tableView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             tableView.widthAnchor.constraint(equalToConstant: 343),
             tableView.heightAnchor.constraint(equalToConstant: 150),
@@ -178,6 +197,17 @@ final class CreateTrackerViewController: UIViewController {
     // Сохраненяет название трекера из TextField
     @objc
     private func textFieldDidChange() {
+        guard let text = textField.text else { return }
+        
+        if text.count > 38 {
+            textField.text = String(text.prefix(38))
+            warningLabel.isHidden = false
+            tableViewTopConstraint?.constant = 62
+        } else {
+            warningLabel.isHidden = true
+            tableViewTopConstraint?.constant = 24
+        }
+
         trackerName = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         updateCreateButtonState()
     }
