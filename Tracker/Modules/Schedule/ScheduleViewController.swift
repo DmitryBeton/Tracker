@@ -38,7 +38,6 @@ final class ScheduleViewController: UIViewController {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.isScrollEnabled = false
         tableView.backgroundColor = .ypWhite
-//        tableView.tableFooterView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.size.width, height: 1))
         return tableView
     }()
     

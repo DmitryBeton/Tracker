@@ -138,11 +138,7 @@ final class TrackersViewController: UIViewController {
             action: #selector(addTapped)
         )
         
-        // Настройка цвета для светлой и темной темы
-        addButton.tintColor = UIColor { traitCollection in
-            return traitCollection.userInterfaceStyle == .dark ? .ypWhite : .ypBlack
-        }
-        
+        addButton.tintColor = .ypBlack
         navigationItem.leftBarButtonItem = addButton
 
         datePicker.preferredDatePickerStyle = .compact
