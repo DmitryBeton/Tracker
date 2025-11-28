@@ -5,36 +5,49 @@
 //  Created by Дмитрий Чалов on 03.11.2025.
 //
 
+enum WeekDay: String, CaseIterable, Codable {
+    case monday = "Пн"
+    case tuesday = "Вт"
+    case wednesday = "Ср"
+    case thursday = "Чт"
+    case friday = "Пт"
+    case saturday = "Сб"
+    case sunday = "Вс"
+    
+    var fullName: String {
+        switch self {
+        case .monday: return "Понедельник"
+        case .tuesday: return "Вторник"
+        case .wednesday: return "Среда"
+        case .thursday: return "Четверг"
+        case .friday: return "Пятница"
+        case .saturday: return "Суббота"
+        case .sunday: return "Воскресенье"
+        }
+    }
+}
+
 struct TrackerSchedule {
-    let monday: Bool
-    let tuesday: Bool
-    let wednesday: Bool
-    let thursday: Bool
-    let friday: Bool
-    let saturday: Bool
-    let sunday: Bool
+    let selectedDays: Set<WeekDay>
+    
+    init(selectedDays: Set<WeekDay>) {
+        self.selectedDays = selectedDays
+    }
+    
+    func contains(_ day: WeekDay) -> Bool {
+        return selectedDays.contains(day)
+    }
 }
 
 extension TrackerSchedule {
     var displayText: String {
-        let days = [
-            (monday, "Пн"),
-            (tuesday, "Вт"),
-            (wednesday, "Ср"),
-            (thursday, "Чт"),
-            (friday, "Пт"),
-            (saturday, "Сб"),
-            (sunday, "Вс")
-        ]
-        
-        let selectedDays = days.filter { $0.0 }.map { $0.1 }
-        
         if selectedDays.count == 7 {
             return "Каждый день"
         } else if selectedDays.isEmpty {
             return ""
         } else {
-            return selectedDays.joined(separator: ", ")
+            let sortedDays = WeekDay.allCases.filter { selectedDays.contains($0) }
+            return sortedDays.map { $0.rawValue }.joined(separator: ", ")
         }
     }
 }
