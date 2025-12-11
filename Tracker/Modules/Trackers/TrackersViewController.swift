@@ -52,7 +52,7 @@ final class TrackersViewController: UIViewController {
     }()
     
     private let datePicker = UIDatePicker()
-    private let searchController = UISearchController(searchResultsController: nil)
+    private let searchController = UISearchController()
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -178,10 +178,6 @@ final class TrackersViewController: UIViewController {
             withReuseIdentifier: TrackerHeaderView.reuseIdentifier
         )
         
-        searchController.searchResultsUpdater = self
-        searchController.obscuresBackgroundDuringPresentation = false
-        searchController.searchBar.placeholder = "Поиск"
-        
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             collectionView.leftAnchor.constraint(equalTo: view.leftAnchor),
@@ -237,6 +233,8 @@ final class TrackersViewController: UIViewController {
         datePicker.addTarget(self, action: #selector(dateChanged), for: .valueChanged)
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
         
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.placeholder = "Поиск"
         navigationItem.searchController = searchController
         navigationItem.hidesSearchBarWhenScrolling = false
     }
@@ -359,33 +357,5 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         referenceSizeForHeaderInSection section: Int
     ) -> CGSize {
         CGSize(width: collectionView.frame.width, height: 40)
-    }
-}
-
-// MARK: - UISearchResultsUpdating
-extension TrackersViewController: UISearchResultsUpdating {
-    func updateSearchResults(for searchController: UISearchController) {
-        guard let searchText = searchController.searchBar.text, !searchText.isEmpty else {
-            displayTrackers(for: selectedDate)
-            return
-        }
-        
-        // Фильтрация по поисковому запросу
-        let filtered = categories.map { category in
-            let filteredTrackers = category.trackers.filter { tracker in
-                tracker.name.localizedCaseInsensitiveContains(searchText)
-            }
-            return TrackerCategory(title: category.title, trackers: filteredTrackers)
-        }.filter { !$0.trackers.isEmpty }
-        
-        visibleCategories = filtered
-        
-        if visibleCategories.isEmpty {
-            showEmptyState()
-        } else {
-            hideEmptyState()
-        }
-        
-        collectionView.reloadData()
     }
 }
