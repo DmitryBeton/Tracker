@@ -9,11 +9,13 @@ import UIKit
 import Logging
 
 final class CreateTrackerViewController: UIViewController {
-    // MARK: - Dependencies
-    private var presenter: CreateTrackerPresenterProtocol?
+    // MARK: - Properties
     private let logger = Logger(label: "CreateTrackerViewController")
     
-    // MARK: - Properties
+    // Callback для создания трекера
+    var onCreateTracker: ((Tracker) -> Void)?
+    
+    // Data sources
     private let tableViewItems = ["Категория", "Расписание"]
     private let sectionsTitles = ["Emoji", "Цвет"]
     private let emojiCollectionViewItems = [
@@ -134,9 +136,49 @@ final class CreateTrackerViewController: UIViewController {
         logger.info("✅ Экран создания трекера готов к работе")
     }
     
-    func configure(with presenter: CreateTrackerPresenterProtocol) {
-        self.presenter = presenter
-        logger.info("🎯 Presenter сконфигурирован")
+    // MARK: - Private methods
+    private func createTracker() {
+        logger.info("🎯 Начало создания трекера. Имя: '\(trackerName)', расписание: \(selectedSchedule != nil ? "установлено" : "не установлено")")
+        
+        guard !trackerName.isEmpty, let schedule = selectedSchedule else { return }
+        
+        let colors: [UIColor] = [.ypBlue, .ypRed]
+        
+        let newTracker = Tracker(
+            name: trackerName,
+            color: selectedColor ?? colors.randomElement()!,
+            emoji: selectedEmoji ?? "emoji",
+            schedule: schedule
+        )
+        
+        logger.info("✅ Трекер создан: '\(trackerName)' с расписанием: \(schedule.displayText)")
+        logger.debug("🔄 Трекер передан через колбэк")
+        
+        onCreateTracker?(newTracker)
+        closeCreateTracker()
+    }
+    
+    private func updateCreateButtonState() {
+        let isEnabled = !trackerName.isEmpty && selectedSchedule != nil
+        addButton.isEnabled = isEnabled
+        addButton.backgroundColor = isEnabled ? .ypBlack : .ypGray
+    }
+    
+    private func showScheduleSelection() {
+        let scheduleVC = ScheduleViewController()
+        scheduleVC.delegate = self
+        let navVC = UINavigationController(rootViewController: scheduleVC)
+        present(navVC, animated: true)
+        logger.info("✅ Экран расписания представлен модально")
+    }
+    
+    private func showCategorySelection() {
+        logger.info("📂 Запрос на показ экрана категорий (ЗАГЛУШКА)")
+    }
+    
+    private func closeCreateTracker() {
+        logger.info("🔒 Закрытие экрана создания трекера")
+        dismiss(animated: true)
     }
     
     // MARK: - Setup UI
@@ -148,7 +190,6 @@ final class CreateTrackerViewController: UIViewController {
             let appearance = UINavigationBarAppearance()
             appearance.configureWithOpaqueBackground()
             appearance.backgroundColor = .ypWhite
-            
             appearance.shadowColor = .clear
             
             let titleFont = UIFont.systemFont(ofSize: 16, weight: .medium)
@@ -183,7 +224,6 @@ final class CreateTrackerViewController: UIViewController {
         collectionView.delegate = self
         collectionView.dataSource = self
         
-        // Добавляем иерархию вьюх
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
         
@@ -249,23 +289,13 @@ final class CreateTrackerViewController: UIViewController {
         view.addGestureRecognizer(tapGesture)
     }
     
-    // MARK: - Private methods
-    // Обновление состояния кнопки (ВКЛ, если заполнены все поля)
-    private func updateCreateButtonState() {
-        let isEnabled = !trackerName.isEmpty && selectedSchedule != nil
-        addButton.isEnabled = isEnabled
-        addButton.backgroundColor = isEnabled ? .ypBlack : .ypGray
-    }
-    
     // MARK: - Actions
-    // Закрывает клавиатуру по нажатию на экран
     @objc
     private func handleTap() {
         logger.trace("👆 Пользователь тапнул по экрану для скрытия клавиатуры")
         view.endEditing(true)
     }
     
-    // Сохраненяет название трекера из TextField
     @objc
     private func textFieldDidChange() {
         guard let text = textField.text else { return }
@@ -283,44 +313,21 @@ final class CreateTrackerViewController: UIViewController {
         updateCreateButtonState()
     }
     
-    // Закрывает экран создания трекера
     @objc
     private func cancelTapped() {
         logger.info("❌ Пользователь отменил создание трекера")
-        dismiss(animated: true)
+        closeCreateTracker()
     }
     
-    // говорит presentr'y о создании трекера
     @objc
     private func createTapped() {
         logger.info("🎯 Пользователь нажал кнопку 'Создать'. Имя: '\(trackerName)', расписание: \(selectedSchedule?.displayText ?? "нет")")
-        presenter?.didTapCreate(name: trackerName, schedule: selectedSchedule)
-    }
-}
-
-// MARK: - CreateTrackerViewProtocol
-extension CreateTrackerViewController: CreateTrackerViewProtocol {
-    func showCategorySelection() {
-        logger.info("📂 Запрос на показ экрана категорий (ЗАГЛУШКА)")
-    }
-    
-    func showScheduleSelection() {
-        let scheduleVC = ScheduleViewController()
-        scheduleVC.delegate = self
-        let navVC = UINavigationController(rootViewController: scheduleVC)
-        present(navVC, animated: true)
-        logger.info("✅ Экран расписания представлен модально")
-    }
-    
-    func closeCreateTracker() {
-        logger.info("🔒 Закрытие экрана создания трекера")
-        dismiss(animated: true)
+        createTracker()
     }
 }
 
 // MARK: - ScheduleViewControllerDelegate
 extension CreateTrackerViewController: ScheduleViewControllerDelegate {
-    // Сохраняет расписание, после чего обновляет состояние кнопки создания трекера и перезагружает таблицу
     func didSelectSchedule(_ schedule: TrackerSchedule) {
         logger.info("✅ Получено новое расписание от ScheduleViewController: '\(schedule.displayText)'")
         selectedSchedule = schedule
@@ -368,7 +375,7 @@ extension CreateTrackerViewController: UITableViewDataSource {
         if indexPath.row == 1, let schedule = selectedSchedule {
             cell.detailTextLabel?.text = schedule.displayText
         } else if indexPath.row == 0 {
-            cell.detailTextLabel?.text = "Важное" // Фиксированная категория
+            cell.detailTextLabel?.text = "Важное"
         }
         
         if indexPath.row == 0 {
@@ -423,37 +430,32 @@ extension CreateTrackerViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if indexPath.section == 0 {
-            guard
-                let cell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: "emojiCell",
-                    for: indexPath
-                ) as? EmojiCollectionViewCell
-            else {
+            guard let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: "emojiCell",
+                for: indexPath
+            ) as? EmojiCollectionViewCell else {
                 fatalError("Unable to dequeue EmojiCollectionViewCell")
             }
             cell.setEmoji(emojiCollectionViewItems[indexPath.row])
             return cell
         } else {
-            guard
-                let cell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: "colorCell",
-                    for: indexPath
-                ) as? ColorCollectionViewCell
-            else {
+            guard let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: "colorCell",
+                for: indexPath
+            ) as? ColorCollectionViewCell else {
                 fatalError("Unable to dequeue ColorCollectionViewCell")
             }
             cell.setColor(colorsCollectionViewItems[indexPath.row])
             return cell
-
         }
     }
 }
 
 // MARK: - UICollectionViewDelegate
 extension CreateTrackerViewController: UICollectionViewDelegateFlowLayout {
-    // MARK: - Selection
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if indexPath.section == 0 {
+            // Deselect other emoji cells
             for i in 0..<emojiCollectionViewItems.count {
                 if i != indexPath.item {
                     let otherIndexPath = IndexPath(item: i, section: 0)
@@ -468,6 +470,7 @@ extension CreateTrackerViewController: UICollectionViewDelegateFlowLayout {
             cell.setSelected(true)
             selectedEmoji = emojiCollectionViewItems[indexPath.row]
         } else {
+            // Deselect other color cells
             for i in 0..<colorsCollectionViewItems.count {
                 if i != indexPath.item {
                     let otherIndexPath = IndexPath(item: i, section: 1)
@@ -494,7 +497,6 @@ extension CreateTrackerViewController: UICollectionViewDelegateFlowLayout {
         }
     }
 
-    // MARK: - Layout (Size & Spacing)
     func collectionView(
         _ collectionView: UICollectionView,
         layout collectionViewLayout: UICollectionViewLayout,
@@ -519,7 +521,6 @@ extension CreateTrackerViewController: UICollectionViewDelegateFlowLayout {
         5
     }
     
-    // MARK: - Section Headers
     func collectionView(
         _ collectionView: UICollectionView,
         viewForSupplementaryElementOfKind kind: String,
@@ -547,5 +548,4 @@ extension CreateTrackerViewController: UICollectionViewDelegateFlowLayout {
     ) -> CGSize {
         CGSize(width: collectionView.frame.width, height: 40)
     }
-
 }
