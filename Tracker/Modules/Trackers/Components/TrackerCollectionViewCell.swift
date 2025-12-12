@@ -17,13 +17,26 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.layer.cornerRadius = 16
+        view.layer.masksToBounds = true
         return view
     }()
     
-    private let emojiImage: UIImageView = {
-        let image = UIImageView()
-        image.translatesAutoresizingMaskIntoConstraints = false
-        return image
+    private let emojiBackgroundView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .white.withAlphaComponent(0.3)
+        view.layer.cornerRadius = 12
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private let emojiLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        label.textAlignment = .center
+        label.adjustsFontSizeToFitWidth = true
+        label.minimumScaleFactor = 0.5
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
     }()
     
     private let descriptionLabel: UILabel = {
@@ -73,7 +86,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         coloredView.backgroundColor = tracker.color
         doneButton.backgroundColor = tracker.color
         
-        emojiImage.image = UIImage(named: tracker.emoji)
+        emojiLabel.text = tracker.emoji
         
         countLabel.text = "\(completedDays) \(dayWord(for: completedDays))"
         
@@ -81,19 +94,16 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
     
     // MARK: - Private methods
-    // Обновляет состояние кнопки выполнения трекера
     private func updateCompletionState(isCompleted: Bool) {
         if isCompleted {
             doneButton.backgroundColor = coloredView.backgroundColor?.withAlphaComponent(0.3)
             doneButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
-            
         } else {
             doneButton.backgroundColor = coloredView.backgroundColor
             doneButton.setImage(UIImage(systemName: "plus"), for: .normal)
         }
     }
     
-    // Правильно склоняет слово "день"
     private func dayWord(for count: Int) -> String {
         let n = abs(count) % 100
         if n >= 11 && n <= 19 {
@@ -107,47 +117,55 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
     
     // MARK: - Actions
-    @objc // Отмечает выполнение трекера
-    private func didTapDoneButton() {
+    @objc private func didTapDoneButton() {
         guard let trackerId = trackerId else { return }
         onDoneButtonTapped?(trackerId)
     }
     
     // MARK: - SetupUI
     private func setupUI() {
-        self.addSubview(coloredView)
-        coloredView.addSubview(emojiImage)
+        contentView.addSubview(coloredView)
+        coloredView.addSubview(emojiBackgroundView)
+        emojiBackgroundView.addSubview(emojiLabel)
         coloredView.addSubview(descriptionLabel)
-        self.addSubview(countLabel)
-        self.addSubview(doneButton)
-        
+        contentView.addSubview(countLabel)
+        contentView.addSubview(doneButton)
     }
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            coloredView.topAnchor.constraint(equalTo: self.topAnchor),
-            coloredView.leftAnchor.constraint(equalTo: self.leftAnchor),
-            coloredView.widthAnchor.constraint(equalToConstant: 167),
+            // Colored View
+            coloredView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            coloredView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            coloredView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             coloredView.heightAnchor.constraint(equalToConstant: 90),
             
-            emojiImage.topAnchor.constraint(equalTo: coloredView.topAnchor, constant: 12),
-            emojiImage.leftAnchor.constraint(equalTo: coloredView.leftAnchor, constant: 12),
-            emojiImage.widthAnchor.constraint(equalToConstant: 24),
-            emojiImage.heightAnchor.constraint(equalToConstant: 24),
+            // Emoji Background - фиксированный размер
+            emojiBackgroundView.topAnchor.constraint(equalTo: coloredView.topAnchor, constant: 12),
+            emojiBackgroundView.leadingAnchor.constraint(equalTo: coloredView.leadingAnchor, constant: 12),
+            emojiBackgroundView.widthAnchor.constraint(equalToConstant: 24),
+            emojiBackgroundView.heightAnchor.constraint(equalToConstant: 24),
             
+            // Emoji Label - без фиксированной ширины, центрируется
+            emojiLabel.centerXAnchor.constraint(equalTo: emojiBackgroundView.centerXAnchor),
+            emojiLabel.centerYAnchor.constraint(equalTo: emojiBackgroundView.centerYAnchor),
+            emojiLabel.heightAnchor.constraint(equalToConstant: 22),
+            
+            // Description Label
+            descriptionLabel.leadingAnchor.constraint(equalTo: coloredView.leadingAnchor, constant: 12),
+            descriptionLabel.trailingAnchor.constraint(equalTo: coloredView.trailingAnchor, constant: -12),
             descriptionLabel.bottomAnchor.constraint(equalTo: coloredView.bottomAnchor, constant: -12),
-            descriptionLabel.leftAnchor.constraint(equalTo: coloredView.leftAnchor, constant: 12),
-            descriptionLabel.rightAnchor.constraint(equalTo: coloredView.rightAnchor, constant: -12),
             
+            // Count Label
             countLabel.topAnchor.constraint(equalTo: coloredView.bottomAnchor, constant: 16),
-            countLabel.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 12),
+            countLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
+            countLabel.trailingAnchor.constraint(lessThanOrEqualTo: doneButton.leadingAnchor, constant: -8),
             
-            doneButton.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -12),
-            doneButton.topAnchor.constraint(equalTo: coloredView.bottomAnchor, constant: 8),
+            // Done Button
+            doneButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
+            doneButton.centerYAnchor.constraint(equalTo: countLabel.centerYAnchor),
             doneButton.widthAnchor.constraint(equalToConstant: 34),
             doneButton.heightAnchor.constraint(equalToConstant: 34)
-            
         ])
     }
-    
 }

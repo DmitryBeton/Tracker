@@ -30,8 +30,8 @@ final class CreateTrackerViewController: UIViewController {
     ]
     
     private var selectedSchedule: TrackerSchedule?
-    private var selectedEmoji: String?
-    private var selectedColor: UIColor?
+    private var selectedEmoji: String = ""
+    private var selectedColor: UIColor = .clear
     private var trackerName: String = ""
     private var tableViewTopConstraint: NSLayoutConstraint?
     
@@ -142,12 +142,10 @@ final class CreateTrackerViewController: UIViewController {
         
         guard !trackerName.isEmpty, let schedule = selectedSchedule else { return }
         
-        let colors: [UIColor] = [.ypBlue, .ypRed]
-        
         let newTracker = Tracker(
             name: trackerName,
-            color: selectedColor ?? colors.randomElement()!,
-            emoji: selectedEmoji ?? "emoji",
+            color: selectedColor,
+            emoji: selectedEmoji,
             schedule: schedule
         )
         
@@ -159,7 +157,7 @@ final class CreateTrackerViewController: UIViewController {
     }
     
     private func updateCreateButtonState() {
-        let isEnabled = !trackerName.isEmpty && selectedSchedule != nil
+        let isEnabled = !trackerName.isEmpty && selectedSchedule != nil && !selectedEmoji.isEmpty && selectedColor != .clear
         addButton.isEnabled = isEnabled
         addButton.backgroundColor = isEnabled ? .ypBlack : .ypGray
     }
@@ -469,6 +467,7 @@ extension CreateTrackerViewController: UICollectionViewDelegateFlowLayout {
             guard let cell = collectionView.cellForItem(at: indexPath) as? EmojiCollectionViewCell else { return }
             cell.setSelected(true)
             selectedEmoji = emojiCollectionViewItems[indexPath.row]
+            updateCreateButtonState()
         } else {
             // Deselect other color cells
             for i in 0..<colorsCollectionViewItems.count {
@@ -484,6 +483,7 @@ extension CreateTrackerViewController: UICollectionViewDelegateFlowLayout {
             guard let cell = collectionView.cellForItem(at: indexPath) as? ColorCollectionViewCell else { return }
             cell.setSelected(true)
             selectedColor = colorsCollectionViewItems[indexPath.row]
+            updateCreateButtonState()
         }
     }
     
