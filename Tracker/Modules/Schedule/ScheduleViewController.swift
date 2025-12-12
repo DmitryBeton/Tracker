@@ -9,7 +9,7 @@ import UIKit
 import Logging
 
 protocol ScheduleViewControllerDelegate: AnyObject {
-    func didSelectSchedule(_ schedule: TrackerSchedule)
+    func didSelectSchedule(_ schedule: Set<WeekDay>)
 }
 
 final class ScheduleViewController: UIViewController {
@@ -126,8 +126,8 @@ final class ScheduleViewController: UIViewController {
     @objc // создает расписание и передает его в CreateTrackerViewController, после чего скрывает экран
     private func doneTapped() {
         logger.info("✅ Пользователь нажал 'Готово'.")
-        let schedule = TrackerSchedule(selectedDays: selectedDays)
-        logger.debug("📅 Создано расписание: \(schedule.displayText)")
+        let schedule = selectedDays
+        logger.debug("📅 Создано расписание: \(selectedDays)")
         logger.info("🔄 Передача расписания делегату.")
         delegate?.didSelectSchedule(schedule)
         dismiss(animated: true)
@@ -158,7 +158,7 @@ extension ScheduleViewController: UITableViewDataSource {
         switcher.addTarget(self, action: #selector(switchChanged(_:)), for: .valueChanged)
         
         cell.accessoryView = switcher
-        cell.textLabel?.text = day.rawValue
+        cell.textLabel?.text = day.fullName
         cell.backgroundColor = .ypBackground
         cell.selectionStyle = .none
         cell.layer.masksToBounds = true

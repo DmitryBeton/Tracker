@@ -22,23 +22,8 @@ final class MockTrackersRepository: TrackerRepositoryProtocol {
     }
 
     func filteredCategories(for date: Date, from categories: [TrackerCategory]) -> [TrackerCategory] {
-        let weekday = Calendar.current.component(.weekday, from: date)
-        
-        let currentWeekDay: WeekDay? = {
-            switch weekday {
-            case 1: return .sunday
-            case 2: return .monday
-            case 3: return .tuesday
-            case 4: return .wednesday
-            case 5: return .thursday
-            case 6: return .friday
-            case 7: return .saturday
-            default: return nil
-            }
-        }()
-        
-        guard let currentWeekDay = currentWeekDay else {
-            logger.error("❌ Неверный номер дня недели: \(weekday)")
+        guard let currentWeekDay = Calendar.current.weekDay(from: date) else {
+            logger.error("❌ Не удалось определить день недели для даты: \(date)")
             return []
         }
         

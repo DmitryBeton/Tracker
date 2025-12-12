@@ -29,7 +29,7 @@ final class CreateTrackerViewController: UIViewController {
         .ypColorSelection13, .ypColorSelection14, .ypColorSelection15, .ypColorSelection16, .ypColorSelection17, .ypColorSelection18
     ]
     
-    private var selectedSchedule: TrackerSchedule?
+    private var selectedSchedule: Set<WeekDay>?
     private var selectedEmoji: String = ""
     private var selectedColor: UIColor = .clear
     private var trackerName: String = ""
@@ -149,7 +149,7 @@ final class CreateTrackerViewController: UIViewController {
             schedule: schedule
         )
         
-        logger.info("✅ Трекер создан: '\(trackerName)' с расписанием: \(schedule.displayText)")
+        logger.info("✅ Трекер создан: '\(trackerName)' с расписанием: \(schedule)")
         logger.debug("🔄 Трекер передан через колбэк")
         
         onCreateTracker?(newTracker)
@@ -319,15 +319,15 @@ final class CreateTrackerViewController: UIViewController {
     
     @objc
     private func createTapped() {
-        logger.info("🎯 Пользователь нажал кнопку 'Создать'. Имя: '\(trackerName)', расписание: \(selectedSchedule?.displayText ?? "нет")")
+        logger.info("🎯 Пользователь нажал кнопку 'Создать'. Имя: '\(trackerName)', расписание: \(selectedSchedule?.map { $0.shortName }.joined(separator: ", ") ?? "Нет расписания")")
         createTracker()
     }
 }
 
 // MARK: - ScheduleViewControllerDelegate
 extension CreateTrackerViewController: ScheduleViewControllerDelegate {
-    func didSelectSchedule(_ schedule: TrackerSchedule) {
-        logger.info("✅ Получено новое расписание от ScheduleViewController: '\(schedule.displayText)'")
+    func didSelectSchedule(_ schedule: Set<WeekDay>) {
+        logger.info("✅ Получено новое расписание от ScheduleViewController: '\(schedule)'")
         selectedSchedule = schedule
         updateCreateButtonState()
         tableView.reloadData()
@@ -371,7 +371,8 @@ extension CreateTrackerViewController: UITableViewDataSource {
         cell.textLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
         
         if indexPath.row == 1, let schedule = selectedSchedule {
-            cell.detailTextLabel?.text = schedule.displayText
+            let sortedSchedule = schedule.sorted { $0.rawValue < $1.rawValue }
+            cell.detailTextLabel?.text = sortedSchedule.map { $0.shortName }.joined(separator: ", ")
         } else if indexPath.row == 0 {
             cell.detailTextLabel?.text = "Важное"
         }
