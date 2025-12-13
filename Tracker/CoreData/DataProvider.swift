@@ -54,22 +54,19 @@ final class DataProvider: NSObject {
         fetchRequest.predicate = predicate
         
         fetchRequest.sortDescriptors = [
-            NSSortDescriptor(key: "category.title", ascending: true), // Сортировка по категории
+            NSSortDescriptor(key: "category.title", ascending: true),
             NSSortDescriptor(key: "name", ascending: true)
         ]
         
         let fetchedResultsController = NSFetchedResultsController(
             fetchRequest: fetchRequest,
             managedObjectContext: context,
-            sectionNameKeyPath: "category.title", // Секции по категориям
+            sectionNameKeyPath: "category.title",
             cacheName: nil
         )
         
         fetchedResultsController.delegate = self
         try? fetchedResultsController.performFetch()
-        
-        print("✅ FetchedResultsController создан")
-        print("📊 Загружено объектов: \(fetchedResultsController.fetchedObjects?.count ?? 0)")
         
         return fetchedResultsController
     }()
@@ -85,16 +82,12 @@ final class DataProvider: NSObject {
     
     // Метод для получения предиката фильтрации по текущей дате
     private func getPredicateForCurrentDate() -> NSPredicate? {
-        print("📅 Создание предиката для даты: \(currentDate)")
-        
         // Получаем день недели из currentDate
         guard let currentWeekDay = WeekDay.fromDate(currentDate) else {
             print("❌ Не удалось определить день недели для даты: \(currentDate)")
             return NSPredicate(value: false) // Ничего не показывать
         }
-        
-        print("🔍 Текущий день недели: \(currentWeekDay.fullName) (rawValue: \(currentWeekDay.rawValue))")
-        
+
         // Создаем предикат:
         // 1. Либо schedule = nil (трекеры без расписания показываем всегда)
         // 2. Либо schedule содержит currentWeekDay
@@ -102,10 +95,7 @@ final class DataProvider: NSObject {
         // Проблема: schedule хранится как Data, нельзя фильтровать через contains
         // Поэтому фильтруем вручную в shouldDisplayTracker
         
-        // Показываем ВСЕ трекеры, фильтровать будем вручную
-//        return nil
         
-        // Альтернатива: если хочешь фильтровать на уровне CoreData:
          return createComplexPredicate(for: currentWeekDay)
     }
     
@@ -128,8 +118,6 @@ final class DataProvider: NSObject {
         
         do {
             try fetchedResultsController.performFetch()
-            print("✅ Предикат обновлен для даты: \(currentDate)")
-            print("📊 Отфильтровано объектов: \(fetchedResultsController.fetchedObjects?.count ?? 0)")
         } catch {
             print("❌ Ошибка обновления предиката: \(error)")
         }
@@ -139,7 +127,6 @@ final class DataProvider: NSObject {
 // MARK: - DataProviderProtocol
 extension DataProvider: DataProviderProtocol {
     var numberOfCategories: Int {
-        print("provider numberOfSections \(fetchedResultsController.sections?.count ?? 0)")
         return fetchedResultsController.sections?.count ?? 0
     }
     
@@ -152,13 +139,10 @@ extension DataProvider: DataProviderProtocol {
         }
         
         let numberOfObjects = sections[section].numberOfObjects
-        print("provider numberOfRowsInSection \(section): \(numberOfObjects)")
         return numberOfObjects
     }
     
     func tracker(at indexPath: IndexPath) -> TrackerCoreData? {
-        print("provider tracker at \(indexPath)")
-        
         // ВАЖНО: Проверяем валидность indexPath
         guard let sections = fetchedResultsController.sections,
               indexPath.section < sections.count,
@@ -166,14 +150,10 @@ extension DataProvider: DataProviderProtocol {
             print("❌ Ошибка: indexPath \(indexPath) вне границ")
             return nil
         }
-        print("✅ Успех: indexPath \(indexPath) в границах")
-
         return fetchedResultsController.object(at: indexPath)
     }
     
     func categoryTitle(at index: Int) -> String {
-        print("📁 categoryTitle at index \(index)")
-        // 1. Проверяем существование секции
         guard let sections = fetchedResultsController.sections,
               index < sections.count else {
             print("⚠️ Секция \(index) не существует")
@@ -193,24 +173,20 @@ extension DataProvider: DataProviderProtocol {
             print("⚠️ Ошибка получения трекера из секции \(index)")
             return "Без категории"
         }
-        print("✅ Название категории для секции \(index): '\(title)'")
         return title
     }
     
     func addTracker(_ tracker: Tracker, to: String) throws {
-        print("Provider addRecord")
         try? dataStore.addTracker(tracker, to: "Важное")
     }
     
     func deleteRecord(at indexPath: IndexPath) throws {
-        print("Provider deleteRecord at index \(indexPath)")
         let record = fetchedResultsController.object(at: indexPath)
         try? dataStore.delete(record)
     }
     
     // Установить текущую дату и обновить фильтрацию
     func setCurrentDate(_ date: Date) {
-        print("📅 Установка текущей даты: \(date)")
         
         // Сохраняем новую дату
         self.currentDate = date
@@ -224,7 +200,6 @@ extension DataProvider: DataProviderProtocol {
     
     // Получить отфильтрованные категории
     func fetchFilteredCategories() -> [TrackerCategory] {
-        print("📊 Получение отфильтрованных категорий для даты: \(currentDate)")
         
         guard let sections = fetchedResultsController.sections else {
             return []
@@ -257,7 +232,6 @@ extension DataProvider: DataProviderProtocol {
             }
         }
         
-        print("✅ Найдено \(categories.count) категорий с трекерами")
         return categories
     }
     
@@ -316,8 +290,6 @@ extension DataProvider: NSFetchedResultsControllerDelegate {
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         insertedIndexes = IndexSet()
         deletedIndexes = IndexSet()
-        print("provider FetchResult ControllerWillChangeContent \(insertedIndexes)")
-        
     }
 
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
@@ -328,8 +300,6 @@ extension DataProvider: NSFetchedResultsControllerDelegate {
         )
         insertedIndexes = nil
         deletedIndexes = nil
-        print("provider FetchResult controllerDidChangeContent \(insertedIndexes)")
-
     }
     
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
@@ -346,8 +316,6 @@ extension DataProvider: NSFetchedResultsControllerDelegate {
         default:
             break
         }
-        print("provider FetchResult controller \(insertedIndexes)")
-
     }
 }
 

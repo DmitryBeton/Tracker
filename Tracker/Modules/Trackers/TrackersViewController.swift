@@ -68,37 +68,22 @@ final class TrackersViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        loadTrackers()
+        dataProvider?.setCurrentDate(selectedDate)
+
+        let hasData = (dataProvider?.numberOfCategories ?? 0) > 0
+        hasData ? hideEmptyState() : showEmptyState()
+
         logger.info("✅ Главный экран трекеров готов к работе")
     }
     
     // MARK: - Private methods
-    private func loadTrackers() {
-        logger.info("🔄 Загрузка данных при запуске")
-        dataProvider?.setCurrentDate(selectedDate)
-        displayTrackers(for: selectedDate)
-    }
-    
     private func displayTrackers(for date: Date) {
-          logger.debug("🔄 Обновление отображения для даты: \(date)")
-          
-          // 1. Устанавливаем текущую дату в DataProvider
-          dataProvider?.setCurrentDate(date)
-          
-          // 2. Проверяем наличие данных
-          let hasData = dataProvider?.numberOfCategories ?? 0 > 0
-          
-          if !hasData {
-              logger.info("📭 Нет трекеров для отображения. Показ пустого состояния")
-              collectionView.reloadData()
-              showEmptyState()
-          } else {
-              logger.debug("✅ Отображение трекеров из DataProvider")
-              collectionView.reloadData()
-              hideEmptyState()
-          }
+        dataProvider?.setCurrentDate(date)
+        collectionView.reloadData()
+        let hasData = (dataProvider?.numberOfCategories ?? 0) > 0
+        hasData ? hideEmptyState() : showEmptyState()
     }
-    
+
     private func toggleTrackerCompletion(for trackerId: UUID) {
         logger.info("🔘 Переключение выполнения трекера \(trackerId) на дату \(selectedDate)")
         
@@ -148,13 +133,39 @@ final class TrackersViewController: UIViewController {
     }
     
     private func showEmptyState() {
+        guard emptyStateView.isHidden else { return }
+
         emptyStateView.isHidden = false
+        emptyStateView.alpha = 0
+        emptyStateView.transform = CGAffineTransform(translationX: 0, y: 20)
+
+        UIView.animate(
+            withDuration: 0.35,
+            delay: 0,
+            usingSpringWithDamping: 0.85,
+            initialSpringVelocity: 0.5,
+            options: [.curveEaseOut]
+        ) {
+            self.emptyStateView.alpha = 1
+            self.emptyStateView.transform = .identity
+        }
     }
-    
+
     private func hideEmptyState() {
-        emptyStateView.isHidden = true
+        guard !emptyStateView.isHidden else { return }
+
+        UIView.animate(
+            withDuration: 0.2,
+            delay: 0,
+            options: [.curveEaseIn]
+        ) {
+            self.emptyStateView.alpha = 0
+            self.emptyStateView.transform = CGAffineTransform(translationX: 0, y: 10)
+        } completion: { _ in
+            self.emptyStateView.isHidden = true
+        }
     }
-    
+
     private func createNewTracker(_ tracker: Tracker) {
         logger.info("🆕 Создание нового трекера: '\(tracker.name)'")
         
@@ -289,30 +300,16 @@ final class TrackersViewController: UIViewController {
 // MARK: - DataProviderDelegate
 extension TrackersViewController: DataProviderDelegate {
     func didUpdate(_ update: NotepadStoreUpdate) {
-        logger.info("🔄 DataProviderDelegate: данные обновлены")
-        
         collectionView.performBatchUpdates {
-            // Вставляем новые элементы
-            update.insertedIndexes.forEach { index in
-                let indexPath = IndexPath(item: index, section: 0)
-                collectionView.insertItems(at: [indexPath])
-                logger.debug("➕ Вставлена ячейка по indexPath: \(indexPath)")
+            update.insertedIndexes.forEach {
+                collectionView.insertItems(at: [IndexPath(item: $0, section: 0)])
             }
-            
-            // Удаляем элементы
-            update.deletedIndexes.forEach { index in
-                let indexPath = IndexPath(item: index, section: 0)
-                collectionView.deleteItems(at: [indexPath])
-                logger.debug("➖ Удалена ячейка по indexPath: \(indexPath)")
+            update.deletedIndexes.forEach {
+                collectionView.deleteItems(at: [IndexPath(item: $0, section: 0)])
             }
-        }
-        
-        // Проверяем, нужно ли показывать пустое состояние
-        let hasData = dataProvider?.numberOfCategories ?? 0 > 0
-        if hasData {
-            hideEmptyState()
-        } else {
-            showEmptyState()
+        } completion: { _ in
+            let hasData = (self.dataProvider?.numberOfCategories ?? 0) > 0
+            hasData ? self.hideEmptyState() : self.showEmptyState()
         }
     }
 }
@@ -343,12 +340,30 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         }
         
         configureCell(cell, with: Tracker(name: tracker.name!, color: uiColorMarhalling.color(from: tracker.color!) , emoji: tracker.emoji!))
+
         return cell
 
     }
     
     // MARK: - Layout (Size & Spacing)
-    
+    func collectionView(
+        _ collectionView: UICollectionView,
+        willDisplay cell: UICollectionViewCell,
+        forItemAt indexPath: IndexPath
+    ) {
+        cell.alpha = 0
+        cell.transform = CGAffineTransform(translationX: 0, y: 20)
+
+        UIView.animate(
+            withDuration: 0.35,
+            delay: 0.03 * Double(indexPath.item),
+            options: [.curveEaseOut]
+        ) {
+            cell.alpha = 1
+            cell.transform = .identity
+        }
+    }
+
     func collectionView(
         _ collectionView: UICollectionView,
         layout collectionViewLayout: UICollectionViewLayout,
@@ -401,7 +416,6 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         let categoryTitle = dataProvider?.categoryTitle(at: indexPath.section) ?? "Категория"
         header.configure(with: categoryTitle)
         
-        print("✅ Заголовок для секции \(indexPath.section): '\(categoryTitle)'")
         return header
     }
     
