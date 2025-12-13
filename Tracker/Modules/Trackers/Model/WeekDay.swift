@@ -39,6 +39,10 @@ enum WeekDay: Int, CaseIterable, Codable {
         case .sunday: return "Вс"
         }
     }
+    
+    static func fromDate(_ date: Date) -> WeekDay? {
+        return Calendar.current.weekDay(from: date)
+    }
 }
 
 extension Calendar {

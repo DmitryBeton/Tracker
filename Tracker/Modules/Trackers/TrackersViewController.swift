@@ -11,12 +11,9 @@ import Logging
 final class TrackersViewController: UIViewController {
     // MARK: - Private properties
     private let logger = Logger(label: "TrackersViewController")
-    private let repository: TrackerRepositoryProtocol = MockTrackersRepository()
     
-    private var categories: [TrackerCategory] = []
     private var completedRecords: [TrackerRecord] = []
     private var selectedDate = Date()
-    private var visibleCategories: [TrackerCategory] = []
     
     private lazy var dataProvider: DataProviderProtocol? = {
         let trackerDataStore = (UIApplication.shared.delegate as! AppDelegate).trackerDataStore
@@ -71,31 +68,35 @@ final class TrackersViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-//        loadTrackers()
+        loadTrackers()
         logger.info("✅ Главный экран трекеров готов к работе")
     }
     
     // MARK: - Private methods
     private func loadTrackers() {
         logger.info("🔄 Загрузка данных при запуске")
-        categories = repository.fetchCategories()
-        logger.debug("📊 Загружено категорий: \(categories.count), трекеров: \(categories.flatMap { $0.trackers }.count)")
+        dataProvider?.setCurrentDate(selectedDate)
         displayTrackers(for: selectedDate)
     }
     
     private func displayTrackers(for date: Date) {
-        logger.debug("🔄 Обновление отображения для даты: \(date)")
-        visibleCategories = repository.filteredCategories(for: date, from: categories)
-        
-        if visibleCategories.isEmpty {
-            logger.info("📭 Нет трекеров для отображения. Показ пустого состояния")
-            collectionView.reloadData()
-            showEmptyState()
-        } else {
-            logger.debug("✅ Отображение \(visibleCategories.count) категорий с трекерами")
-            collectionView.reloadData()
-            hideEmptyState()
-        }
+          logger.debug("🔄 Обновление отображения для даты: \(date)")
+          
+          // 1. Устанавливаем текущую дату в DataProvider
+          dataProvider?.setCurrentDate(date)
+          
+          // 2. Проверяем наличие данных
+          let hasData = dataProvider?.numberOfCategories ?? 0 > 0
+          
+          if !hasData {
+              logger.info("📭 Нет трекеров для отображения. Показ пустого состояния")
+              collectionView.reloadData()
+              showEmptyState()
+          } else {
+              logger.debug("✅ Отображение трекеров из DataProvider")
+              collectionView.reloadData()
+              hideEmptyState()
+          }
     }
     
     private func toggleTrackerCompletion(for trackerId: UUID) {
@@ -119,13 +120,19 @@ final class TrackersViewController: UIViewController {
         logger.trace("📊 Трекер \(trackerId) выполнен всего: \(totalCompletions) раз")
         
         // Находим и обновляем конкретную ячейку
-        for (sectionIndex, category) in visibleCategories.enumerated() {
-            if let rowIndex = category.trackers.firstIndex(where: { $0.id == trackerId }) {
-                let indexPath = IndexPath(item: rowIndex, section: sectionIndex)
-                collectionView.performBatchUpdates({
-                    collectionView.reloadItems(at: [indexPath])
-                }, completion: nil)
-                break
+        // Теперь ищем через DataProvider
+        guard let dataProvider = dataProvider else { return }
+        
+        for section in 0..<dataProvider.numberOfCategories {
+            for row in 0..<dataProvider.numberOfTrackersInCategory(section) {
+                let indexPath = IndexPath(row: row, section: section)
+                if let tracker = dataProvider.tracker(at: indexPath),
+                   tracker.id == trackerId {
+                    collectionView.performBatchUpdates({
+                        collectionView.reloadItems(at: [indexPath])
+                    }, completion: nil)
+                    return
+                }
             }
         }
     }
@@ -151,13 +158,12 @@ final class TrackersViewController: UIViewController {
     private func createNewTracker(_ tracker: Tracker) {
         logger.info("🆕 Создание нового трекера: '\(tracker.name)'")
         
-//        repository.addTracker(tracker, toCategory: "Важное")
-        try? dataProvider?.addTracker(tracker, to: "Важное")
-        
-        categories = repository.fetchCategories()
-        logger.debug("📊 Категории обновлены.")
-        
-        displayTrackers(for: selectedDate)
+        do {
+            try dataProvider?.addTracker(tracker, to: "Важное")
+            logger.debug("✅ Трекер сохранен через DataProvider")
+        } catch {
+            logger.error("❌ Ошибка сохранения трекера: \(error)")
+        }
     }
     
     private func configureCell(_ cell: TrackerCollectionViewCell, with tracker: Tracker) {
@@ -283,11 +289,30 @@ final class TrackersViewController: UIViewController {
 // MARK: - DataProviderDelegate
 extension TrackersViewController: DataProviderDelegate {
     func didUpdate(_ update: NotepadStoreUpdate) {
+        logger.info("🔄 DataProviderDelegate: данные обновлены")
+        
         collectionView.performBatchUpdates {
-            let insertedIndexPaths = update.insertedIndexes.map { IndexPath(item: $0, section: 0) }
-            let deletedIndexPaths = update.deletedIndexes.map { IndexPath(item: $0, section: 0) }
-            collectionView.insertItems(at: insertedIndexPaths)
-            collectionView.deleteItems(at: deletedIndexPaths)
+            // Вставляем новые элементы
+            update.insertedIndexes.forEach { index in
+                let indexPath = IndexPath(item: index, section: 0)
+                collectionView.insertItems(at: [indexPath])
+                logger.debug("➕ Вставлена ячейка по indexPath: \(indexPath)")
+            }
+            
+            // Удаляем элементы
+            update.deletedIndexes.forEach { index in
+                let indexPath = IndexPath(item: index, section: 0)
+                collectionView.deleteItems(at: [indexPath])
+                logger.debug("➖ Удалена ячейка по indexPath: \(indexPath)")
+            }
+        }
+        
+        // Проверяем, нужно ли показывать пустое состояние
+        let hasData = dataProvider?.numberOfCategories ?? 0 > 0
+        if hasData {
+            hideEmptyState()
+        } else {
+            showEmptyState()
         }
     }
 }
