@@ -29,7 +29,7 @@ final class CreateTrackerViewController: UIViewController {
         .ypColorSelection13, .ypColorSelection14, .ypColorSelection15, .ypColorSelection16, .ypColorSelection17, .ypColorSelection18
     ]
     
-    private var selectedSchedule: Set<WeekDay>?
+    private var selectedSchedule: [WeekDay]?
     private var selectedEmoji: String = ""
     private var selectedColor: UIColor = .clear
     private var trackerName: String = ""
@@ -326,7 +326,7 @@ final class CreateTrackerViewController: UIViewController {
 
 // MARK: - ScheduleViewControllerDelegate
 extension CreateTrackerViewController: ScheduleViewControllerDelegate {
-    func didSelectSchedule(_ schedule: Set<WeekDay>) {
+    func didSelectSchedule(_ schedule: [WeekDay]) {
         logger.info("✅ Получено новое расписание от ScheduleViewController: '\(schedule)'")
         selectedSchedule = schedule
         updateCreateButtonState()

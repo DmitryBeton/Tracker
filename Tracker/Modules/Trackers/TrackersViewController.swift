@@ -18,6 +18,19 @@ final class TrackersViewController: UIViewController {
     private var selectedDate = Date()
     private var visibleCategories: [TrackerCategory] = []
     
+    private lazy var dataProvider: DataProviderProtocol? = {
+        let trackerDataStore = (UIApplication.shared.delegate as! AppDelegate).trackerDataStore
+        do {
+            try dataProvider = DataProvider(trackerDataStore, delegate: self)
+            return dataProvider
+        } catch {
+            print("Данные недоступны.")
+            return nil
+        }
+    }()
+    
+    private let uiColorMarhalling = UIColorMarshalling.shared
+    
     // MARK: - UI Elements
     private let collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -58,7 +71,7 @@ final class TrackersViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        loadTrackers()
+//        loadTrackers()
         logger.info("✅ Главный экран трекеров готов к работе")
     }
     
@@ -138,7 +151,8 @@ final class TrackersViewController: UIViewController {
     private func createNewTracker(_ tracker: Tracker) {
         logger.info("🆕 Создание нового трекера: '\(tracker.name)'")
         
-        repository.addTracker(tracker, toCategory: "Важное")
+//        repository.addTracker(tracker, toCategory: "Важное")
+        try? dataProvider?.addTracker(tracker, to: "Важное")
         
         categories = repository.fetchCategories()
         logger.debug("📊 Категории обновлены.")
@@ -266,23 +280,36 @@ final class TrackersViewController: UIViewController {
     }
 }
 
+// MARK: - DataProviderDelegate
+extension TrackersViewController: DataProviderDelegate {
+    func didUpdate(_ update: NotepadStoreUpdate) {
+        collectionView.performBatchUpdates {
+            let insertedIndexPaths = update.insertedIndexes.map { IndexPath(item: $0, section: 0) }
+            let deletedIndexPaths = update.deletedIndexes.map { IndexPath(item: $0, section: 0) }
+            collectionView.insertItems(at: insertedIndexPaths)
+            collectionView.deleteItems(at: deletedIndexPaths)
+        }
+    }
+}
+
 // MARK: - UICollectionViewDataSource & UICollectionViewDelegateFlowLayout
 extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     // MARK: - Sections & Items
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        visibleCategories.count
+        dataProvider?.numberOfCategories ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        visibleCategories[section].trackers.count
+        dataProvider?.numberOfTrackersInCategory(section) ?? 0
     }
     
     func collectionView(
         _ collectionView: UICollectionView,
         cellForItemAt indexPath: IndexPath
     ) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(
+        guard let tracker = dataProvider?.tracker(at: indexPath),
+              let cell = collectionView.dequeueReusableCell(
             withReuseIdentifier: "Cell",
             for: indexPath
         ) as? TrackerCollectionViewCell else {
@@ -290,9 +317,9 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
             return UICollectionViewCell()
         }
         
-        let tracker = visibleCategories[indexPath.section].trackers[indexPath.item]
-        configureCell(cell, with: tracker)
+        configureCell(cell, with: Tracker(name: tracker.name!, color: uiColorMarhalling.color(from: tracker.color!) , emoji: tracker.emoji!))
         return cell
+
     }
     
     // MARK: - Layout (Size & Spacing)
@@ -346,8 +373,10 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
             for: indexPath
         ) as! TrackerHeaderView
         
-        let category = visibleCategories[indexPath.section]
-        header.configure(with: category.title)
+        let categoryTitle = dataProvider?.categoryTitle(at: indexPath.section) ?? "Категория"
+        header.configure(with: categoryTitle)
+        
+        print("✅ Заголовок для секции \(indexPath.section): '\(categoryTitle)'")
         return header
     }
     

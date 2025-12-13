@@ -9,7 +9,7 @@ import UIKit
 import Logging
 
 protocol ScheduleViewControllerDelegate: AnyObject {
-    func didSelectSchedule(_ schedule: Set<WeekDay>)
+    func didSelectSchedule(_ schedule: [WeekDay])
 }
 
 final class ScheduleViewController: UIViewController {
@@ -18,7 +18,7 @@ final class ScheduleViewController: UIViewController {
     weak var delegate: ScheduleViewControllerDelegate?
     
     // MARK: - Properties
-    private var selectedDays: Set<WeekDay> = []
+    private var selectedDays: [WeekDay] = []
     private let tableViewData: [WeekDay] = WeekDay.allCases
     
     // MARK: - UI Elements
@@ -114,9 +114,11 @@ final class ScheduleViewController: UIViewController {
         let day = tableViewData[sender.tag]
         
         if sender.isOn {
-            selectedDays.insert(day)
+            selectedDays.append(day)
         } else {
-            selectedDays.remove(day)
+            if let index = selectedDays.firstIndex(of: day) {
+                    selectedDays.remove(at: index)
+                }
         }
 
         logger.debug("🔘 Изменен переключатель для '\(day.rawValue)': \(!sender.isOn) -> \(sender.isOn)")

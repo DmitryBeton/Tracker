@@ -9,7 +9,7 @@ import UIKit
 
 enum TrackersMockData {
     static let categories: [TrackerCategory] = {
-        let schedule: Set<WeekDay> = [.monday, .tuesday, .sunday]
+        let schedule: [WeekDay] = [.monday, .tuesday, .sunday]
         
         let tracker = Tracker(name: "Полить растения", color: .ypColorSelection5, emoji: "😪", schedule: schedule)
         

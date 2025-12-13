@@ -9,10 +9,30 @@ import UIKit
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
+    
+    lazy var trackerDataStore: TrackerDataStore = {
+        do {
+            print("💿DataStore получен")
+            return try DataStore()
+        } catch {
+            print("❌ERROR: не удалось получить DataStore")
+            return NullStore()
+        }
+    }()
+
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
+        NSSetUncaughtExceptionHandler { exception in
+            print("🔥 КРАШ ПРОИЗОШЕЛ В ФУНКЦИИ:")
+            print("Name: \(exception.name)")
+            print("Reason: \(exception.reason ?? "нет причины")")
+            print("Стек вызовов:")
+            exception.callStackSymbols.forEach { print($0) }
+        }
+
+        DaysValueTransformer.register()
         return true
     }
 
