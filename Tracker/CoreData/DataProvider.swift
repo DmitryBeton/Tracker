@@ -9,11 +9,6 @@ import UIKit
 import CoreData
 import Logging
 
-struct NotepadStoreUpdate {
-    let insertedIndexes: IndexSet
-    let deletedIndexes: IndexSet
-}
-
 protocol DataProviderProtocol {
     var numberOfCategories: Int { get }
     func numberOfTrackersInCategory(_ section: Int) -> Int

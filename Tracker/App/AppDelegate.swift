@@ -18,7 +18,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             return try DataStore()
         } catch {
             logger.error("❌ не удалось получить DataStore - \(#function)")
-            exit(0)
+            exit(0) // TODO: Костыль, потом убереу
 //            return NullStore()
         }
     }()

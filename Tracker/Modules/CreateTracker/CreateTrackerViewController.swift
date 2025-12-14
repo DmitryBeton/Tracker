@@ -454,7 +454,6 @@ extension CreateTrackerViewController: UICollectionViewDataSource {
 extension CreateTrackerViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if indexPath.section == 0 {
-            // Deselect other emoji cells
             for i in 0..<emojiCollectionViewItems.count {
                 if i != indexPath.item {
                     let otherIndexPath = IndexPath(item: i, section: 0)
@@ -470,7 +469,6 @@ extension CreateTrackerViewController: UICollectionViewDelegateFlowLayout {
             selectedEmoji = emojiCollectionViewItems[indexPath.row]
             updateCreateButtonState()
         } else {
-            // Deselect other color cells
             for i in 0..<colorsCollectionViewItems.count {
                 if i != indexPath.item {
                     let otherIndexPath = IndexPath(item: i, section: 1)

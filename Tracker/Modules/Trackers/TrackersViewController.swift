@@ -75,7 +75,7 @@ final class TrackersViewController: UIViewController {
     
     // MARK: - Private methods
     private func displayTrackers(for date: Date) {
-        logger.info("called: \(#function)")
+        logger.info("called: \(#function) \(#line)")
 
         dataProvider?.setCurrentDate(date)
         completedRecords = dataProvider?.fetchCompletedRecords() ?? []
@@ -86,7 +86,7 @@ final class TrackersViewController: UIViewController {
     }
 
     private func toggleTrackerCompletion(for trackerId: UUID) {
-        logger.info("called: \(#function)")
+        logger.info("called: \(#function) \(#line)")
 
         if selectedDate > Date() {
             showFutureDateRestriction()
@@ -97,17 +97,15 @@ final class TrackersViewController: UIViewController {
 
         dataProvider.toggleRecord(trackerId: trackerId, date: selectedDate)
 
-        // 1. Обновляем локальное состояние
         completedRecords = dataProvider.fetchCompletedRecords()
 
-        // 2. Перерисовываем ТОЛЬКО нужную ячейку
         if let indexPath = indexPath(for: trackerId) {
             collectionView.reloadItems(at: [indexPath])
         }
     }
 
     private func indexPath(for trackerId: UUID) -> IndexPath? {
-        logger.info("called: \(#function)")
+        logger.info("called: \(#function) \(#line)")
 
         guard let dataProvider else { return nil }
 
@@ -123,10 +121,8 @@ final class TrackersViewController: UIViewController {
     }
 
     private func createNewTracker(_ tracker: Tracker) {
-        logger.info("called: \(#function)")
+        logger.info("called: \(#function) \(#line)")
 
-        logger.info("🆕 Создание нового трекера: '\(tracker.name)'")
-        
         do {
             try dataProvider?.addTracker(tracker, to: "Важное")
             logger.debug("✅ Трекер сохранен через DataProvider")
@@ -205,7 +201,7 @@ final class TrackersViewController: UIViewController {
     }
 
     private func showCreateTrackerScreen() {
-        logger.info("called: \(#function)")
+        logger.info("called: \(#function) \(#line)")
 
         let createVC = CreateTrackerViewController()
         createVC.title = "Новая привычка"
@@ -221,7 +217,7 @@ final class TrackersViewController: UIViewController {
 
     // MARK: - UI Setup
     private func setupUI() {
-        logger.info("called: \(#function)")
+        logger.info("called: \(#function) \(#line)")
 
         view.backgroundColor = .ypWhite
         setupNavigation()
@@ -261,7 +257,7 @@ final class TrackersViewController: UIViewController {
     }
     
     private func setupNavigation() {
-        logger.info("called: \(#function)")
+        logger.info("called: \(#function) \(#line)")
 
         title = "Трекеры"
         navigationController?.navigationBar.prefersLargeTitles = true
@@ -308,7 +304,7 @@ final class TrackersViewController: UIViewController {
     
     // MARK: - Actions
     @objc private func addTapped() {
-        logger.info("➕ Пользователь нажал кнопку добавления трекера")
+        logger.info("called: \(#function) \(#line)")
         showCreateTrackerScreen()
     }
     

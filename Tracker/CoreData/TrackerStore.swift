@@ -78,14 +78,3 @@ final class TrackerStore: NSObject {
         }
     }
 }
-
-// MARK: - NSFetchedResultsControllerDelegate
-extension TrackerStore: NSFetchedResultsControllerDelegate {
-    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        logger.info("called: \(#function)")
-    }
-    
-    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        logger.info("called: \(#function)")
-    }
-}
