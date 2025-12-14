@@ -24,14 +24,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
-        NSSetUncaughtExceptionHandler { exception in
-            print("🔥 КРАШ ПРОИЗОШЕЛ В ФУНКЦИИ:")
-            print("Name: \(exception.name)")
-            print("Reason: \(exception.reason ?? "нет причины")")
-            print("Стек вызовов:")
-            exception.callStackSymbols.forEach { print($0) }
-        }
-
         DaysValueTransformer.register()
         return true
     }

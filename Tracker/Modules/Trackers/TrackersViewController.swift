@@ -129,6 +129,7 @@ final class TrackersViewController: UIViewController {
         } catch {
             logger.error("❌ Ошибка сохранения трекера: \(error)")
         }
+        displayTrackers(for: selectedDate)
     }
     
     private func configureCell(_ cell: TrackerCollectionViewCell, with tracker: Tracker) {
@@ -295,7 +296,6 @@ final class TrackersViewController: UIViewController {
     
     @objc private func dateChanged() {
         selectedDate = datePicker.date
-        logger.info("📅 Пользователь выбрал дату: \(selectedDate)")
         displayTrackers(for: selectedDate)
     }
 }
