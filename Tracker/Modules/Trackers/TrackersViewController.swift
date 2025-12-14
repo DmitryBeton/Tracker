@@ -328,19 +328,19 @@ final class TrackersViewController: UIViewController {
 // MARK: - DataProviderDelegate
 extension TrackersViewController: DataProviderDelegate {
     func didUpdate(_ update: NotepadStoreUpdate) {
-        logger.info("called: \(#function)")
-
-        collectionView.performBatchUpdates {
-            update.insertedIndexes.forEach {
-                collectionView.insertItems(at: [IndexPath(item: $0, section: 0)])
-            }
-            update.deletedIndexes.forEach {
-                collectionView.deleteItems(at: [IndexPath(item: $0, section: 0)])
-            }
-        } completion: { _ in
-            let hasData = (self.dataProvider?.numberOfCategories ?? 0) > 0
-            hasData ? self.hideEmptyState() : self.showEmptyState()
-        }
+//        logger.info("called: \(#function)")
+//
+//        collectionView.performBatchUpdates {
+//            update.insertedIndexes.forEach {
+//                collectionView.insertItems(at: [IndexPath(item: $0, section: 0)])
+//            }
+//            update.deletedIndexes.forEach {
+//                collectionView.deleteItems(at: [IndexPath(item: $0, section: 0)])
+//            }
+//        } completion: { _ in
+//            let hasData = (self.dataProvider?.numberOfCategories ?? 0) > 0
+//            hasData ? self.hideEmptyState() : self.showEmptyState()
+//        }
     }
 }
 

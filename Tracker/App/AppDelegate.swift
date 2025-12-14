@@ -12,13 +12,14 @@ import Logging
 final class AppDelegate: UIResponder, UIApplicationDelegate {
     private let logger = Logger(label: "AppDelegate")
 
-    lazy var trackerDataStore: TrackerDataStore = {
+    lazy var trackerDataStore: DataStore = {
         do {
             logger.info("✅ DataStore получен - \(#function)")
             return try DataStore()
         } catch {
             logger.error("❌ не удалось получить DataStore - \(#function)")
-            return NullStore()
+            exit(0)
+//            return NullStore()
         }
     }()
 
