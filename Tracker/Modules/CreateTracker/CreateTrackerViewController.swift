@@ -371,8 +371,12 @@ extension CreateTrackerViewController: UITableViewDataSource {
         cell.textLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
         
         if indexPath.row == 1, let schedule = selectedSchedule {
-            let sortedSchedule = schedule.sorted { $0.rawValue < $1.rawValue }
-            cell.detailTextLabel?.text = sortedSchedule.map { $0.shortName }.joined(separator: ", ")
+            if schedule.count == 7 {
+                cell.detailTextLabel?.text = "Каждый день"
+            } else {
+                let sortedSchedule = schedule.sorted { $0.rawValue < $1.rawValue }
+                cell.detailTextLabel?.text = sortedSchedule.map { $0.shortName }.joined(separator: ", ")
+            }
         } else if indexPath.row == 0 {
             cell.detailTextLabel?.text = "Важное"
         }
