@@ -7,9 +7,11 @@
 
 
 import CoreData
+import Logging
 
 // MARK: - DataStore
 final class DataStore {
+    private let logger = Logger(label: "DataStore")
 
     private let modelName = "Tracker"
     private let storeURL = NSPersistentContainer
@@ -27,7 +29,7 @@ final class DataStore {
     }
     
     init() throws {
-        print("📦 Инициализация DataStore")
+        logger.info("called: \(#function) \(#line)")
         guard let modelUrl = Bundle(for: DataStore.self).url(forResource: modelName, withExtension: "momd"),
               let model = NSManagedObjectModel(contentsOf: modelUrl) else {
             throw StoreError.modelNotFound
@@ -46,11 +48,11 @@ final class DataStore {
         let context = self.context
         var result: Result<R, Error>!
         context.performAndWait { result = action(context) }
-        print("DataStore performSync->\(#function)")
         return try result.get()
     }
     
     private func cleanUpReferencesToPersistentStores() {
+        logger.info("called: \(#function) \(#line)")
         context.performAndWait {
             let coordinator = self.container.persistentStoreCoordinator
             try? coordinator.persistentStores.forEach(coordinator.remove)
@@ -63,6 +65,8 @@ final class DataStore {
     }
     
     private func findOrCreateCategory(withTitle title: String, in context: NSManagedObjectContext) -> TrackerCategoryCoreData {
+        logger.info("called: \(#function)")
+
         let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "title == %@", title)
         fetchRequest.fetchLimit = 1
@@ -90,12 +94,12 @@ final class DataStore {
 // MARK: - NotepadDataStore
 extension DataStore: TrackerDataStore {
     var managedObjectContext: NSManagedObjectContext? {
-        print("DataStore->managedObjectContext->Дан доступ к контексту✅")
+        logger.info("called: \(#function)")
         return context
     }
     
     func addTracker(_ tracker: Tracker, to categoryTitle: String) throws {
-        print("Добавляем трекер в категорию '\(categoryTitle)'...")
+        logger.info("called: \(#function)")
         try performSync { context in
             Result {
                 // 1. Находим или создаем категорию
@@ -119,7 +123,7 @@ extension DataStore: TrackerDataStore {
     }
     
     func delete(_ tracker: NSManagedObject) throws {
-        print("Удаляем заметку...")
+        logger.info("called: \(#function)")
         try performSync { context in
             Result {
                 context.delete(tracker)
@@ -129,6 +133,7 @@ extension DataStore: TrackerDataStore {
     }
     
     func addRecord(trackerId: UUID, date: Date) throws {
+        logger.info("called: \(#function) \(#line)")
         try performSync { context in
             Result {
                 let record = TrackerRecordCoreData(context: context)
@@ -140,6 +145,7 @@ extension DataStore: TrackerDataStore {
     }
 
     func deleteRecord(trackerId: UUID, date: Date) throws {
+        logger.info("called: \(#function) \(#line)")
         try performSync { context in
             Result {
                 let request: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
@@ -156,7 +162,8 @@ extension DataStore: TrackerDataStore {
     }
 
     func fetchRecords() throws -> [TrackerRecord] {
-        try performSync { context in
+        logger.info("called: \(#function) \(#line)")
+        return try performSync { context in
             Result {
                 let request: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
                 let result = try context.fetch(request)

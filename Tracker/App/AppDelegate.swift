@@ -6,16 +6,18 @@
 //
 
 import UIKit
+import Logging
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
-    
+    private let logger = Logger(label: "AppDelegate")
+
     lazy var trackerDataStore: TrackerDataStore = {
         do {
-            print("💿DataStore получен")
+            logger.info("✅ DataStore получен - \(#function)")
             return try DataStore()
         } catch {
-            print("❌ERROR: не удалось получить DataStore")
+            logger.error("❌ не удалось получить DataStore - \(#function)")
             return NullStore()
         }
     }()

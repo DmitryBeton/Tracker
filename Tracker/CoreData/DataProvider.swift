@@ -7,6 +7,7 @@
 
 import UIKit
 import CoreData
+import Logging
 
 struct NotepadStoreUpdate {
     let insertedIndexes: IndexSet
@@ -25,8 +26,7 @@ protocol DataProviderProtocol {
     func addTracker(_ tracker: Tracker, to: String) throws
     func deleteRecord(at indexPath: IndexPath) throws
     
-    // Фильтрация по дате
-    func setCurrentDate(_ date: Date) // Установить текущую дату для фильтрации
+    func setCurrentDate(_ date: Date)
     
     func fetchCompletedRecords() -> [TrackerRecord]
     func toggleRecord(trackerId: UUID, date: Date)
@@ -34,6 +34,7 @@ protocol DataProviderProtocol {
 
 // MARK: - DataProvider
 final class DataProvider: NSObject {
+    private let logger = Logger(label: "DataProvider")
 
     enum DataProviderError: Error {
         case failedToInitializeContext
@@ -46,7 +47,6 @@ final class DataProvider: NSObject {
     private lazy var fetchedResultsController: NSFetchedResultsController<TrackerCoreData> = {
         let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
         
-        // Базовый предикат
         let predicate = getPredicateForCurrentDate()
         fetchRequest.predicate = predicate
         
@@ -71,7 +71,7 @@ final class DataProvider: NSObject {
     private var insertedIndexes: IndexSet?
     private var deletedIndexes: IndexSet?
     
-    private var currentDate: Date = Date() // Текущая дата для фильтрации
+    private var currentDate: Date = Date()
     private let uiColorMarshalling = UIColorMarshalling.shared
     
     init(_ dataStore: TrackerDataStore, delegate: DataProviderDelegate) throws {
@@ -85,9 +85,10 @@ final class DataProvider: NSObject {
     
     // Метод для получения предиката фильтрации по текущей дате
     private func getPredicateForCurrentDate() -> NSPredicate? {
+        logger.info("called: \(#function) \(#line)")
         guard let currentWeekDay = WeekDay.fromDate(currentDate) else {
-            print("❌ Не удалось определить день недели для даты: \(currentDate)")
-            return NSPredicate(value: false) // Ничего не показывать
+            logger.error("❌ Не удалось определить день недели для даты: \(currentDate)")
+            return NSPredicate(value: false)
         }
         // Проблема: schedule хранится как Data, нельзя фильтровать через contains
         // Поэтому фильтруем вручную в shouldDisplayTracke
@@ -95,6 +96,7 @@ final class DataProvider: NSObject {
     }
     
     private func createComplexPredicate(for weekDay: WeekDay) -> NSPredicate? {
+        logger.info("called: \(#function) \(#line)")
         // Сложный предикат для фильтрации в CoreData
         // Работает только если schedule хранится как String, а не Data
         
@@ -108,6 +110,7 @@ final class DataProvider: NSObject {
     
     // Обновить предикат при смене даты
     private func updatePredicate() {
+        logger.info("called: \(#function) \(#line)")
         let predicate = getPredicateForCurrentDate()
         fetchedResultsController.fetchRequest.predicate = predicate
         
@@ -122,10 +125,12 @@ final class DataProvider: NSObject {
 // MARK: - DataProviderProtocol
 extension DataProvider: DataProviderProtocol {
     func fetchCompletedRecords() -> [TrackerRecord] {
-        (try? dataStore.fetchRecords()) ?? []
+        logger.info("called: \(#function)")
+        return (try? dataStore.fetchRecords()) ?? []
     }
 
     func toggleRecord(trackerId: UUID, date: Date) {
+        logger.info("called: \(#function)")
         let day = Calendar.current.startOfDay(for: date)
         let records = fetchCompletedRecords()
 
@@ -146,10 +151,12 @@ extension DataProvider: DataProviderProtocol {
     }
 
     var numberOfCategories: Int {
+        logger.info("called: \(#function)")
         return fetchedResultsController.sections?.count ?? 0
     }
     
     func numberOfTrackersInCategory(_ section: Int) -> Int {
+        logger.info("called: \(#function)")
         // ВАЖНО: Проверяем существование секции
         guard let sections = fetchedResultsController.sections,
               section < sections.count else {
@@ -162,6 +169,7 @@ extension DataProvider: DataProviderProtocol {
     }
     
     func tracker(at indexPath: IndexPath) -> TrackerCoreData? {
+        logger.info("called: \(#function)")
         // ВАЖНО: Проверяем валидность indexPath
         guard let sections = fetchedResultsController.sections,
               indexPath.section < sections.count,
@@ -173,6 +181,7 @@ extension DataProvider: DataProviderProtocol {
     }
     
     func categoryTitle(at index: Int) -> String {
+        logger.info("called: \(#function)")
         guard let sections = fetchedResultsController.sections,
               index < sections.count else {
             print("⚠️ Секция \(index) не существует")
@@ -196,19 +205,21 @@ extension DataProvider: DataProviderProtocol {
     }
     
     func addTracker(_ tracker: Tracker, to: String) throws {
+        logger.info("called: \(#function)")
         try? dataStore.addTracker(tracker, to: "Важное")
     }
     
     func deleteRecord(at indexPath: IndexPath) throws {
+        logger.info("called: \(#function)")
         let record = fetchedResultsController.object(at: indexPath)
         try? dataStore.delete(record)
     }
     
     // Установить текущую дату и обновить фильтрацию
     func setCurrentDate(_ date: Date) {
+        logger.info("called: \(#function)")
         self.currentDate = date
         
-        // Обновляем фильтрацию
         updatePredicate()
     }
 }
@@ -216,11 +227,13 @@ extension DataProvider: DataProviderProtocol {
 // MARK: - NSFetchedResultsControllerDelegate
 extension DataProvider: NSFetchedResultsControllerDelegate {
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        logger.info("called: \(#function) \(#line)")
         insertedIndexes = IndexSet()
         deletedIndexes = IndexSet()
     }
 
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        logger.info("called: \(#function) \(#line)")
         delegate?.didUpdate(NotepadStoreUpdate(
                 insertedIndexes: insertedIndexes!,
                 deletedIndexes: deletedIndexes!
@@ -231,7 +244,8 @@ extension DataProvider: NSFetchedResultsControllerDelegate {
     }
     
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
-        
+        logger.info("called: \(#function) \(#line)")
+
         switch type {
         case .delete:
             if let indexPath = indexPath {

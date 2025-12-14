@@ -21,7 +21,7 @@ final class TrackersViewController: UIViewController {
             try dataProvider = DataProvider(trackerDataStore, delegate: self)
             return dataProvider
         } catch {
-            print("Данные недоступны.")
+            logger.error("dataProvider init failed: \(#function)")
             return nil
         }
     }()
@@ -67,6 +67,7 @@ final class TrackersViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        logger.info("called: \(#function) \(#line)")
         setupUI()
         dataProvider?.setCurrentDate(selectedDate)
         completedRecords = dataProvider?.fetchCompletedRecords() ?? []
@@ -79,6 +80,8 @@ final class TrackersViewController: UIViewController {
     
     // MARK: - Private methods
     private func displayTrackers(for date: Date) {
+        logger.info("called: \(#function)")
+
         dataProvider?.setCurrentDate(date)
         completedRecords = dataProvider?.fetchCompletedRecords() ?? []
 
@@ -88,6 +91,8 @@ final class TrackersViewController: UIViewController {
     }
 
     private func toggleTrackerCompletion(for trackerId: UUID) {
+        logger.info("called: \(#function)")
+
         if selectedDate > Date() {
             showFutureDateRestriction()
             return
@@ -107,6 +112,8 @@ final class TrackersViewController: UIViewController {
     }
 
     private func indexPath(for trackerId: UUID) -> IndexPath? {
+        logger.info("called: \(#function)")
+
         guard let dataProvider else { return nil }
 
         for section in 0..<dataProvider.numberOfCategories {
@@ -121,6 +128,8 @@ final class TrackersViewController: UIViewController {
     }
 
     private func createNewTracker(_ tracker: Tracker) {
+        logger.info("called: \(#function)")
+
         logger.info("🆕 Создание нового трекера: '\(tracker.name)'")
         
         do {
@@ -133,6 +142,8 @@ final class TrackersViewController: UIViewController {
     }
     
     private func configureCell(_ cell: TrackerCollectionViewCell, with tracker: Tracker) {
+        logger.info("called: \(#function)")
+
         let isCompleted = completedRecords.contains {
             $0.id == tracker.id &&
             Calendar.current.isDate($0.date, inSameDayAs: selectedDate)
@@ -149,6 +160,8 @@ final class TrackersViewController: UIViewController {
     }
     
     private func showFutureDateRestriction() {
+        logger.info("called: \(#function)")
+
         let alert = UIAlertController(
             title: "Недоступно",
             message: "Нельзя отмечать трекеры на будущие даты.",
@@ -159,6 +172,8 @@ final class TrackersViewController: UIViewController {
     }
     
     private func showEmptyState() {
+        logger.info("called: \(#function)")
+
         guard emptyStateView.isHidden else { return }
 
         emptyStateView.isHidden = false
@@ -178,6 +193,8 @@ final class TrackersViewController: UIViewController {
     }
 
     private func hideEmptyState() {
+        logger.info("called: \(#function)")
+
         guard !emptyStateView.isHidden else { return }
 
         UIView.animate(
@@ -193,6 +210,8 @@ final class TrackersViewController: UIViewController {
     }
 
     private func showCreateTrackerScreen() {
+        logger.info("called: \(#function)")
+
         let createVC = CreateTrackerViewController()
         createVC.title = "Новая привычка"
         
@@ -207,6 +226,8 @@ final class TrackersViewController: UIViewController {
 
     // MARK: - UI Setup
     private func setupUI() {
+        logger.info("called: \(#function)")
+
         view.backgroundColor = .ypWhite
         setupNavigation()
         
@@ -245,6 +266,8 @@ final class TrackersViewController: UIViewController {
     }
     
     private func setupNavigation() {
+        logger.info("called: \(#function)")
+
         title = "Трекеры"
         navigationController?.navigationBar.prefersLargeTitles = true
         
@@ -295,6 +318,8 @@ final class TrackersViewController: UIViewController {
     }
     
     @objc private func dateChanged() {
+        logger.info("called: \(#function) \(#line)")
+
         selectedDate = datePicker.date
         displayTrackers(for: selectedDate)
     }
@@ -303,6 +328,8 @@ final class TrackersViewController: UIViewController {
 // MARK: - DataProviderDelegate
 extension TrackersViewController: DataProviderDelegate {
     func didUpdate(_ update: NotepadStoreUpdate) {
+        logger.info("called: \(#function)")
+
         collectionView.performBatchUpdates {
             update.insertedIndexes.forEach {
                 collectionView.insertItems(at: [IndexPath(item: $0, section: 0)])
@@ -322,17 +349,22 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
     // MARK: - Sections & Items
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        dataProvider?.numberOfCategories ?? 0
+        logger.info("called: \(#function) \(#line)")
+
+        return dataProvider?.numberOfCategories ?? 0
     }
     
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        dataProvider?.numberOfTrackersInCategory(section) ?? 0
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {        logger.info("called: \(#function) \(#line)")
+
+        return dataProvider?.numberOfTrackersInCategory(section) ?? 0
     }
     
     func collectionView(
         _ collectionView: UICollectionView,
         cellForItemAt indexPath: IndexPath
     ) -> UICollectionViewCell {
+        logger.info("called: \(#function) \(#line)")
+
         guard let tracker = dataProvider?.tracker(at: indexPath),
               let cell = collectionView.dequeueReusableCell(
             withReuseIdentifier: "Cell",
@@ -354,6 +386,8 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         willDisplay cell: UICollectionViewCell,
         forItemAt indexPath: IndexPath
     ) {
+        logger.info("called: \(#function) \(#line)")
+
         cell.alpha = 0
         cell.transform = CGAffineTransform(translationX: 0, y: 20)
 
@@ -406,6 +440,8 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         viewForSupplementaryElementOfKind kind: String,
         at indexPath: IndexPath
     ) -> UICollectionReusableView {
+        logger.info("called: \(#function) \(#line)")
+
         guard kind == UICollectionView.elementKindSectionHeader else {
             return UICollectionReusableView()
         }

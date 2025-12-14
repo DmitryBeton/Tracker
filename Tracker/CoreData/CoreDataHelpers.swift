@@ -18,7 +18,6 @@ extension NSPersistentContainer {
         container.loadPersistentStores { loadError = $1 }
         try loadError.map { throw $0 }
 
-        print("✅ NSPersistentContainer получен")
         return container
     }
 }
