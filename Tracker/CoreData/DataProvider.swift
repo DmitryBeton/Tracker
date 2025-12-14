@@ -14,10 +14,6 @@ struct NotepadStoreUpdate {
     let deletedIndexes: IndexSet
 }
 
-protocol DataProviderDelegate: AnyObject {
-    func didUpdate(_ update: NotepadStoreUpdate)
-}
-
 protocol DataProviderProtocol {
     var numberOfCategories: Int { get }
     func numberOfTrackersInCategory(_ section: Int) -> Int
@@ -39,24 +35,18 @@ final class DataProvider: NSObject {
     enum DataProviderError: Error {
         case failedToInitializeContext
     }
-    
-    weak var delegate: DataProviderDelegate?
-    
+
     private let context: NSManagedObjectContext
     private let trackerStore: TrackerStore
     private let trackerCategoryStore: TrackerCategoryStore
     private let trackerRecordStore: TrackerRecordStore
     
-    private var insertedIndexes: IndexSet?
-    private var deletedIndexes: IndexSet?
-    
     private var currentDate: Date = Date()
     
-    init(_ dataStore: DataStore, delegate: DataProviderDelegate) throws {
+    init(_ dataStore: DataStore) throws {
         guard let context = dataStore.managedObjectContext else {
             throw DataProviderError.failedToInitializeContext
         }
-        self.delegate = delegate
         self.context = context
         self.trackerStore = TrackerStore(context: context)
         self.trackerCategoryStore = TrackerCategoryStore(context: context)

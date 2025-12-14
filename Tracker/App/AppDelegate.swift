@@ -12,7 +12,7 @@ import Logging
 final class AppDelegate: UIResponder, UIApplicationDelegate {
     private let logger = Logger(label: "AppDelegate")
 
-    lazy var trackerDataStore: DataStore = {
+    lazy var trackerStore: DataStore = {
         do {
             logger.info("✅ DataStore получен - \(#function)")
             return try DataStore()

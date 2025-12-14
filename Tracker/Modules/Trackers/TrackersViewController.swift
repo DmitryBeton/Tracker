@@ -16,9 +16,9 @@ final class TrackersViewController: UIViewController {
     private var selectedDate = Date()
     
     private lazy var dataProvider: DataProviderProtocol? = {
-        let trackerDataStore = (UIApplication.shared.delegate as! AppDelegate).trackerDataStore
+        let trackerStore = (UIApplication.shared.delegate as! AppDelegate).trackerStore
         do {
-            try dataProvider = DataProvider(trackerDataStore, delegate: self)
+            try dataProvider = DataProvider(trackerStore)
             return dataProvider
         } catch {
             logger.error("dataProvider init failed: \(#function)")
@@ -69,12 +69,7 @@ final class TrackersViewController: UIViewController {
         super.viewDidLoad()
         logger.info("called: \(#function) \(#line)")
         setupUI()
-        dataProvider?.setCurrentDate(selectedDate)
-        completedRecords = dataProvider?.fetchCompletedRecords() ?? []
-
-        let hasData = (dataProvider?.numberOfCategories ?? 0) > 0
-        hasData ? hideEmptyState() : showEmptyState()
-
+        displayTrackers(for: selectedDate)
         logger.info("✅ Главный экран трекеров готов к работе")
     }
     
@@ -325,46 +320,22 @@ final class TrackersViewController: UIViewController {
     }
 }
 
-// MARK: - DataProviderDelegate
-extension TrackersViewController: DataProviderDelegate {
-    func didUpdate(_ update: NotepadStoreUpdate) {
-//        logger.info("called: \(#function)")
-//
-//        collectionView.performBatchUpdates {
-//            update.insertedIndexes.forEach {
-//                collectionView.insertItems(at: [IndexPath(item: $0, section: 0)])
-//            }
-//            update.deletedIndexes.forEach {
-//                collectionView.deleteItems(at: [IndexPath(item: $0, section: 0)])
-//            }
-//        } completion: { _ in
-//            let hasData = (self.dataProvider?.numberOfCategories ?? 0) > 0
-//            hasData ? self.hideEmptyState() : self.showEmptyState()
-//        }
-    }
-}
-
 // MARK: - UICollectionViewDataSource & UICollectionViewDelegateFlowLayout
 extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     // MARK: - Sections & Items
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        logger.info("called: \(#function) \(#line)")
-
-        return dataProvider?.numberOfCategories ?? 0
+        dataProvider?.numberOfCategories ?? 0
     }
     
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {        logger.info("called: \(#function) \(#line)")
-
-        return dataProvider?.numberOfTrackersInCategory(section) ?? 0
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        dataProvider?.numberOfTrackersInCategory(section) ?? 0
     }
     
     func collectionView(
         _ collectionView: UICollectionView,
         cellForItemAt indexPath: IndexPath
     ) -> UICollectionViewCell {
-        logger.info("called: \(#function) \(#line)")
-
         guard let tracker = dataProvider?.tracker(at: indexPath),
               let cell = collectionView.dequeueReusableCell(
             withReuseIdentifier: "Cell",
@@ -386,8 +357,6 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         willDisplay cell: UICollectionViewCell,
         forItemAt indexPath: IndexPath
     ) {
-        logger.info("called: \(#function) \(#line)")
-
         cell.alpha = 0
         cell.transform = CGAffineTransform(translationX: 0, y: 20)
 
@@ -440,8 +409,6 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         viewForSupplementaryElementOfKind kind: String,
         at indexPath: IndexPath
     ) -> UICollectionReusableView {
-        logger.info("called: \(#function) \(#line)")
-
         guard kind == UICollectionView.elementKindSectionHeader else {
             return UICollectionReusableView()
         }

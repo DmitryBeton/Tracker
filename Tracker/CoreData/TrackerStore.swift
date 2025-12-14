@@ -29,7 +29,6 @@ final class TrackerStore: NSObject {
             cacheName: nil
         )
         
-        fetchedResultsController.delegate = self
         try? fetchedResultsController.performFetch()
         
         return fetchedResultsController
