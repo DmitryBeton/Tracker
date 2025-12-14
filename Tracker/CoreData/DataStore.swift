@@ -127,4 +127,45 @@ extension DataStore: TrackerDataStore {
             }
         }
     }
+    
+    func addRecord(trackerId: UUID, date: Date) throws {
+        try performSync { context in
+            Result {
+                let record = TrackerRecordCoreData(context: context)
+                record.id = trackerId
+                record.date = Calendar.current.startOfDay(for: date)
+                try context.save()
+            }
+        }
+    }
+
+    func deleteRecord(trackerId: UUID, date: Date) throws {
+        try performSync { context in
+            Result {
+                let request: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
+                request.predicate = NSPredicate(
+                    format: "id == %@ AND date == %@",
+                    trackerId as CVarArg,
+                    Calendar.current.startOfDay(for: date) as CVarArg
+                )
+                let records = try context.fetch(request)
+                records.forEach { context.delete($0) }
+                try context.save()
+            }
+        }
+    }
+
+    func fetchRecords() throws -> [TrackerRecord] {
+        try performSync { context in
+            Result {
+                let request: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
+                let result = try context.fetch(request)
+                return result.compactMap {
+                    guard let id = $0.id, let date = $0.date else { return nil }
+                    return TrackerRecord(id: id, date: date)
+                }
+            }
+        }
+    }
+
 }

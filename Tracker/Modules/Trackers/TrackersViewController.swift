@@ -69,6 +69,7 @@ final class TrackersViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         dataProvider?.setCurrentDate(selectedDate)
+        completedRecords = dataProvider?.fetchCompletedRecords() ?? []
 
         let hasData = (dataProvider?.numberOfCategories ?? 0) > 0
         hasData ? hideEmptyState() : showEmptyState()
@@ -79,46 +80,70 @@ final class TrackersViewController: UIViewController {
     // MARK: - Private methods
     private func displayTrackers(for date: Date) {
         dataProvider?.setCurrentDate(date)
+        completedRecords = dataProvider?.fetchCompletedRecords() ?? []
+
         collectionView.reloadData()
         let hasData = (dataProvider?.numberOfCategories ?? 0) > 0
         hasData ? hideEmptyState() : showEmptyState()
     }
 
     private func toggleTrackerCompletion(for trackerId: UUID) {
-        logger.info("🔘 Переключение выполнения трекера \(trackerId) на дату \(selectedDate)")
-        
-        guard Date() > selectedDate else {
-            logger.warning("⚠️ Попытка отметить трекер на будущую дату: \(selectedDate)")
+        if selectedDate > Date() {
             showFutureDateRestriction()
             return
         }
-        
-        if let index = completedRecords.firstIndex(where: { $0.id == trackerId && Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }) {
-            completedRecords.remove(at: index)
-            logger.debug("❌ Снято выполнение с трекера \(trackerId)")
-        } else {
-            completedRecords.append(TrackerRecord(id: trackerId, date: selectedDate))
-            logger.debug("✅ Отмечено выполнение трекера \(trackerId)")
+
+        guard let dataProvider else { return }
+
+        dataProvider.toggleRecord(trackerId: trackerId, date: selectedDate)
+
+        // 1. Обновляем локальное состояние
+        completedRecords = dataProvider.fetchCompletedRecords()
+
+        // 2. Перерисовываем ТОЛЬКО нужную ячейку
+        if let indexPath = indexPath(for: trackerId) {
+            collectionView.reloadItems(at: [indexPath])
         }
-        
-        let totalCompletions = completedRecords.filter { $0.id == trackerId }.count
-        logger.trace("📊 Трекер \(trackerId) выполнен всего: \(totalCompletions) раз")
-        
-        // Находим и обновляем конкретную ячейку
-        // Теперь ищем через DataProvider
-        guard let dataProvider = dataProvider else { return }
-        
+    }
+
+    private func indexPath(for trackerId: UUID) -> IndexPath? {
+        guard let dataProvider else { return nil }
+
         for section in 0..<dataProvider.numberOfCategories {
-            for row in 0..<dataProvider.numberOfTrackersInCategory(section) {
-                let indexPath = IndexPath(row: row, section: section)
-                if let tracker = dataProvider.tracker(at: indexPath),
-                   tracker.id == trackerId {
-                    collectionView.performBatchUpdates({
-                        collectionView.reloadItems(at: [indexPath])
-                    }, completion: nil)
-                    return
+            for item in 0..<dataProvider.numberOfTrackersInCategory(section) {
+                let indexPath = IndexPath(item: item, section: section)
+                if dataProvider.tracker(at: indexPath)?.id == trackerId {
+                    return indexPath
                 }
             }
+        }
+        return nil
+    }
+
+    private func createNewTracker(_ tracker: Tracker) {
+        logger.info("🆕 Создание нового трекера: '\(tracker.name)'")
+        
+        do {
+            try dataProvider?.addTracker(tracker, to: "Важное")
+            logger.debug("✅ Трекер сохранен через DataProvider")
+        } catch {
+            logger.error("❌ Ошибка сохранения трекера: \(error)")
+        }
+    }
+    
+    private func configureCell(_ cell: TrackerCollectionViewCell, with tracker: Tracker) {
+        let isCompleted = completedRecords.contains {
+            $0.id == tracker.id &&
+            Calendar.current.isDate($0.date, inSameDayAs: selectedDate)
+        }
+
+        let completedDays = completedRecords.filter {
+            $0.id == tracker.id
+        }.count
+
+        cell.configure(with: tracker, completedDays: completedDays, isCompletedToday: isCompleted)
+        cell.onDoneButtonTapped = { [weak self] trackerId in
+            self?.toggleTrackerCompletion(for: trackerId)
         }
     }
     
@@ -166,27 +191,19 @@ final class TrackersViewController: UIViewController {
         }
     }
 
-    private func createNewTracker(_ tracker: Tracker) {
-        logger.info("🆕 Создание нового трекера: '\(tracker.name)'")
+    private func showCreateTrackerScreen() {
+        let createVC = CreateTrackerViewController()
+        createVC.title = "Новая привычка"
         
-        do {
-            try dataProvider?.addTracker(tracker, to: "Важное")
-            logger.debug("✅ Трекер сохранен через DataProvider")
-        } catch {
-            logger.error("❌ Ошибка сохранения трекера: \(error)")
+        createVC.onCreateTracker = { [weak self] newTracker in
+            self?.logger.info("🔄 Получен новый трекер из CreateTracker: '\(newTracker.name)'")
+            self?.createNewTracker(newTracker)
         }
-    }
-    
-    private func configureCell(_ cell: TrackerCollectionViewCell, with tracker: Tracker) {
-        let isCompleted = completedRecords.contains { $0.id == tracker.id && Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }
-        let completedDays = completedRecords.filter { $0.id == tracker.id }.count
         
-        cell.configure(with: tracker, completedDays: completedDays, isCompletedToday: isCompleted)
-        cell.onDoneButtonTapped = { [weak self] trackerId in
-            self?.toggleTrackerCompletion(for: trackerId)
-        }
+        let navVC = UINavigationController(rootViewController: createVC)
+        present(navVC, animated: true)
     }
-    
+
     // MARK: - UI Setup
     private func setupUI() {
         view.backgroundColor = .ypWhite
@@ -281,20 +298,6 @@ final class TrackersViewController: UIViewController {
         logger.info("📅 Пользователь выбрал дату: \(selectedDate)")
         displayTrackers(for: selectedDate)
     }
-    
-    private func showCreateTrackerScreen() {
-        let createVC = CreateTrackerViewController()
-        createVC.title = "Новая привычка"
-        
-        // В MVC передаем колбэк напрямую
-        createVC.onCreateTracker = { [weak self] newTracker in
-            self?.logger.info("🔄 Получен новый трекер из CreateTracker: '\(newTracker.name)'")
-            self?.createNewTracker(newTracker)
-        }
-        
-        let navVC = UINavigationController(rootViewController: createVC)
-        present(navVC, animated: true)
-    }
 }
 
 // MARK: - DataProviderDelegate
@@ -339,7 +342,7 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
             return UICollectionViewCell()
         }
         
-        configureCell(cell, with: Tracker(name: tracker.name!, color: uiColorMarhalling.color(from: tracker.color!) , emoji: tracker.emoji!))
+        configureCell(cell, with: Tracker(id: tracker.id!, name: tracker.name!, color: uiColorMarhalling.color(from: tracker.color!) , emoji: tracker.emoji!))
 
         return cell
 

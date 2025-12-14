@@ -5,7 +5,6 @@
 //  Created by Дмитрий Чалов on 12.12.2025.
 //
 
-
 import UIKit
 import CoreData
 
@@ -28,7 +27,9 @@ protocol DataProviderProtocol {
     
     // Фильтрация по дате
     func setCurrentDate(_ date: Date) // Установить текущую дату для фильтрации
-    func fetchFilteredCategories() -> [TrackerCategory] // Получить отфильтрованные категории
+    
+    func fetchCompletedRecords() -> [TrackerRecord]
+    func toggleRecord(trackerId: UUID, date: Date)
 }
 
 // MARK: - DataProvider
@@ -42,10 +43,6 @@ final class DataProvider: NSObject {
     
     private let context: NSManagedObjectContext
     private let dataStore: TrackerDataStore
-    private var insertedIndexes: IndexSet?
-    private var deletedIndexes: IndexSet?
-    private var currentDate: Date = Date() // Текущая дата для фильтрации
-    private let uiColorMarshalling = UIColorMarshalling.shared
     private lazy var fetchedResultsController: NSFetchedResultsController<TrackerCoreData> = {
         let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
         
@@ -70,6 +67,12 @@ final class DataProvider: NSObject {
         
         return fetchedResultsController
     }()
+
+    private var insertedIndexes: IndexSet?
+    private var deletedIndexes: IndexSet?
+    
+    private var currentDate: Date = Date() // Текущая дата для фильтрации
+    private let uiColorMarshalling = UIColorMarshalling.shared
     
     init(_ dataStore: TrackerDataStore, delegate: DataProviderDelegate) throws {
         guard let context = dataStore.managedObjectContext else {
@@ -82,20 +85,12 @@ final class DataProvider: NSObject {
     
     // Метод для получения предиката фильтрации по текущей дате
     private func getPredicateForCurrentDate() -> NSPredicate? {
-        // Получаем день недели из currentDate
         guard let currentWeekDay = WeekDay.fromDate(currentDate) else {
             print("❌ Не удалось определить день недели для даты: \(currentDate)")
             return NSPredicate(value: false) // Ничего не показывать
         }
-
-        // Создаем предикат:
-        // 1. Либо schedule = nil (трекеры без расписания показываем всегда)
-        // 2. Либо schedule содержит currentWeekDay
-        
         // Проблема: schedule хранится как Data, нельзя фильтровать через contains
-        // Поэтому фильтруем вручную в shouldDisplayTracker
-        
-        
+        // Поэтому фильтруем вручную в shouldDisplayTracke
          return createComplexPredicate(for: currentWeekDay)
     }
     
@@ -126,6 +121,30 @@ final class DataProvider: NSObject {
 
 // MARK: - DataProviderProtocol
 extension DataProvider: DataProviderProtocol {
+    func fetchCompletedRecords() -> [TrackerRecord] {
+        (try? dataStore.fetchRecords()) ?? []
+    }
+
+    func toggleRecord(trackerId: UUID, date: Date) {
+        let day = Calendar.current.startOfDay(for: date)
+        let records = fetchCompletedRecords()
+
+        let exists = records.contains {
+            $0.id == trackerId &&
+            Calendar.current.isDate($0.date, inSameDayAs: day)
+        }
+
+        do {
+            if exists {
+                try dataStore.deleteRecord(trackerId: trackerId, date: day)
+            } else {
+                try dataStore.addRecord(trackerId: trackerId, date: day)
+            }
+        } catch {
+            print("❌ Ошибка toggleRecord: \(error)")
+        }
+    }
+
     var numberOfCategories: Int {
         return fetchedResultsController.sections?.count ?? 0
     }
@@ -187,101 +206,10 @@ extension DataProvider: DataProviderProtocol {
     
     // Установить текущую дату и обновить фильтрацию
     func setCurrentDate(_ date: Date) {
-        
-        // Сохраняем новую дату
         self.currentDate = date
         
         // Обновляем фильтрацию
         updatePredicate()
-        
-        // Уведомляем делегата об обновлении данных
-        // (данные обновятся через NSFetchedResultsControllerDelegate)
-    }
-    
-    // Получить отфильтрованные категории
-    func fetchFilteredCategories() -> [TrackerCategory] {
-        
-        guard let sections = fetchedResultsController.sections else {
-            return []
-        }
-        
-        var categories: [TrackerCategory] = []
-        
-        for sectionInfo in sections {
-            // Получаем трекеры из секции
-            guard let objects = sectionInfo.objects as? [TrackerCoreData] else {
-                continue
-            }
-            
-            // Фильтруем трекеры по текущему дню недели
-            let filteredTrackers: [Tracker] = objects.compactMap { coreDataObject in
-                // Конвертируем в Tracker
-                guard let tracker = convertToTracker(coreDataObject) else {
-                    return nil
-                }
-                
-                // Проверяем, должен ли трекер отображаться в текущий день
-                return shouldDisplayTracker(tracker, on: currentDate) ? tracker : nil
-            }
-            
-            // Если есть отфильтрованные трекеры - создаем категорию
-            if !filteredTrackers.isEmpty {
-                let categoryTitle = sectionInfo.name
-                let category = TrackerCategory(title: categoryTitle, trackers: filteredTrackers)
-                categories.append(category)
-            }
-        }
-        
-        return categories
-    }
-    
-    // Проверка, должен ли трекер отображаться на указанную дату
-    private func shouldDisplayTracker(_ tracker: Tracker, on date: Date) -> Bool {
-        // Получаем день недели из даты
-        guard let dateWeekDay = WeekDay.fromDate(date) else {
-            return false
-        }
-        
-        // Если у трекера нет расписания - показываем всегда (для нерегулярных)
-        guard let schedule = tracker.schedule else {
-            return true
-        }
-        
-        // Проверяем, содержит ли расписание текущий день
-        return schedule.contains(dateWeekDay)
-    }
-    
-    // Конвертация TrackerCoreData в Tracker
-    private func convertToTracker(_ coreDataObject: TrackerCoreData) -> Tracker? {
-        guard let id = coreDataObject.id,
-              let name = coreDataObject.name,
-              let emoji = coreDataObject.emoji,
-              let color = coreDataObject.color else {
-            print("❌ Не удалось конвертировать TrackerCoreData")
-            return nil
-        }
-        
-        // Получаем расписание и конвертируем в [WeekDay]?
-        var schedule: [WeekDay]?
-        if let scheduleData = coreDataObject.schedule as? Data {
-            do {
-                let daysArray = try JSONDecoder().decode([WeekDay].self, from: scheduleData)
-                schedule = daysArray
-                print("✅ Расписание декодировано: \(daysArray.count) дней")
-            } catch {
-                print("❌ Ошибка декодирования расписания: \(error)")
-            }
-        } else {
-            print("ℹ️ Расписание отсутствует (nil)")
-        }
-        
-        return Tracker(
-            id: id,
-            name: name,
-            color: uiColorMarshalling.color(from: color),
-            emoji: emoji,
-            schedule: schedule
-        )
     }
 }
 
@@ -318,4 +246,3 @@ extension DataProvider: NSFetchedResultsControllerDelegate {
         }
     }
 }
-
