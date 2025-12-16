@@ -4,7 +4,6 @@
 //
 //  Created by Дмитрий Чалов on 13.12.2025.
 //
-import CoreData
 import Foundation
 import Logging
 

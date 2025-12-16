@@ -48,7 +48,6 @@ final class DataProvider: NSObject {
         self.trackerRecordStore = TrackerRecordStore(context: context)
     }
     
-    // Метод для получения предиката фильтрации по текущей дате
     private func getPredicateForCurrentDate() -> NSPredicate? {
         logger.info("called: \(#function)")
         guard let currentWeekDay = WeekDay.fromDate(currentDate) else {

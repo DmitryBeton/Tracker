@@ -16,7 +16,7 @@ final class TrackersViewController: UIViewController {
     private var selectedDate = Date()
     
     private lazy var dataProvider: DataProviderProtocol? = {
-        let trackerStore = (UIApplication.shared.delegate as! AppDelegate).trackerStore
+        guard let trackerStore = (UIApplication.shared.delegate as? AppDelegate)?.trackerStore else { return  nil }
         do {
             try dataProvider = DataProvider(trackerStore)
             return dataProvider
@@ -25,9 +25,7 @@ final class TrackersViewController: UIViewController {
             return nil
         }
     }()
-    
-    private let uiColorMarhalling = UIColorMarshalling.shared
-    
+        
     // MARK: - UI Elements
     private let collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -333,15 +331,20 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         cellForItemAt indexPath: IndexPath
     ) -> UICollectionViewCell {
         guard let tracker = dataProvider?.tracker(at: indexPath),
+              let id = tracker.id,
+              let name = tracker.name,
+              let color = tracker.color,
+              let emoji = tracker.emoji,
               let cell = collectionView.dequeueReusableCell(
             withReuseIdentifier: "Cell",
             for: indexPath
-        ) as? TrackerCollectionViewCell else {
+        ) as? TrackerCollectionViewCell
+        else {
             assertionFailure("Failed to dequeue TrackerCollectionViewCell")
             return UICollectionViewCell()
         }
         
-        configureCell(cell, with: Tracker(id: tracker.id!, name: tracker.name!, color: uiColorMarhalling.color(from: tracker.color!) , emoji: tracker.emoji!))
+        configureCell(cell, with: Tracker(id: id, name: name, color: UIColorMarshalling.color(from: color), emoji: emoji))
 
         return cell
 
@@ -405,15 +408,16 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         viewForSupplementaryElementOfKind kind: String,
         at indexPath: IndexPath
     ) -> UICollectionReusableView {
-        guard kind == UICollectionView.elementKindSectionHeader else {
+        guard kind == UICollectionView.elementKindSectionHeader,
+              let header = collectionView.dequeueReusableSupplementaryView(
+                  ofKind: kind,
+                  withReuseIdentifier: TrackerHeaderView.reuseIdentifier,
+                  for: indexPath
+              ) as? TrackerHeaderView
+
+        else {
             return UICollectionReusableView()
         }
-        
-        let header = collectionView.dequeueReusableSupplementaryView(
-            ofKind: kind,
-            withReuseIdentifier: TrackerHeaderView.reuseIdentifier,
-            for: indexPath
-        ) as! TrackerHeaderView
         
         let categoryTitle = dataProvider?.categoryTitle(at: indexPath.section) ?? "Категория"
         header.configure(with: categoryTitle)

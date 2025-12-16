@@ -437,7 +437,8 @@ extension CreateTrackerViewController: UICollectionViewDataSource {
                 withReuseIdentifier: "emojiCell",
                 for: indexPath
             ) as? EmojiCollectionViewCell else {
-                fatalError("Unable to dequeue EmojiCollectionViewCell")
+                assertionFailure("Unable to dequeue EmojiCollectionViewCell")
+                return UICollectionViewCell()
             }
             cell.setEmoji(emojiCollectionViewItems[indexPath.row])
             return cell
@@ -446,7 +447,8 @@ extension CreateTrackerViewController: UICollectionViewDataSource {
                 withReuseIdentifier: "colorCell",
                 for: indexPath
             ) as? ColorCollectionViewCell else {
-                fatalError("Unable to dequeue ColorCollectionViewCell")
+                assertionFailure("Unable to dequeue ColorCollectionViewCell")
+                return UICollectionViewCell()
             }
             cell.setColor(colorsCollectionViewItems[indexPath.row])
             return cell
@@ -529,16 +531,16 @@ extension CreateTrackerViewController: UICollectionViewDelegateFlowLayout {
         viewForSupplementaryElementOfKind kind: String,
         at indexPath: IndexPath
     ) -> UICollectionReusableView {
-        guard kind == UICollectionView.elementKindSectionHeader else {
+        guard kind == UICollectionView.elementKindSectionHeader,
+        let header = collectionView.dequeueReusableSupplementaryView(
+                  ofKind: kind,
+                  withReuseIdentifier: TrackerHeaderView.reuseIdentifier,
+                  for: indexPath
+              ) as? TrackerHeaderView
+        else {
             return UICollectionReusableView()
         }
-        
-        let header = collectionView.dequeueReusableSupplementaryView(
-            ofKind: kind,
-            withReuseIdentifier: TrackerHeaderView.reuseIdentifier,
-            for: indexPath
-        ) as! TrackerHeaderView
-        
+                
         let category = sectionsTitles[indexPath.section]
         header.configure(with: category)
         return header

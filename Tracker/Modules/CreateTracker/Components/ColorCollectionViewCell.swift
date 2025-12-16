@@ -24,28 +24,25 @@ final class ColorCollectionViewCell: UICollectionViewCell {
         
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
 
     // MARK: - Public Methods
     func setColor(_ color: UIColor) {
         view.backgroundColor = color
-        self.layer.borderColor = color.withAlphaComponent(0.3).cgColor
+        layer.borderColor = color.withAlphaComponent(0.3).cgColor
     }
 
     func setSelected(_ isSelected: Bool) {
-        if isSelected {
-            self.layer.borderWidth = 3
-        } else {
-            self.layer.borderWidth = 0
-        }
+        layer.borderWidth = isSelected ? 3 : 0
     }
 
     // MARK: - Setups
     private func setupUI() {
-        self.layer.cornerRadius = 8
-        self.addSubview(view)
+        layer.cornerRadius = 8
+        addSubview(view)
     }
     
     private func setupConstraints() {

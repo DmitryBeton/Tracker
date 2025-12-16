@@ -36,16 +36,16 @@ final class EmojiCollectionViewCell: UICollectionViewCell {
 
     func setSelected(_ isSelected: Bool) {
         if isSelected {
-            self.backgroundColor = .ypLightGray
+            backgroundColor = .ypLightGray
         } else {
-            self.backgroundColor = .clear
+            backgroundColor = .clear
         }
     }
 
     // MARK: - Setups
     private func setupUI() {
-        self.layer.cornerRadius = 16
-        self.addSubview(emojiLabel)
+        layer.cornerRadius = 16
+        addSubview(emojiLabel)
     }
     
     private func setupConstraints() {

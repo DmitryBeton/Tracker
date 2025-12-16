@@ -13,7 +13,6 @@ import Logging
 final class TrackerStore: NSObject {
     private let logger = Logger(label: "TrackerStore")
     private let context: NSManagedObjectContext
-    private let uiColorMarshalling = UIColorMarshalling.shared
     
     lazy var fetchedResultsController: NSFetchedResultsController<TrackerCoreData> = {
         let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
@@ -45,7 +44,7 @@ final class TrackerStore: NSObject {
         let managedTracker = TrackerCoreData(context: context)
         managedTracker.id = tracker.id
         managedTracker.name = tracker.name
-        managedTracker.color = uiColorMarshalling.hexString(from: tracker.color)
+        managedTracker.color = UIColorMarshalling.hexString(from: tracker.color)
         managedTracker.emoji = tracker.emoji
         managedTracker.schedule = tracker.schedule as NSObject?
         managedTracker.category = category
