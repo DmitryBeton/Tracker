@@ -9,7 +9,7 @@ import UIKit
 import Logging
 
 protocol ScheduleViewControllerDelegate: AnyObject {
-    func didSelectSchedule(_ schedule: TrackerSchedule)
+    func didSelectSchedule(_ schedule: [WeekDay])
 }
 
 final class ScheduleViewController: UIViewController {
@@ -18,8 +18,8 @@ final class ScheduleViewController: UIViewController {
     weak var delegate: ScheduleViewControllerDelegate?
     
     // MARK: - Properties
-    private var selectedDays: [Bool] = Array(repeating: false, count: 7)
-    private let tableViewData: [String] = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
+    private var selectedDays: [WeekDay] = []
+    private let tableViewData: [WeekDay] = WeekDay.allCases
     
     // MARK: - UI Elements
     private lazy var button: UIButton = {
@@ -111,24 +111,25 @@ final class ScheduleViewController: UIViewController {
     // MARK: - Actions
     @objc // изменяет состояние switch вкл/выкл
     private func switchChanged(_ sender: UISwitch) {
-        selectedDays[sender.tag] = sender.isOn
-        logger.debug("🔘 Изменен переключатель для '\(selectedDays[sender.tag])': \(!sender.isOn) -> \(sender.isOn)")
+        let day = tableViewData[sender.tag]
+        
+        if sender.isOn {
+            selectedDays.append(day)
+        } else {
+            if let index = selectedDays.firstIndex(of: day) {
+                    selectedDays.remove(at: index)
+                }
+        }
+
+        logger.debug("🔘 Изменен переключатель для '\(day.rawValue)': \(!sender.isOn) -> \(sender.isOn)")
         logger.trace("📊 Текущее состояние дней: \(selectedDays)")
     }
     
     @objc // создает расписание и передает его в CreateTrackerViewController, после чего скрывает экран
     private func doneTapped() {
         logger.info("✅ Пользователь нажал 'Готово'.")
-        let schedule = TrackerSchedule(
-            monday: selectedDays[0],
-            tuesday: selectedDays[1],
-            wednesday: selectedDays[2],
-            thursday: selectedDays[3],
-            friday: selectedDays[4],
-            saturday: selectedDays[5],
-            sunday: selectedDays[6]
-        )
-        logger.debug("📅 Создано расписание: \(schedule.displayText)")
+        let schedule = selectedDays
+        logger.debug("📅 Создано расписание: \(selectedDays)")
         logger.info("🔄 Передача расписания делегату.")
         delegate?.didSelectSchedule(schedule)
         dismiss(animated: true)
@@ -150,15 +151,16 @@ extension ScheduleViewController: UITableViewDataSource {
         } else {
             cell = UITableViewCell(style: .default, reuseIdentifier: "cell")
         }
+        let day = tableViewData[indexPath.row]
         
         let switcher = UISwitch()
         switcher.tag = indexPath.row
-        switcher.isOn = selectedDays[indexPath.row]
+        switcher.isOn = selectedDays.contains(day)
         switcher.onTintColor = .ypBlue
         switcher.addTarget(self, action: #selector(switchChanged(_:)), for: .valueChanged)
         
         cell.accessoryView = switcher
-        cell.textLabel?.text = tableViewData[indexPath.row]
+        cell.textLabel?.text = day.fullName
         cell.backgroundColor = .ypBackground
         cell.selectionStyle = .none
         cell.layer.masksToBounds = true

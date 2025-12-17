@@ -6,13 +6,28 @@
 //
 
 import UIKit
+import Logging
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
+    private let logger = Logger(label: "AppDelegate")
+
+    lazy var trackerStore: DataStore = {
+        do {
+            logger.info("✅ DataStore получен - \(#function)")
+            return try DataStore()
+        } catch {
+            logger.error("❌ не удалось получить DataStore - \(#function)")
+            exit(0) // TODO: Костыль, потом убереу
+//            return NullStore()
+        }
+    }()
+
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
+        DaysValueTransformer.register()
         return true
     }
 

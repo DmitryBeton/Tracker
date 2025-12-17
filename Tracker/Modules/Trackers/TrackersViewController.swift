@@ -1,0 +1,435 @@
+//
+//  TrackerListViewController.swift
+//  Tracker
+//
+//  Created by Дмитрий Чалов on 31.10.2025.
+//
+
+import UIKit
+import Logging
+
+final class TrackersViewController: UIViewController {
+    // MARK: - Private properties
+    private let logger = Logger(label: "TrackersViewController")
+    
+    private var completedRecords: [TrackerRecord] = []
+    private var selectedDate = Date()
+    
+    private lazy var dataProvider: DataProviderProtocol? = {
+        guard let trackerStore = (UIApplication.shared.delegate as? AppDelegate)?.trackerStore else { return  nil }
+        do {
+            try dataProvider = DataProvider(trackerStore)
+            return dataProvider
+        } catch {
+            logger.error("dataProvider init failed: \(#function)")
+            return nil
+        }
+    }()
+        
+    // MARK: - UI Elements
+    private let collectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        cv.backgroundColor = .ypWhite
+        cv.translatesAutoresizingMaskIntoConstraints = false
+        return cv
+    }()
+    
+    private let emptyStateView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.alignment = .center
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.isHidden = true
+        return stackView
+    }()
+    
+    private let dizzyImage: UIImageView = {
+        let image = UIImageView(image: UIImage(resource: .dizzy))
+        image.translatesAutoresizingMaskIntoConstraints = false
+        return image
+    }()
+    
+    private let label: UILabel = {
+        let label = UILabel()
+        label.text = "Что будем отслеживать?"
+        label.font = .systemFont(ofSize: 12, weight: .medium)
+        label.textColor = .ypBlack
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private let datePicker = UIDatePicker()
+    private let searchController = UISearchController()
+    
+    // MARK: - Lifecycle
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        logger.info("called: \(#function) \(#line)")
+        setupUI()
+        displayTrackers(for: selectedDate)
+        logger.info("✅ Главный экран трекеров готов к работе")
+    }
+    
+    // MARK: - Private methods
+    private func displayTrackers(for date: Date) {
+        logger.info("called: \(#function) \(#line)")
+
+        dataProvider?.setCurrentDate(date)
+        completedRecords = dataProvider?.fetchCompletedRecords() ?? []
+
+        collectionView.reloadData()
+        let hasData = (dataProvider?.numberOfCategories ?? 0) > 0
+        hasData ? hideEmptyState() : showEmptyState()
+    }
+
+    private func toggleTrackerCompletion(for trackerId: UUID) {
+        logger.info("called: \(#function) \(#line)")
+
+        if selectedDate > Date() {
+            showFutureDateRestriction()
+            return
+        }
+
+        guard let dataProvider else { return }
+
+        dataProvider.toggleRecord(trackerId: trackerId, date: selectedDate)
+
+        completedRecords = dataProvider.fetchCompletedRecords()
+
+        if let indexPath = indexPath(for: trackerId) {
+            collectionView.reloadItems(at: [indexPath])
+        }
+    }
+
+    private func indexPath(for trackerId: UUID) -> IndexPath? {
+        logger.info("called: \(#function) \(#line)")
+
+        guard let dataProvider else { return nil }
+
+        for section in 0..<dataProvider.numberOfCategories {
+            for item in 0..<dataProvider.numberOfTrackersInCategory(section) {
+                let indexPath = IndexPath(item: item, section: section)
+                if dataProvider.tracker(at: indexPath)?.id == trackerId {
+                    return indexPath
+                }
+            }
+        }
+        return nil
+    }
+
+    private func createNewTracker(_ tracker: Tracker) {
+        logger.info("called: \(#function) \(#line)")
+
+        do {
+            try dataProvider?.addTracker(tracker, to: "Важное")
+            logger.debug("✅ Трекер сохранен через DataProvider")
+        } catch {
+            logger.error("❌ Ошибка сохранения трекера: \(error)")
+        }
+        displayTrackers(for: selectedDate)
+    }
+    
+    private func configureCell(_ cell: TrackerCollectionViewCell, with tracker: Tracker) {
+        logger.info("called: \(#function)")
+
+        let isCompleted = completedRecords.contains {
+            $0.id == tracker.id &&
+            Calendar.current.isDate($0.date, inSameDayAs: selectedDate)
+        }
+
+        let completedDays = completedRecords.filter {
+            $0.id == tracker.id
+        }.count
+
+        cell.configure(with: tracker, completedDays: completedDays, isCompletedToday: isCompleted)
+        cell.onDoneButtonTapped = { [weak self] trackerId in
+            self?.toggleTrackerCompletion(for: trackerId)
+        }
+    }
+    
+    private func showFutureDateRestriction() {
+        logger.info("called: \(#function)")
+
+        let alert = UIAlertController(
+            title: "Недоступно",
+            message: "Нельзя отмечать трекеры на будущие даты.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "ОК", style: .default))
+        present(alert, animated: true)
+    }
+    
+    private func showEmptyState() {
+        logger.info("called: \(#function)")
+
+        guard emptyStateView.isHidden else { return }
+
+        emptyStateView.isHidden = false
+        emptyStateView.alpha = 0
+        emptyStateView.transform = CGAffineTransform(translationX: 0, y: 20)
+
+        UIView.animate(
+            withDuration: 0.35,
+            delay: 0,
+            usingSpringWithDamping: 0.85,
+            initialSpringVelocity: 0.5,
+            options: [.curveEaseOut]
+        ) {
+            self.emptyStateView.alpha = 1
+            self.emptyStateView.transform = .identity
+        }
+    }
+
+    private func hideEmptyState() {
+        logger.info("called: \(#function)")
+
+        guard !emptyStateView.isHidden else { return }
+
+        UIView.animate(
+            withDuration: 0.2,
+            delay: 0,
+            options: [.curveEaseIn]
+        ) {
+            self.emptyStateView.alpha = 0
+            self.emptyStateView.transform = CGAffineTransform(translationX: 0, y: 10)
+        } completion: { _ in
+            self.emptyStateView.isHidden = true
+        }
+    }
+
+    private func showCreateTrackerScreen() {
+        logger.info("called: \(#function) \(#line)")
+
+        let createVC = CreateTrackerViewController()
+        createVC.title = "Новая привычка"
+        
+        createVC.onCreateTracker = { [weak self] newTracker in
+            self?.logger.info("🔄 Получен новый трекер из CreateTracker: '\(newTracker.name)'")
+            self?.createNewTracker(newTracker)
+        }
+        
+        let navVC = UINavigationController(rootViewController: createVC)
+        present(navVC, animated: true)
+    }
+
+    // MARK: - UI Setup
+    private func setupUI() {
+        logger.info("called: \(#function) \(#line)")
+
+        view.backgroundColor = .ypWhite
+        setupNavigation()
+        
+        view.addSubview(collectionView)
+        view.addSubview(emptyStateView)
+        emptyStateView.addSubview(dizzyImage)
+        emptyStateView.addSubview(label)
+        
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.register(
+            TrackerCollectionViewCell.self,
+            forCellWithReuseIdentifier: "Cell"
+        )
+        collectionView.register(
+            TrackerHeaderView.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+            withReuseIdentifier: TrackerHeaderView.reuseIdentifier
+        )
+        
+        NSLayoutConstraint.activate([
+            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            collectionView.leftAnchor.constraint(equalTo: view.leftAnchor),
+            collectionView.rightAnchor.constraint(equalTo: view.rightAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            emptyStateView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            emptyStateView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            
+            dizzyImage.topAnchor.constraint(equalTo: emptyStateView.topAnchor),
+            dizzyImage.centerXAnchor.constraint(equalTo: emptyStateView.centerXAnchor),
+            
+            label.topAnchor.constraint(equalTo: dizzyImage.bottomAnchor, constant: 8),
+            label.centerXAnchor.constraint(equalTo: emptyStateView.centerXAnchor),
+        ])
+    }
+    
+    private func setupNavigation() {
+        logger.info("called: \(#function) \(#line)")
+
+        title = "Трекеры"
+        navigationController?.navigationBar.prefersLargeTitles = true
+        
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = .ypWhite
+        appearance.shadowColor = .clear
+        
+        appearance.titleTextAttributes = [
+            .foregroundColor: UIColor.ypBlack,
+            .font: UIFont.systemFont(ofSize: 17, weight: .bold)
+        ]
+        
+        appearance.largeTitleTextAttributes = [
+            .foregroundColor: UIColor.ypBlack,
+            .font: UIFont.systemFont(ofSize: 34, weight: .bold)
+        ]
+        
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        navigationController?.navigationBar.compactAppearance = appearance
+        
+        let addImage = UIImage(resource: .addTracker)
+        let addButton = UIBarButtonItem(
+            image: addImage,
+            style: .plain,
+            target: self,
+            action: #selector(addTapped)
+        )
+        addButton.tintColor = .ypBlack
+        navigationItem.leftBarButtonItem = addButton
+        
+        datePicker.preferredDatePickerStyle = .compact
+        datePicker.datePickerMode = .date
+        datePicker.addTarget(self, action: #selector(dateChanged), for: .valueChanged)
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
+        
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.placeholder = "Поиск"
+        navigationItem.searchController = searchController
+        navigationItem.hidesSearchBarWhenScrolling = false
+    }
+    
+    // MARK: - Actions
+    @objc private func addTapped() {
+        logger.info("called: \(#function) \(#line)")
+        showCreateTrackerScreen()
+    }
+    
+    @objc private func dateChanged() {
+        logger.info("called: \(#function) \(#line)")
+
+        selectedDate = datePicker.date
+        displayTrackers(for: selectedDate)
+    }
+}
+
+// MARK: - UICollectionViewDataSource & UICollectionViewDelegateFlowLayout
+extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+    // MARK: - Sections & Items
+    
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        dataProvider?.numberOfCategories ?? 0
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        dataProvider?.numberOfTrackersInCategory(section) ?? 0
+    }
+    
+    func collectionView(
+        _ collectionView: UICollectionView,
+        cellForItemAt indexPath: IndexPath
+    ) -> UICollectionViewCell {
+        guard let tracker = dataProvider?.tracker(at: indexPath),
+              let id = tracker.id,
+              let name = tracker.name,
+              let color = tracker.color,
+              let emoji = tracker.emoji,
+              let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: "Cell",
+            for: indexPath
+        ) as? TrackerCollectionViewCell
+        else {
+            assertionFailure("Failed to dequeue TrackerCollectionViewCell")
+            return UICollectionViewCell()
+        }
+        
+        configureCell(cell, with: Tracker(id: id, name: name, color: UIColorMarshalling.color(from: color), emoji: emoji))
+
+        return cell
+
+    }
+    
+    // MARK: - Layout (Size & Spacing)
+    func collectionView(
+        _ collectionView: UICollectionView,
+        willDisplay cell: UICollectionViewCell,
+        forItemAt indexPath: IndexPath
+    ) {
+        cell.alpha = 0
+        cell.transform = CGAffineTransform(translationX: 0, y: 20)
+
+        UIView.animate(
+            withDuration: 0.35,
+            delay: 0.03 * Double(indexPath.item),
+            options: [.curveEaseOut]
+        ) {
+            cell.alpha = 1
+            cell.transform = .identity
+        }
+    }
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        sizeForItemAt indexPath: IndexPath
+    ) -> CGSize {
+        CGSize(width: 167, height: 148)
+    }
+    
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        insetForSectionAt section: Int
+    ) -> UIEdgeInsets {
+        UIEdgeInsets(top: 12, left: 16, bottom: 16, right: 16)
+    }
+    
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        minimumLineSpacingForSectionAt section: Int
+    ) -> CGFloat {
+        16
+    }
+    
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        minimumInteritemSpacingForSectionAt section: Int
+    ) -> CGFloat {
+        9
+    }
+    
+    // MARK: - Section Headers
+    
+    func collectionView(
+        _ collectionView: UICollectionView,
+        viewForSupplementaryElementOfKind kind: String,
+        at indexPath: IndexPath
+    ) -> UICollectionReusableView {
+        guard kind == UICollectionView.elementKindSectionHeader,
+              let header = collectionView.dequeueReusableSupplementaryView(
+                  ofKind: kind,
+                  withReuseIdentifier: TrackerHeaderView.reuseIdentifier,
+                  for: indexPath
+              ) as? TrackerHeaderView
+
+        else {
+            return UICollectionReusableView()
+        }
+        
+        let categoryTitle = dataProvider?.categoryTitle(at: indexPath.section) ?? "Категория"
+        header.configure(with: categoryTitle)
+        
+        return header
+    }
+    
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        referenceSizeForHeaderInSection section: Int
+    ) -> CGSize {
+        CGSize(width: collectionView.frame.width, height: 40)
+    }
+}
