@@ -6,5 +6,5 @@
 //
 
 final class CreateCategoryModel {
-    
+    // В рамках CreateCategory имеет ли смысл что либо сюда добавлять?
 }

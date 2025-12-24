@@ -39,7 +39,7 @@ final class OnboardingViewController: UIPageViewController {
     
     private let label: UILabel = {
         let label = UILabel()
-        label.text = "Даже если это не литры воды и йога"
+        label.text = "Отслеживайте только то, что хотите"
         
         label.font = .systemFont(ofSize: 32, weight: .bold)
         label.textColor = .ypBlack

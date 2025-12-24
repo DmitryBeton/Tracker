@@ -173,12 +173,31 @@ final class CreateTrackerViewController: UIViewController {
     
     private func showCategorySelection() {
         logger.info("📂 Запрос на показ экрана категорий")
-        let categoryVC = CategoryView()
+
+        guard let trackerStore = (UIApplication.shared.delegate as? AppDelegate)?.trackerStore else {
+            assertionFailure("trackerStore not found")
+            return
+        }
+
+        let dataProvider: DataProviderProtocol
+        do {
+            dataProvider = try DataProvider(trackerStore)
+        } catch {
+            assertionFailure("DataProvider init failed")
+            return
+        }
+
+        let categoryModel = CategoryModel(dataProvider: dataProvider)
+
+        let categoryViewModel = CategoryViewModel(model: categoryModel)
+
+        let categoryVC = CategoryView(viewModel: categoryViewModel)
         categoryVC.delegate = self
+
         let navVC = UINavigationController(rootViewController: categoryVC)
         present(navVC, animated: true)
     }
-    
+
     private func closeCreateTracker() {
         logger.info("🔒 Закрытие экрана создания трекера")
         dismiss(animated: true)
@@ -393,7 +412,6 @@ extension CreateTrackerViewController: UITableViewDataSource {
                 cell.detailTextLabel?.text = sortedSchedule.map { $0.shortName }.joined(separator: ", ")
             }
         } else if indexPath.row == 0 {
-            print("Отображаю выбранную катоегрию: \(selectedCategory)")
             cell.detailTextLabel?.text = selectedCategory
         }
         
