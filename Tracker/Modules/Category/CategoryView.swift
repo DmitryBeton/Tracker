@@ -7,13 +7,29 @@
 
 import UIKit
 
+protocol CategoryViewDelegate: AnyObject {
+    func didSelectCategory(_ category: String)
+}
+
 final class CategoryView: UIViewController {
     // MARK: - Properties
     private var viewModel: CategoryViewModel?
     
-    // data source - это пример, сами данные должны браться из CoreData и отображать все title category с возможностью выбора
-    private let tableViewData: [String] = ["Категория №1", "Категория №2", "Категория №3"]
-    
+    private lazy var dataProvider: DataProviderProtocol? = {
+        guard let trackerStore = (UIApplication.shared.delegate as? AppDelegate)?.trackerStore else { return  nil }
+        do {
+            try dataProvider = DataProvider(trackerStore)
+            return dataProvider
+        } catch {
+            assertionFailure("Ошибка dataprovider в categoryView")
+            return nil
+        }
+    }()
+        
+    private var tableViewData: [String] = []
+    private var selectedCategory = ""
+    weak var delegate: CategoryViewDelegate?
+
     // MARK: - UI Elements
     private let emptyStateView: UIStackView = {
         let stackView = UIStackView()
@@ -46,6 +62,8 @@ final class CategoryView: UIViewController {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.isScrollEnabled = false
         tableView.backgroundColor = .ypWhite
+        tableView.allowsMultipleSelection = false
+        tableView.allowsMultipleSelectionDuringEditing = false
         return tableView
     }()
 
@@ -69,31 +87,45 @@ final class CategoryView: UIViewController {
         setupConstraints()
         
         displayCategories()
+        
     }
     
+    // MARK: - Actions
+    @objc
+    private func showCreateCategory() {
+        let createCategoryVC = CreateCategoryView()
+        print("создаем замыкание")
+
+        createCategoryVC.onCreateCategory = { [weak self] category in
+            print("🔄 Получена новая категория из CreateCategory: '\(category)'")
+            try? self?.dataProvider?.addCategory(category)
+            self?.displayCategories()
+        }
+
+        let navVC = UINavigationController(rootViewController: createCategoryVC)
+        present(navVC, animated: true)
+    }
+
     // MARK: - Public methods
     func initialize(viewModel: CategoryViewModel) {
         self.viewModel = viewModel
         bind()
     }
-
+    
     // MARK: - Private methods
-    @objc
-    private func showCreateCategory() {
-        let scheduleVC = CreateCategoryView()
-        let navVC = UINavigationController(rootViewController: scheduleVC)
-        present(navVC, animated: true)
+    private func saveCategory() {
+        delegate?.didSelectCategory(selectedCategory)
+        dismiss(animated: true)
     }
 
     private func displayCategories() {
-        // TODO: - отображаем категории...
-        // если их нет то показывает пустое состояние:
-        
+        tableViewData = dataProvider?.fetchAllCategories() ?? []
         if tableViewData.isEmpty {
             showEmptyState()
         } else {
             hideEmptyState()
         }
+        tableView.reloadData()
     }
     
     private func showEmptyState() {
@@ -137,11 +169,11 @@ final class CategoryView: UIViewController {
     }
 
     private func setupUI() {
+        view.addSubview(tableView)
         view.addSubview(emptyStateView)
         emptyStateView.addSubview(dizzyImage)
         emptyStateView.addSubview(label)
         view.addSubview(button)
-        view.addSubview(tableView)
         
         tableView.dataSource = self
         tableView.delegate = self
@@ -255,4 +287,20 @@ extension CategoryView: UITableViewDelegate {
                 cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
             }
         }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        guard let cell = tableView.cellForRow(at: indexPath) else { return }
+        
+        if cell.accessoryType == .checkmark {
+            cell.accessoryType = .none
+            selectedCategory = ""
+        } else {
+            cell.accessoryType = .checkmark
+            selectedCategory = tableViewData[indexPath.row]
+        }
+        
+        saveCategory()
+
+    }
 }

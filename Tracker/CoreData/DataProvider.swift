@@ -21,6 +21,9 @@ protocol DataProviderProtocol {
     
     func fetchCompletedRecords() -> [TrackerRecord]
     func toggleRecord(trackerId: UUID, date: Date)
+    
+    func addCategory(_ title: String) throws
+    func fetchAllCategories() -> [String]
 }
 
 // MARK: - DataProvider
@@ -73,6 +76,28 @@ final class DataProvider: NSObject {
 
 // MARK: - DataProviderProtocol
 extension DataProvider: DataProviderProtocol {
+    func fetchAllCategories() -> [String] {
+        var categories: [String] = []
+        do {
+            let categoriesCD = try trackerCategoryStore.fetchAllCategories()
+            categories = categoriesCD.compactMap(\.title)
+        } catch {
+            print("ошибка загрузки категорий")
+        }
+        return categories
+    }
+    
+    func addCategory(_ title: String) {
+        do {
+            try trackerCategoryStore.tryCreateCategory(withTitle: title)
+            print("успешно сохранили")
+
+
+        } catch {
+            print("ошибка сохраниеия")
+        }
+    }
+    
     func fetchCompletedRecords() -> [TrackerRecord] {
         logger.info("called: \(#function)")
         return (try? trackerRecordStore.fetchAllRecords()) ?? []

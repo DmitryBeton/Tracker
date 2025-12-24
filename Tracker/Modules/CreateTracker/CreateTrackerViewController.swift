@@ -13,8 +13,8 @@ final class CreateTrackerViewController: UIViewController {
     private let logger = Logger(label: "CreateTrackerViewController")
     
     // Callback для создания трекера
-    var onCreateTracker: ((Tracker) -> Void)?
-    
+    var onCreateTracker: ((Tracker, String) -> Void)?
+
     // Data sources
     private let tableViewItems = ["Категория", "Расписание"]
     private let sectionsTitles = ["Emoji", "Цвет"]
@@ -29,6 +29,7 @@ final class CreateTrackerViewController: UIViewController {
         .ypColorSelection13, .ypColorSelection14, .ypColorSelection15, .ypColorSelection16, .ypColorSelection17, .ypColorSelection18
     ]
     
+    private var selectedCategory: String = ""
     private var selectedSchedule: [WeekDay]?
     private var selectedEmoji: String = ""
     private var selectedColor: UIColor = .clear
@@ -152,12 +153,12 @@ final class CreateTrackerViewController: UIViewController {
         logger.info("✅ Трекер создан: '\(trackerName)' с расписанием: \(schedule)")
         logger.debug("🔄 Трекер передан через колбэк")
         
-        onCreateTracker?(newTracker)
+        onCreateTracker?(newTracker, selectedCategory)
         closeCreateTracker()
     }
     
     private func updateCreateButtonState() {
-        let isEnabled = !trackerName.isEmpty && selectedSchedule != nil && !selectedEmoji.isEmpty && selectedColor != .clear
+        let isEnabled = !trackerName.isEmpty && selectedSchedule != nil && !selectedEmoji.isEmpty && selectedColor != .clear && !selectedCategory.isEmpty
         addButton.isEnabled = isEnabled
         addButton.backgroundColor = isEnabled ? .ypBlack : .ypGray
     }
@@ -171,12 +172,11 @@ final class CreateTrackerViewController: UIViewController {
     }
     
     private func showCategorySelection() {
-        let scheduleVC = CategoryView()
-        let navVC = UINavigationController(rootViewController: scheduleVC)
-        present(navVC, animated: true)
-
         logger.info("📂 Запрос на показ экрана категорий")
-
+        let categoryVC = CategoryView()
+        categoryVC.delegate = self
+        let navVC = UINavigationController(rootViewController: categoryVC)
+        present(navVC, animated: true)
     }
     
     private func closeCreateTracker() {
@@ -339,6 +339,16 @@ extension CreateTrackerViewController: ScheduleViewControllerDelegate {
     }
 }
 
+// MARK: - ScheduleViewControllerDelegate
+extension CreateTrackerViewController: CategoryViewDelegate {
+    func didSelectCategory(_ category: String) {
+        logger.info("✅ Получен заголовок категории: '\(category)'")
+        selectedCategory = category
+        updateCreateButtonState()
+        tableView.reloadData()
+    }
+}
+
 // MARK: - UITextFieldDelegate
 extension CreateTrackerViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
@@ -383,7 +393,8 @@ extension CreateTrackerViewController: UITableViewDataSource {
                 cell.detailTextLabel?.text = sortedSchedule.map { $0.shortName }.joined(separator: ", ")
             }
         } else if indexPath.row == 0 {
-            cell.detailTextLabel?.text = "Важное"
+            print("Отображаю выбранную катоегрию: \(selectedCategory)")
+            cell.detailTextLabel?.text = selectedCategory
         }
         
         if indexPath.row == 0 {

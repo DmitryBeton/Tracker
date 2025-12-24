@@ -118,11 +118,11 @@ final class TrackersViewController: UIViewController {
         return nil
     }
 
-    private func createNewTracker(_ tracker: Tracker) {
+    private func createNewTracker(_ tracker: Tracker, to category: String) {
         logger.info("called: \(#function) \(#line)")
 
         do {
-            try dataProvider?.addTracker(tracker, to: "Важное")
+            try dataProvider?.addTracker(tracker, to: category)
             logger.debug("✅ Трекер сохранен через DataProvider")
         } catch {
             logger.error("❌ Ошибка сохранения трекера: \(error)")
@@ -204,9 +204,9 @@ final class TrackersViewController: UIViewController {
         let createVC = CreateTrackerViewController()
         createVC.title = "Новая привычка"
         
-        createVC.onCreateTracker = { [weak self] newTracker in
+        createVC.onCreateTracker = { [weak self] newTracker, category in
             self?.logger.info("🔄 Получен новый трекер из CreateTracker: '\(newTracker.name)'")
-            self?.createNewTracker(newTracker)
+            self?.createNewTracker(newTracker, to: category)
         }
         
         let navVC = UINavigationController(rootViewController: createVC)

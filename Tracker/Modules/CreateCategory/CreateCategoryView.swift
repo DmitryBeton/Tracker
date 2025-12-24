@@ -11,8 +11,9 @@ final class CreateCategoryView: UIViewController {
     // MARK: - Properties
     private var viewModel: CategoryViewModel?
     
-    private var categoryName: String = ""
+    var onCreateCategory: ((String) -> Void)?
 
+    private var categoryName: String = ""
     private var tableViewTopConstraint: NSLayoutConstraint?
 
     // MARK: - UI Elements
@@ -80,7 +81,7 @@ final class CreateCategoryView: UIViewController {
             warningLabel.isHidden = true
             tableViewTopConstraint?.constant = 24
         }
-        
+        print("вводим название категории")
         categoryName = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         updateCreateButtonState()
     }
@@ -98,7 +99,10 @@ final class CreateCategoryView: UIViewController {
     }
     
     private func createCategory() {
-        // TODO: - Добавляем категорию в СoreData
+        print("отправляем название \(categoryName)")
+
+        onCreateCategory?(categoryName)
+
         dismiss(animated: true)
     }
     
