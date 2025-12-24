@@ -19,7 +19,7 @@ final class OnboardingViewController: UIPageViewController {
     
     private let viewOne: UIViewController = OnboardingViewOne()
     private let viewTwo: UIViewController = OnboardingViewTwo()
-
+    
     
     private lazy var button: UIButton = {
         let button = UIButton()
@@ -43,7 +43,7 @@ final class OnboardingViewController: UIPageViewController {
         
         label.font = .systemFont(ofSize: 32, weight: .bold)
         label.textColor = .ypBlack
-
+        
         label.numberOfLines = 0
         label.textAlignment = .center
         
@@ -53,7 +53,7 @@ final class OnboardingViewController: UIPageViewController {
     @objc
     private func openTracker() {
         OnboardingManager.shared.markOnboardingAsSeen()
-
+        
         let tabBarController = TabBarController()
         
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
@@ -63,7 +63,7 @@ final class OnboardingViewController: UIPageViewController {
             window.rootViewController = tabBarController
         }, completion: nil)
     }
-
+    
     private lazy var pages: [UIViewController] = [viewOne, viewTwo]
     
     private lazy var pageControl: UIPageControl = {
@@ -78,7 +78,7 @@ final class OnboardingViewController: UIPageViewController {
         
         return pageControl
     }()
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -87,23 +87,17 @@ final class OnboardingViewController: UIPageViewController {
         
         dataSource = self
         delegate = self
-
+        
         if let first = pages.first {
             setViewControllers([first], direction: .forward, animated: true, completion: nil)
         }
         
-        view.addSubview(pageControl)
-        
-        NSLayoutConstraint.activate([
-            pageControl.bottomAnchor.constraint(equalTo: button.topAnchor, constant: -24),
-            pageControl.centerXAnchor.constraint(equalTo: view.centerXAnchor)
-        ])
-
     }
     
     private func setupUI() {
         view.addSubview(button)
         view.addSubview(label)
+        view.addSubview(pageControl)
     }
     
     private func setupConstraints() {
@@ -111,22 +105,24 @@ final class OnboardingViewController: UIPageViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
+            pageControl.bottomAnchor.constraint(equalTo: button.topAnchor, constant: -24),
+            pageControl.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
             button.heightAnchor.constraint(equalToConstant: 60),
             button.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             button.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             button.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -50),
-
+            
             label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             label.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             label.bottomAnchor.constraint(equalTo: button.topAnchor, constant: -160),
-
-
+            
+            
         ])
     }
-
     
-
+    
+    
 }
 // MARK: - UIPageViewControllerDelegate
 extension OnboardingViewController: UIPageViewControllerDelegate {
@@ -143,7 +139,7 @@ extension OnboardingViewController: UIPageViewControllerDelegate {
         } else {
             label.text = "Даже если это не литры воды и йога"
         }
-
+        
     }
 }
 
@@ -172,12 +168,12 @@ extension OnboardingViewController: UIPageViewControllerDataSource {
         }
         
         let nextIndex = viewControllerIndex + 1
-
+        
         guard nextIndex < pages.count else {
             return pages.first
         }
         
         return pages[nextIndex]
     }
-
+    
 }

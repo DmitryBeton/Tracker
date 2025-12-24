@@ -36,7 +36,7 @@ final class OnboardingViewOne: UIViewController {
             image.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             image.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             image.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-
+            
         ])
     }
 }

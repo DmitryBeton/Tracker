@@ -25,7 +25,7 @@ final class TrackersViewController: UIViewController {
             return nil
         }
     }()
-        
+    
     // MARK: - UI Elements
     private let collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -74,39 +74,39 @@ final class TrackersViewController: UIViewController {
     // MARK: - Private methods
     private func displayTrackers(for date: Date) {
         logger.info("called: \(#function) \(#line)")
-
+        
         dataProvider?.setCurrentDate(date)
         completedRecords = dataProvider?.fetchCompletedRecords() ?? []
-
+        
         collectionView.reloadData()
         let hasData = (dataProvider?.numberOfCategories ?? 0) > 0
         hasData ? hideEmptyState() : showEmptyState()
     }
-
+    
     private func toggleTrackerCompletion(for trackerId: UUID) {
         logger.info("called: \(#function) \(#line)")
-
+        
         if selectedDate > Date() {
             showFutureDateRestriction()
             return
         }
-
+        
         guard let dataProvider else { return }
-
+        
         dataProvider.toggleRecord(trackerId: trackerId, date: selectedDate)
-
+        
         completedRecords = dataProvider.fetchCompletedRecords()
-
+        
         if let indexPath = indexPath(for: trackerId) {
             collectionView.reloadItems(at: [indexPath])
         }
     }
-
+    
     private func indexPath(for trackerId: UUID) -> IndexPath? {
         logger.info("called: \(#function) \(#line)")
-
+        
         guard let dataProvider else { return nil }
-
+        
         for section in 0..<dataProvider.numberOfCategories {
             for item in 0..<dataProvider.numberOfTrackersInCategory(section) {
                 let indexPath = IndexPath(item: item, section: section)
@@ -117,10 +117,10 @@ final class TrackersViewController: UIViewController {
         }
         return nil
     }
-
+    
     private func createNewTracker(_ tracker: Tracker, to category: String) {
         logger.info("called: \(#function) \(#line)")
-
+        
         do {
             try dataProvider?.addTracker(tracker, to: category)
             logger.debug("✅ Трекер сохранен через DataProvider")
@@ -132,16 +132,16 @@ final class TrackersViewController: UIViewController {
     
     private func configureCell(_ cell: TrackerCollectionViewCell, with tracker: Tracker) {
         logger.info("called: \(#function)")
-
+        
         let isCompleted = completedRecords.contains {
             $0.id == tracker.id &&
             Calendar.current.isDate($0.date, inSameDayAs: selectedDate)
         }
-
+        
         let completedDays = completedRecords.filter {
             $0.id == tracker.id
         }.count
-
+        
         cell.configure(with: tracker, completedDays: completedDays, isCompletedToday: isCompleted)
         cell.onDoneButtonTapped = { [weak self] trackerId in
             self?.toggleTrackerCompletion(for: trackerId)
@@ -150,7 +150,7 @@ final class TrackersViewController: UIViewController {
     
     private func showFutureDateRestriction() {
         logger.info("called: \(#function)")
-
+        
         let alert = UIAlertController(
             title: "Недоступно",
             message: "Нельзя отмечать трекеры на будущие даты.",
@@ -162,13 +162,13 @@ final class TrackersViewController: UIViewController {
     
     private func showEmptyState() {
         logger.info("called: \(#function)")
-
+        
         guard emptyStateView.isHidden else { return }
-
+        
         emptyStateView.isHidden = false
         emptyStateView.alpha = 0
         emptyStateView.transform = CGAffineTransform(translationX: 0, y: 20)
-
+        
         UIView.animate(
             withDuration: 0.35,
             delay: 0,
@@ -180,12 +180,12 @@ final class TrackersViewController: UIViewController {
             self.emptyStateView.transform = .identity
         }
     }
-
+    
     private func hideEmptyState() {
         logger.info("called: \(#function)")
-
+        
         guard !emptyStateView.isHidden else { return }
-
+        
         UIView.animate(
             withDuration: 0.2,
             delay: 0,
@@ -197,10 +197,10 @@ final class TrackersViewController: UIViewController {
             self.emptyStateView.isHidden = true
         }
     }
-
+    
     private func showCreateTrackerScreen() {
         logger.info("called: \(#function) \(#line)")
-
+        
         let createVC = CreateTrackerViewController()
         createVC.title = "Новая привычка"
         
@@ -212,11 +212,11 @@ final class TrackersViewController: UIViewController {
         let navVC = UINavigationController(rootViewController: createVC)
         present(navVC, animated: true)
     }
-
+    
     // MARK: - UI Setup
     private func setupUI() {
         logger.info("called: \(#function) \(#line)")
-
+        
         view.backgroundColor = .ypWhite
         setupNavigation()
         
@@ -256,7 +256,7 @@ final class TrackersViewController: UIViewController {
     
     private func setupNavigation() {
         logger.info("called: \(#function) \(#line)")
-
+        
         title = "Трекеры"
         navigationController?.navigationBar.prefersLargeTitles = true
         
@@ -308,7 +308,7 @@ final class TrackersViewController: UIViewController {
     
     @objc private func dateChanged() {
         logger.info("called: \(#function) \(#line)")
-
+        
         selectedDate = datePicker.date
         displayTrackers(for: selectedDate)
     }
@@ -336,18 +336,18 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
               let color = tracker.color,
               let emoji = tracker.emoji,
               let cell = collectionView.dequeueReusableCell(
-            withReuseIdentifier: "Cell",
-            for: indexPath
-        ) as? TrackerCollectionViewCell
+                withReuseIdentifier: "Cell",
+                for: indexPath
+              ) as? TrackerCollectionViewCell
         else {
             assertionFailure("Failed to dequeue TrackerCollectionViewCell")
             return UICollectionViewCell()
         }
         
         configureCell(cell, with: Tracker(id: id, name: name, color: UIColorMarshalling.color(from: color), emoji: emoji))
-
+        
         return cell
-
+        
     }
     
     // MARK: - Layout (Size & Spacing)
@@ -358,7 +358,7 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
     ) {
         cell.alpha = 0
         cell.transform = CGAffineTransform(translationX: 0, y: 20)
-
+        
         UIView.animate(
             withDuration: 0.35,
             delay: 0.03 * Double(indexPath.item),
@@ -368,7 +368,7 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
             cell.transform = .identity
         }
     }
-
+    
     func collectionView(
         _ collectionView: UICollectionView,
         layout collectionViewLayout: UICollectionViewLayout,
@@ -410,11 +410,11 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
     ) -> UICollectionReusableView {
         guard kind == UICollectionView.elementKindSectionHeader,
               let header = collectionView.dequeueReusableSupplementaryView(
-                  ofKind: kind,
-                  withReuseIdentifier: TrackerHeaderView.reuseIdentifier,
-                  for: indexPath
+                ofKind: kind,
+                withReuseIdentifier: TrackerHeaderView.reuseIdentifier,
+                for: indexPath
               ) as? TrackerHeaderView
-
+                
         else {
             return UICollectionReusableView()
         }

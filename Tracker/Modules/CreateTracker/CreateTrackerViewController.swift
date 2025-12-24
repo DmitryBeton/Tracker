@@ -14,7 +14,7 @@ final class CreateTrackerViewController: UIViewController {
     
     // Callback для создания трекера
     var onCreateTracker: ((Tracker, String) -> Void)?
-
+    
     // Data sources
     private let tableViewItems = ["Категория", "Расписание"]
     private let sectionsTitles = ["Emoji", "Цвет"]
@@ -43,13 +43,13 @@ final class CreateTrackerViewController: UIViewController {
         scrollView.showsVerticalScrollIndicator = false
         return scrollView
     }()
-
+    
     private let contentView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
-
+    
     private lazy var textField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Введите название трекера"
@@ -173,12 +173,12 @@ final class CreateTrackerViewController: UIViewController {
     
     private func showCategorySelection() {
         logger.info("📂 Запрос на показ экрана категорий")
-
+        
         guard let trackerStore = (UIApplication.shared.delegate as? AppDelegate)?.trackerStore else {
             assertionFailure("trackerStore not found")
             return
         }
-
+        
         let dataProvider: DataProviderProtocol
         do {
             dataProvider = try DataProvider(trackerStore)
@@ -186,18 +186,18 @@ final class CreateTrackerViewController: UIViewController {
             assertionFailure("DataProvider init failed")
             return
         }
-
+        
         let categoryModel = CategoryModel(dataProvider: dataProvider)
-
+        
         let categoryViewModel = CategoryViewModel(model: categoryModel)
-
+        
         let categoryVC = CategoryView(viewModel: categoryViewModel)
         categoryVC.delegate = self
-
+        
         let navVC = UINavigationController(rootViewController: categoryVC)
         present(navVC, animated: true)
     }
-
+    
     private func closeCreateTracker() {
         logger.info("🔒 Закрытие экрана создания трекера")
         dismiss(animated: true)
@@ -503,7 +503,7 @@ extension CreateTrackerViewController: UICollectionViewDelegateFlowLayout {
                     }
                 }
             }
-
+            
             guard let cell = collectionView.cellForItem(at: indexPath) as? EmojiCollectionViewCell else { return }
             cell.setSelected(true)
             selectedEmoji = emojiCollectionViewItems[indexPath.row]
@@ -518,7 +518,7 @@ extension CreateTrackerViewController: UICollectionViewDelegateFlowLayout {
                     }
                 }
             }
-
+            
             guard let cell = collectionView.cellForItem(at: indexPath) as? ColorCollectionViewCell else { return }
             cell.setSelected(true)
             selectedColor = colorsCollectionViewItems[indexPath.row]
@@ -535,7 +535,7 @@ extension CreateTrackerViewController: UICollectionViewDelegateFlowLayout {
             cell.setSelected(false)
         }
     }
-
+    
     func collectionView(
         _ collectionView: UICollectionView,
         layout collectionViewLayout: UICollectionViewLayout,
@@ -543,7 +543,7 @@ extension CreateTrackerViewController: UICollectionViewDelegateFlowLayout {
     ) -> CGSize {
         CGSize(width: 52, height: 52)
     }
-
+    
     func collectionView(
         _ collectionView: UICollectionView,
         layout collectionViewLayout: UICollectionViewLayout,
@@ -551,7 +551,7 @@ extension CreateTrackerViewController: UICollectionViewDelegateFlowLayout {
     ) -> UIEdgeInsets {
         UIEdgeInsets(top: 16, left: 28, bottom: 16, right: 16)
     }
-        
+    
     func collectionView(
         _ collectionView: UICollectionView,
         layout collectionViewLayout: UICollectionViewLayout,
@@ -566,15 +566,15 @@ extension CreateTrackerViewController: UICollectionViewDelegateFlowLayout {
         at indexPath: IndexPath
     ) -> UICollectionReusableView {
         guard kind == UICollectionView.elementKindSectionHeader,
-        let header = collectionView.dequeueReusableSupplementaryView(
-                  ofKind: kind,
-                  withReuseIdentifier: TrackerHeaderView.reuseIdentifier,
-                  for: indexPath
+              let header = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                withReuseIdentifier: TrackerHeaderView.reuseIdentifier,
+                for: indexPath
               ) as? TrackerHeaderView
         else {
             return UICollectionReusableView()
         }
-                
+        
         let category = sectionsTitles[indexPath.section]
         header.configure(with: category)
         return header

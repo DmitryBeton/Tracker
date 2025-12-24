@@ -13,17 +13,17 @@ protocol CategoryModelProtocol {
 }
 
 final class CategoryModel: CategoryModelProtocol {
-
+    
     private let dataProvider: DataProviderProtocol
-
+    
     init(dataProvider: DataProviderProtocol) {
         self.dataProvider = dataProvider
     }
-
+    
     func fetchCategories() -> [String] {
         dataProvider.fetchAllCategories()
     }
-
+    
     func addCategory(_ name: String) throws {
         try dataProvider.addCategory(name)
     }

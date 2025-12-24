@@ -50,7 +50,7 @@ final class CategoryView: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-
+    
     private let addButton: UIButton = {
         let button = UIButton()
         button.setTitle("Добавить категорию", for: .normal)
@@ -117,11 +117,11 @@ final class CategoryView: UIViewController {
         tableView.tableHeaderView = UIView(
             frame: CGRect(x: 0, y: 0, width: 0, height: CGFloat.leastNonzeroMagnitude)
         )
-
+        
         tableView.tableFooterView = UIView(
             frame: CGRect(x: 0, y: 0, width: 0, height: CGFloat.leastNonzeroMagnitude)
         )
-
+        
         addButton.addTarget(self, action: #selector(addTapped), for: .touchUpInside)
         
         [tableView, emptyStateView, label, dizzyImage, addButton].forEach {
@@ -153,7 +153,7 @@ final class CategoryView: UIViewController {
             
             label.topAnchor.constraint(equalTo: dizzyImage.bottomAnchor, constant: 8),
             label.centerXAnchor.constraint(equalTo: emptyStateView.centerXAnchor),
-
+            
         ])
     }
 }
@@ -201,5 +201,5 @@ extension CategoryView: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         viewModel.didSelectRow(at: indexPath.row)
     }
-
+    
 }

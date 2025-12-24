@@ -23,7 +23,7 @@ final class OnboardingViewTwo: UIViewController {
         setupUI()
         setupConstraints()
     }
-
+    
     private func setupUI() {
         view.addSubview(image)
     }
@@ -36,8 +36,8 @@ final class OnboardingViewTwo: UIViewController {
             image.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             image.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             image.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-
-
+            
+            
         ])
     }
 }
