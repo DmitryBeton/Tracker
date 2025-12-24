@@ -171,7 +171,12 @@ final class CreateTrackerViewController: UIViewController {
     }
     
     private func showCategorySelection() {
-        logger.info("📂 Запрос на показ экрана категорий (ЗАГЛУШКА)")
+        let scheduleVC = CategoryView()
+        let navVC = UINavigationController(rootViewController: scheduleVC)
+        present(navVC, animated: true)
+
+        logger.info("📂 Запрос на показ экрана категорий")
+
     }
     
     private func closeCreateTracker() {
