@@ -55,6 +55,7 @@ final class CategoryView: UIViewController {
         let button = UIButton()
         button.setTitle("Добавить категорию", for: .normal)
         button.backgroundColor = .ypBlack
+        button.setTitleColor(.ypWhite, for: .normal)
         button.layer.cornerRadius = 16
         return button
     }()

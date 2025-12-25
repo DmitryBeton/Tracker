@@ -37,6 +37,7 @@ final class CreateCategoryView: UIViewController {
         button.layer.cornerRadius = 16
         button.isEnabled = false
         button.backgroundColor = .ypGray
+        button.setTitleColor(.ypWhite, for: .normal)
         button.addTarget(self, action: #selector(createTapped), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
