@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class CategoryViewModel {
+final class CategoryViewModel: CategoryViewModelProtocol {
     
     // MARK: - Bindings
     var onDataChanged: (() -> Void)?

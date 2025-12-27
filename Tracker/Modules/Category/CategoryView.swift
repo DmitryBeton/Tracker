@@ -14,7 +14,7 @@ protocol CategoryViewDelegate: AnyObject {
 final class CategoryView: UIViewController {
     
     // MARK: - Properties
-    private let viewModel: CategoryViewModel
+    private let viewModel: CategoryViewModelProtocol
     weak var delegate: CategoryViewDelegate?
     
     // MARK: - UI
@@ -118,9 +118,12 @@ final class CategoryView: UIViewController {
         tableView.tableHeaderView = UIView(
             frame: CGRect(x: 0, y: 0, width: 0, height: CGFloat.leastNonzeroMagnitude)
         )
-        
         tableView.tableFooterView = UIView(
             frame: CGRect(x: 0, y: 0, width: 0, height: CGFloat.leastNonzeroMagnitude)
+        )
+        tableView.register(
+            CategoryTableViewCell.self,
+            forCellReuseIdentifier: CategoryTableViewCell.reuseIdentifier
         )
         
         addButton.addTarget(self, action: #selector(addTapped), for: .touchUpInside)
@@ -167,36 +170,22 @@ extension CategoryView: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell: UITableViewCell
-        
-        if let reusedCell = tableView.dequeueReusableCell(withIdentifier: "cell") {
-            cell = reusedCell
-        } else {
-            cell = UITableViewCell(style: .default, reuseIdentifier: "cell")
-        }
-        cell.textLabel?.text = viewModel.titleForRow(at: indexPath.row)
-        
-        cell.backgroundColor = .ypBackground
-        cell.selectionStyle = .none
-        cell.layer.masksToBounds = true
-        
-        cell.textLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
-        
-
-        switch indexPath.row {
-        case 0:
-            cell.layer.cornerRadius = 16
-            cell.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        case viewModel.numberOfRows() - 1:
-            cell.layer.cornerRadius = 16
-            cell.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
-        default:
-            cell.layer.cornerRadius = 0
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryTableViewCell",
+                                                       for: indexPath
+        ) as? CategoryTableViewCell
+        else {
+            assertionFailure("Failed to dequeue TrackerCollectionViewCell")
+            return UITableViewCell()
         }
         
-        if viewModel.numberOfRows() == 1 {
-            cell.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMinYCorner]
-        }
+        let title = viewModel.titleForRow(at: indexPath.row)
+        let numberOfRows = viewModel.numberOfRows()
+        
+        let isFirst = indexPath.row == 0
+        let isLast = indexPath.row == numberOfRows - 1
+        let isSingle = numberOfRows == 1
+        
+        cell.configure(with: title, isFirst: isFirst, isLast: isLast, isSingle: isSingle)
         
         return cell
     }
