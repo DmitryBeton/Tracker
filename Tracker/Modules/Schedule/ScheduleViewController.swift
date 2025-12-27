@@ -24,7 +24,8 @@ final class ScheduleViewController: UIViewController {
     // MARK: - UI Elements
     private lazy var button: UIButton = {
         let button = UIButton()
-        button.setTitle("Готово", for: .normal)
+        let text = NSLocalizedString("ready", comment: "")
+        button.setTitle(text, for: .normal)
         button.setTitleColor(.ypWhite, for: .normal)
         button.backgroundColor = .ypBlack
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -51,7 +52,8 @@ final class ScheduleViewController: UIViewController {
     
     // MARK: - Setup UI
     private func setupUI() {
-        title = "Расписание"
+        let text = NSLocalizedString("schedule", comment: "")
+        title = text
         view.backgroundColor = .ypWhite
         if let navigationController = navigationController {
             let appearance = UINavigationBarAppearance()
@@ -78,7 +80,7 @@ final class ScheduleViewController: UIViewController {
             
             navigationItem.titleView = {
                 let label = UILabel()
-                label.text = "Расписание"
+                label.text = text
                 label.font = titleFont
                 label.textColor = .ypBlack
                 label.textAlignment = .center

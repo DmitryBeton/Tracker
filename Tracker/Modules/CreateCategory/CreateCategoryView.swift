@@ -16,7 +16,8 @@ final class CreateCategoryView: UIViewController {
     // MARK: - UI
     private lazy var textField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Введите название категории"
+        let text = NSLocalizedString("enter_name_of_category", comment: "")
+        textField.placeholder = text
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.backgroundColor = .ypBackground
         textField.layer.cornerRadius = 16
@@ -33,7 +34,8 @@ final class CreateCategoryView: UIViewController {
     
     private lazy var button: UIButton = {
         let button = UIButton()
-        button.setTitle("Готово", for: .normal)
+        let text = NSLocalizedString("ready", comment: "")
+        button.setTitle(text, for: .normal)
         button.layer.cornerRadius = 16
         button.isEnabled = false
         button.backgroundColor = .ypGray
@@ -95,7 +97,8 @@ final class CreateCategoryView: UIViewController {
     
     // MARK: - UI Setup
     private func setupUI() {
-        title = "Новая категория"
+        let text = NSLocalizedString("new_category", comment: "")
+        title = text
         
         view.backgroundColor = .ypWhite
         

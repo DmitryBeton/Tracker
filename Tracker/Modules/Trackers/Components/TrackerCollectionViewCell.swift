@@ -88,7 +88,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         
         emojiLabel.text = tracker.emoji
         
-        countLabel.text = "\(completedDays) \(dayWord(for: completedDays))"
+        countLabel.text = dayWord(for: completedDays)
         
         updateCompletionState(isCompleted: isCompletedToday)
     }
@@ -104,16 +104,13 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         }
     }
     
-    private func dayWord(for count: Int) -> String {
-        let n = abs(count) % 100
-        if n >= 11 && n <= 19 {
-            return "дней"
-        }
-        switch n % 10 {
-        case 1: return "день"
-        case 2, 3, 4: return "дня"
-        default: return "дней"
-        }
+    private func dayWord(for countOfDays: Int) -> String {
+                        
+        let daysString = String.localizedStringWithFormat(
+            NSLocalizedString("countOfDays", comment: "Number of completed days"),
+            countOfDays
+        )
+        return daysString
     }
     
     // MARK: - Actions

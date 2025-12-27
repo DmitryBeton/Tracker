@@ -52,7 +52,8 @@ final class TrackersViewController: UIViewController {
     
     private let label: UILabel = {
         let label = UILabel()
-        label.text = "Что будем отслеживать?"
+        let text = NSLocalizedString("what_we_will_be_tracking", comment: "")
+        label.text = text
         label.font = .systemFont(ofSize: 12, weight: .medium)
         label.textColor = .ypBlack
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -257,7 +258,8 @@ final class TrackersViewController: UIViewController {
     private func setupNavigation() {
         logger.info("called: \(#function) \(#line)")
         
-        title = "Трекеры"
+        let text = NSLocalizedString("title_trackers", comment: "")
+        title = text
         navigationController?.navigationBar.prefersLargeTitles = true
         
         let appearance = UINavigationBarAppearance()
@@ -295,7 +297,9 @@ final class TrackersViewController: UIViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
         
         searchController.obscuresBackgroundDuringPresentation = false
-        searchController.searchBar.placeholder = "Поиск"
+        
+        let searchText = NSLocalizedString("search", comment: "")
+        searchController.searchBar.placeholder = searchText
         navigationItem.searchController = searchController
         navigationItem.hidesSearchBarWhenScrolling = false
     }

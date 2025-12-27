@@ -16,8 +16,13 @@ final class CreateTrackerViewController: UIViewController {
     var onCreateTracker: ((Tracker, String) -> Void)?
     
     // Data sources
-    private let tableViewItems = ["Категория", "Расписание"]
-    private let sectionsTitles = ["Emoji", "Цвет"]
+    let textCategoty = NSLocalizedString("category", comment: "")
+    let textSchedule = NSLocalizedString("schedule", comment: "")
+    private lazy var tableViewItems = [textCategoty, textSchedule]
+    
+    let textColor = NSLocalizedString("color", comment: "")
+    let textEmoji = NSLocalizedString("emoji", comment: "")
+    private lazy var sectionsTitles = [textEmoji, textColor]
     private let emojiCollectionViewItems = [
         "🙂", "😻", "🌺", "🐶", "❤️", "😱",
         "😇", "😡", "🥶", "🤔", "🙌", "🍔",
@@ -52,7 +57,8 @@ final class CreateTrackerViewController: UIViewController {
     
     private lazy var textField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Введите название трекера"
+        let text = NSLocalizedString("enter_name_of_tracker", comment: "")
+        textField.placeholder = text
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.backgroundColor = .ypBackground
         textField.layer.cornerRadius = 16
@@ -69,7 +75,8 @@ final class CreateTrackerViewController: UIViewController {
     
     private lazy var warningLabel: UILabel = {
         let label = UILabel()
-        label.text = "Ограничение 38 символов"
+        let text = NSLocalizedString("symbol_limit", comment: "")
+        label.text = text
         label.textColor = .ypRed
         label.font = UIFont.systemFont(ofSize: 17, weight: .regular)
         label.textAlignment = .center
@@ -105,7 +112,8 @@ final class CreateTrackerViewController: UIViewController {
     
     private lazy var cancelButton: UIButton = {
         let button = UIButton()
-        button.setTitle("Отменить", for: .normal)
+        let text = NSLocalizedString("cancel", comment: "")
+        button.setTitle(text, for: .normal)
         button.setTitleColor(UIColor.ypRed, for: .normal)
         button.layer.borderWidth = 1
         button.layer.borderColor = UIColor.ypRed.cgColor
@@ -118,7 +126,8 @@ final class CreateTrackerViewController: UIViewController {
     
     private lazy var addButton: UIButton = {
         let button = UIButton()
-        button.setTitle("Создать", for: .normal)
+        let text = NSLocalizedString("create", comment: "")
+        button.setTitle(text, for: .normal)
         button.setTitleColor(.ypWhite, for: .normal)
         button.backgroundColor = .ypGray
         button.layer.cornerRadius = 16
@@ -205,7 +214,8 @@ final class CreateTrackerViewController: UIViewController {
     
     // MARK: - Setup UI
     private func setupUI() {
-        title = "Новая привычка"
+        let titleText = NSLocalizedString("new_tracker", comment: "")
+        title = titleText
         view.backgroundColor = .ypWhite
         
         if let navigationController = navigationController {
@@ -232,7 +242,7 @@ final class CreateTrackerViewController: UIViewController {
             
             navigationItem.titleView = {
                 let label = UILabel()
-                label.text = "Новая привычка"
+                label.text = titleText
                 label.font = titleFont
                 label.textColor = .ypBlack
                 label.textAlignment = .center
@@ -404,9 +414,11 @@ extension CreateTrackerViewController: UITableViewDataSource {
         cell.detailTextLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
         cell.textLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
         
+        let textDays = NSLocalizedString("every_day", comment: "")
+
         if indexPath.row == 1, let schedule = selectedSchedule {
             if schedule.count == 7 {
-                cell.detailTextLabel?.text = "Каждый день"
+                cell.detailTextLabel?.text = textDays
             } else {
                 let sortedSchedule = schedule.sorted { $0.rawValue < $1.rawValue }
                 cell.detailTextLabel?.text = sortedSchedule.map { $0.shortName }.joined(separator: ", ")

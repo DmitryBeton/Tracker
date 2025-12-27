@@ -42,8 +42,9 @@ final class CategoryView: UIViewController {
     
     private let label: UILabel = {
         let label = UILabel()
+        let text = NSLocalizedString("can_be_combined_into_categories", comment: "")
         label.textAlignment = .center
-        label.text = "Привычки и события можно\nобъединить по смыслу"
+        label.text = text
         label.font = .systemFont(ofSize: 12, weight: .medium)
         label.textColor = .ypBlack
         label.numberOfLines = 0
@@ -53,7 +54,8 @@ final class CategoryView: UIViewController {
     
     private let addButton: UIButton = {
         let button = UIButton()
-        button.setTitle("Добавить категорию", for: .normal)
+        let text = NSLocalizedString("add_category", comment: "")
+        button.setTitle(text, for: .normal)
         button.backgroundColor = .ypBlack
         button.setTitleColor(.ypWhite, for: .normal)
         button.layer.cornerRadius = 16
@@ -108,7 +110,9 @@ final class CategoryView: UIViewController {
     
     // MARK: - UI Setup
     private func setupUI() {
-        title = "Категория"
+        let text = NSLocalizedString("category", comment: "")
+
+        title = text
         
         view.backgroundColor = .ypWhite
         

@@ -1,0 +1,60 @@
+/* 
+  Localizable.strings
+  Tracker
+
+  Created by Дмитрий Чалов on 27.12.2025.
+  
+*/
+
+"what_we_will_be_tracking" = "Что будем отслеживать?";
+"can_be_combined_into_categories" = "Привычки и события можно\nобъединить по смыслу";
+
+"tabbar_trackers" = "Трекеры";
+"title_trackers" = "Трекеры";
+
+"tabbar_statistic" = "Статистика";
+
+"new_tracker" = "Новая привычка";
+"new_category" = "Новая категория";
+
+"enter_name_of_tracker" = "Введите название трекера";
+"enter_name_of_category" = "Введите название категории";
+
+"category" = "Категория";
+"schedule" = "Расписание";
+"emoji" = "Emoji";
+"color" = "Цвет";
+
+"cancel" = "Отменить";
+"create" = "Создать";
+"ready" = "Готово";
+
+"add_category" = "Добавить категорию";
+
+"search" = "Поиск";
+"symbol_limit" = "Ограничение 38 символов";
+
+"every_day" = "Каждый день";
+
+// Onboarding
+"technologies" = "Вот это технологии!";
+"about_tracking" = "Отслеживайте только то, что хотите";
+"about_water_and_yoga" = "Даже если это не литры воды и йога";
+
+// WeekDays
+
+"monday_full" = "Понедельниик";
+"tuesday_full" = "Вторник";
+"wednesday_full" = "Среда";
+"thursday_full" = "Четверг";
+"friday_full" = "Пятница";
+"saturday_full" = "Суббота";
+"sunday_full" = "Воскресенье";
+
+"monday_short" = "Пн";
+"tuesday_short" = "Вт";
+"wednesday_short" = "Ср";
+"thursday_short" = "Чт";
+"friday_short" = "Пт";
+"saturday_short" = "Сб";
+"sunday_short" = "Вс";

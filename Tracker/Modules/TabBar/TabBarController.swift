@@ -16,11 +16,14 @@ final class TabBarController: UITabBarController {
     }
     
     private func setupViewControllers() {
+        let textTrackers = NSLocalizedString("tabbar_trackers", comment: "")
+        let textStatistic = NSLocalizedString("tabbar_statistic", comment: "")
+
         let trackerViewController = TrackersViewController()
 
         let trackerNavigationController = UINavigationController(rootViewController: trackerViewController)
         trackerNavigationController.tabBarItem = UITabBarItem(
-            title: "Трекеры",
+            title: textTrackers,
             image: UIImage(resource: .tabTracker),
             tag: 1
         )
@@ -28,7 +31,7 @@ final class TabBarController: UITabBarController {
         let statisticsViewController = StatisticsViewController()
         let statisticsNavigationController = UINavigationController(rootViewController: statisticsViewController)
         statisticsNavigationController.tabBarItem = UITabBarItem(
-            title: "Статистика",
+            title: textStatistic,
             image: UIImage(resource: .tabStatistic),
             tag: 2
         )
