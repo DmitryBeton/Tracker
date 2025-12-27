@@ -17,6 +17,22 @@ final class TrackerCategoryStore {
         self.context = context
     }
     
+    func tryCreateCategory(withTitle title: String) throws {
+        logger.info("called: \(#function)")
+        
+        let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "title == %@", title)
+        fetchRequest.fetchLimit = 1
+        
+        let newCategory = TrackerCategoryCoreData(context: context)
+        newCategory.id = UUID()
+        newCategory.title = title
+        print("🆕 Создана новая категория '\(title)'")
+        
+        try context.save()
+        print("успещнос сохранили")
+    }
+    
     func findOrCreateCategory(withTitle title: String) throws -> TrackerCategoryCoreData {
         logger.info("called: \(#function)")
         

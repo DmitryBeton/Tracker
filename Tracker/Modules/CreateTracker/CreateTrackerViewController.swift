@@ -13,7 +13,7 @@ final class CreateTrackerViewController: UIViewController {
     private let logger = Logger(label: "CreateTrackerViewController")
     
     // Callback для создания трекера
-    var onCreateTracker: ((Tracker) -> Void)?
+    var onCreateTracker: ((Tracker, String) -> Void)?
     
     // Data sources
     private let tableViewItems = ["Категория", "Расписание"]
@@ -29,6 +29,7 @@ final class CreateTrackerViewController: UIViewController {
         .ypColorSelection13, .ypColorSelection14, .ypColorSelection15, .ypColorSelection16, .ypColorSelection17, .ypColorSelection18
     ]
     
+    private var selectedCategory: String = ""
     private var selectedSchedule: [WeekDay]?
     private var selectedEmoji: String = ""
     private var selectedColor: UIColor = .clear
@@ -42,13 +43,13 @@ final class CreateTrackerViewController: UIViewController {
         scrollView.showsVerticalScrollIndicator = false
         return scrollView
     }()
-
+    
     private let contentView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
-
+    
     private lazy var textField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Введите название трекера"
@@ -152,12 +153,12 @@ final class CreateTrackerViewController: UIViewController {
         logger.info("✅ Трекер создан: '\(trackerName)' с расписанием: \(schedule)")
         logger.debug("🔄 Трекер передан через колбэк")
         
-        onCreateTracker?(newTracker)
+        onCreateTracker?(newTracker, selectedCategory)
         closeCreateTracker()
     }
     
     private func updateCreateButtonState() {
-        let isEnabled = !trackerName.isEmpty && selectedSchedule != nil && !selectedEmoji.isEmpty && selectedColor != .clear
+        let isEnabled = !trackerName.isEmpty && selectedSchedule != nil && !selectedEmoji.isEmpty && selectedColor != .clear && !selectedCategory.isEmpty
         addButton.isEnabled = isEnabled
         addButton.backgroundColor = isEnabled ? .ypBlack : .ypGray
     }
@@ -171,7 +172,30 @@ final class CreateTrackerViewController: UIViewController {
     }
     
     private func showCategorySelection() {
-        logger.info("📂 Запрос на показ экрана категорий (ЗАГЛУШКА)")
+        logger.info("📂 Запрос на показ экрана категорий")
+        
+        guard let trackerStore = (UIApplication.shared.delegate as? AppDelegate)?.trackerStore else {
+            assertionFailure("trackerStore not found")
+            return
+        }
+        
+        let dataProvider: DataProviderProtocol
+        do {
+            dataProvider = try DataProvider(trackerStore)
+        } catch {
+            assertionFailure("DataProvider init failed")
+            return
+        }
+        
+        let categoryModel = CategoryModel(dataProvider: dataProvider)
+        
+        let categoryViewModel = CategoryViewModel(model: categoryModel)
+        
+        let categoryVC = CategoryView(viewModel: categoryViewModel)
+        categoryVC.delegate = self
+        
+        let navVC = UINavigationController(rootViewController: categoryVC)
+        present(navVC, animated: true)
     }
     
     private func closeCreateTracker() {
@@ -334,6 +358,16 @@ extension CreateTrackerViewController: ScheduleViewControllerDelegate {
     }
 }
 
+// MARK: - ScheduleViewControllerDelegate
+extension CreateTrackerViewController: CategoryViewDelegate {
+    func didSelectCategory(_ category: String) {
+        logger.info("✅ Получен заголовок категории: '\(category)'")
+        selectedCategory = category
+        updateCreateButtonState()
+        tableView.reloadData()
+    }
+}
+
 // MARK: - UITextFieldDelegate
 extension CreateTrackerViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
@@ -378,7 +412,7 @@ extension CreateTrackerViewController: UITableViewDataSource {
                 cell.detailTextLabel?.text = sortedSchedule.map { $0.shortName }.joined(separator: ", ")
             }
         } else if indexPath.row == 0 {
-            cell.detailTextLabel?.text = "Важное"
+            cell.detailTextLabel?.text = selectedCategory
         }
         
         if indexPath.row == 0 {
@@ -469,7 +503,7 @@ extension CreateTrackerViewController: UICollectionViewDelegateFlowLayout {
                     }
                 }
             }
-
+            
             guard let cell = collectionView.cellForItem(at: indexPath) as? EmojiCollectionViewCell else { return }
             cell.setSelected(true)
             selectedEmoji = emojiCollectionViewItems[indexPath.row]
@@ -484,7 +518,7 @@ extension CreateTrackerViewController: UICollectionViewDelegateFlowLayout {
                     }
                 }
             }
-
+            
             guard let cell = collectionView.cellForItem(at: indexPath) as? ColorCollectionViewCell else { return }
             cell.setSelected(true)
             selectedColor = colorsCollectionViewItems[indexPath.row]
@@ -501,7 +535,7 @@ extension CreateTrackerViewController: UICollectionViewDelegateFlowLayout {
             cell.setSelected(false)
         }
     }
-
+    
     func collectionView(
         _ collectionView: UICollectionView,
         layout collectionViewLayout: UICollectionViewLayout,
@@ -509,7 +543,7 @@ extension CreateTrackerViewController: UICollectionViewDelegateFlowLayout {
     ) -> CGSize {
         CGSize(width: 52, height: 52)
     }
-
+    
     func collectionView(
         _ collectionView: UICollectionView,
         layout collectionViewLayout: UICollectionViewLayout,
@@ -517,7 +551,7 @@ extension CreateTrackerViewController: UICollectionViewDelegateFlowLayout {
     ) -> UIEdgeInsets {
         UIEdgeInsets(top: 16, left: 28, bottom: 16, right: 16)
     }
-        
+    
     func collectionView(
         _ collectionView: UICollectionView,
         layout collectionViewLayout: UICollectionViewLayout,
@@ -532,15 +566,15 @@ extension CreateTrackerViewController: UICollectionViewDelegateFlowLayout {
         at indexPath: IndexPath
     ) -> UICollectionReusableView {
         guard kind == UICollectionView.elementKindSectionHeader,
-        let header = collectionView.dequeueReusableSupplementaryView(
-                  ofKind: kind,
-                  withReuseIdentifier: TrackerHeaderView.reuseIdentifier,
-                  for: indexPath
+              let header = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                withReuseIdentifier: TrackerHeaderView.reuseIdentifier,
+                for: indexPath
               ) as? TrackerHeaderView
         else {
             return UICollectionReusableView()
         }
-                
+        
         let category = sectionsTitles[indexPath.section]
         header.configure(with: category)
         return header
