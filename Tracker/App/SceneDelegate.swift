@@ -16,8 +16,32 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     ) {
         guard let scene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: scene)
-        window.rootViewController = OnboardingManager.shared.hasSeenOnboarding ? TabBarController() : OnboardingViewController()
+        
+        if OnboardingManager.shared.hasSeenOnboarding {
+            window.rootViewController = TabBarController()
+        } else {
+
+            let onboardingVC = OnboardingViewController()
+            
+            onboardingVC.onShowOnboarding = { [weak self] hasSeen in
+                OnboardingManager.shared.markOnboardingAsSeen()
+                
+                let tabBarController = TabBarController()
+                
+                UIView.transition(with: window,
+                                  duration: 0.3,
+                                  options: .transitionCrossDissolve,
+                                  animations: {
+                    window.rootViewController = tabBarController
+                },
+                                  completion: nil)
+            }
+            
+            window.rootViewController = onboardingVC
+        }
+        
         self.window = window
         window.makeKeyAndVisible()
+        
     }
 }

@@ -182,13 +182,15 @@ extension CategoryView: UITableViewDataSource, UITableViewDelegate {
         
         cell.textLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
         
-        if indexPath.row == 0 {
+
+        switch indexPath.row {
+        case 0:
             cell.layer.cornerRadius = 16
             cell.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        } else if indexPath.row == viewModel.numberOfRows() - 1 {
+        case viewModel.numberOfRows() - 1:
             cell.layer.cornerRadius = 16
             cell.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
-        } else {
+        default:
             cell.layer.cornerRadius = 0
         }
         

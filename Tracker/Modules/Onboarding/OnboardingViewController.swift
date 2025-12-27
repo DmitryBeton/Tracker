@@ -9,101 +9,81 @@ import UIKit
 
 final class OnboardingViewController: UIPageViewController {
     
-    init() {
-        super.init(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil)
-    }
+    // MARK: - Properties
+    var onShowOnboarding: ((Bool) -> Void)?
     
-    required init?(coder: NSCoder) {
-        super.init(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil)
-    }
+    private lazy var pages: [UIViewController] = [
+        OnboardingPageViewController(pageModel: .aboutTracking),
+        OnboardingPageViewController(pageModel: .aboutWaterAndYoga)
+    ]
     
-    private let viewOne: UIViewController = OnboardingViewOne()
-    private let viewTwo: UIViewController = OnboardingViewTwo()
-    
-    
+    // MARK: - UI Elements
     private lazy var button: UIButton = {
         let button = UIButton()
-        
         button.setTitle("Вот это технологии!", for: .normal)
-        button.setTitleColor(UIColor.ypWhite, for: .normal)
+        button.setTitleColor(.ypWhite, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         button.titleLabel?.textAlignment = .center
-        
         button.backgroundColor = .ypBlack
         button.layer.cornerRadius = 16
-        
         button.addTarget(self, action: #selector(openTracker), for: .touchUpInside)
-        
+        button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
     
-    private let label: UILabel = {
+    private lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Отслеживайте только то, что хотите"
-        
         label.font = .systemFont(ofSize: 32, weight: .bold)
         label.textColor = .ypBlack
-        
         label.numberOfLines = 0
         label.textAlignment = .center
-        
+        label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-    
-    @objc
-    private func openTracker() {
-        OnboardingManager.shared.markOnboardingAsSeen()
-        
-        let tabBarController = TabBarController()
-        
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let window = windowScene.windows.first else { return }
-        
-        UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: {
-            window.rootViewController = tabBarController
-        }, completion: nil)
-    }
-    
-    private lazy var pages: [UIViewController] = [viewOne, viewTwo]
     
     private lazy var pageControl: UIPageControl = {
         let pageControl = UIPageControl()
         pageControl.numberOfPages = pages.count
         pageControl.currentPage = 0
-        
         pageControl.currentPageIndicatorTintColor = .ypBlack
         pageControl.pageIndicatorTintColor = .ypBlack.withAlphaComponent(0.3)
-        
         pageControl.translatesAutoresizingMaskIntoConstraints = false
-        
         return pageControl
     }()
     
+    // MARK: - Init
+    init() {
+        super.init(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         setupUI()
         setupConstraints()
         
         dataSource = self
         delegate = self
         
-        if let first = pages.first {
-            setViewControllers([first], direction: .forward, animated: true, completion: nil)
+        if let firstPage = pages.first {
+            setViewControllers([firstPage], direction: .forward, animated: true)
         }
         
+        updateTitleForCurrentPage()
     }
     
+    // MARK: - Private Methods
     private func setupUI() {
         view.addSubview(button)
-        view.addSubview(label)
+        view.addSubview(titleLabel)
         view.addSubview(pageControl)
     }
     
     private func setupConstraints() {
-        label.translatesAutoresizingMaskIntoConstraints = false
-        button.translatesAutoresizingMaskIntoConstraints = false
-        
         NSLayoutConstraint.activate([
             pageControl.bottomAnchor.constraint(equalTo: button.topAnchor, constant: -24),
             pageControl.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -113,67 +93,51 @@ final class OnboardingViewController: UIPageViewController {
             button.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             button.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -50),
             
-            label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            label.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            label.bottomAnchor.constraint(equalTo: button.topAnchor, constant: -160),
-            
-            
+            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            titleLabel.bottomAnchor.constraint(equalTo: button.topAnchor, constant: -160)
         ])
     }
     
+    private func updateTitleForCurrentPage() {
+        guard let currentVC = viewControllers?.first as? OnboardingPageViewController else { return }
+        titleLabel.text = currentVC.pageModel.titleText
+    }
     
-    
-}
-// MARK: - UIPageViewControllerDelegate
-extension OnboardingViewController: UIPageViewControllerDelegate {
-    func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
-        
-        if let currentViewController = pageViewController.viewControllers?.first,
-           let currentIndex = pages.firstIndex(of: currentViewController) {
-            pageControl.currentPage = currentIndex
-        }
-        
-        
-        if pageControl.currentPage == 0 {
-            label.text = "Отслеживайте только то, что хотите"
-        } else {
-            label.text = "Даже если это не литры воды и йога"
-        }
-        
+    // MARK: - Actions
+    @objc private func openTracker() {
+        onShowOnboarding?(true)
     }
 }
 
 // MARK: - UIPageViewControllerDataSource
 extension OnboardingViewController: UIPageViewControllerDataSource {
-    
-    func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
-        //возвращаем предыдущий (относительно переданного viewController) дочерний контроллер
-        guard let viewControllerIndex = pages.firstIndex(of: viewController) else {
-            return nil
-        }
-        
-        let previousIndex = viewControllerIndex - 1
-        
-        guard previousIndex >= 0 else {
-            return pages.last
-        }
-        
-        return pages[previousIndex]
+    func pageViewController(_ pageViewController: UIPageViewController,
+                          viewControllerBefore viewController: UIViewController) -> UIViewController? {
+        guard let index = pages.firstIndex(of: viewController) else { return nil }
+        let previousIndex = index - 1
+        return previousIndex >= 0 ? pages[previousIndex] : pages.last
     }
     
-    func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
-        //возвращаем следующий (относительно переданного viewController) дочерний контроллер
-        guard let viewControllerIndex = pages.firstIndex(of: viewController) else {
-            return nil
-        }
-        
-        let nextIndex = viewControllerIndex + 1
-        
-        guard nextIndex < pages.count else {
-            return pages.first
-        }
-        
-        return pages[nextIndex]
+    func pageViewController(_ pageViewController: UIPageViewController,
+                          viewControllerAfter viewController: UIViewController) -> UIViewController? {
+        guard let index = pages.firstIndex(of: viewController) else { return nil }
+        let nextIndex = index + 1
+        return nextIndex < pages.count ? pages[nextIndex] : pages.first
     }
-    
+}
+
+// MARK: - UIPageViewControllerDelegate
+extension OnboardingViewController: UIPageViewControllerDelegate {
+    func pageViewController(_ pageViewController: UIPageViewController,
+                          didFinishAnimating finished: Bool,
+                          previousViewControllers: [UIViewController],
+                          transitionCompleted completed: Bool) {
+        if completed,
+           let currentViewController = pageViewController.viewControllers?.first,
+           let currentIndex = pages.firstIndex(of: currentViewController) {
+            pageControl.currentPage = currentIndex
+            updateTitleForCurrentPage()
+        }
+    }
 }
