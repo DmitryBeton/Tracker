@@ -1,8 +1,8 @@
 //
-//  ScheduleViewController.swift
+//  ScheduleView.swift
 //  Tracker
 //
-//  Created by Дмитрий Чалов on 11.11.2025.
+//  Created by Дмитрий Чалов on 01.01.2026.
 //
 
 import UIKit
@@ -12,14 +12,13 @@ protocol ScheduleViewControllerDelegate: AnyObject {
     func didSelectSchedule(_ schedule: [WeekDay])
 }
 
-final class ScheduleViewController: UIViewController {
-    // MARK: - Dependencies
-    private let logger = Logger(label: "ScheduleViewController")
-    weak var delegate: ScheduleViewControllerDelegate?
+final class ScheduleView: UIViewController {
     
     // MARK: - Properties
-    private var selectedDays: [WeekDay] = []
-    private let tableViewData: [WeekDay] = WeekDay.allCases
+    weak var delegate: ScheduleViewControllerDelegate?
+    private var viewModel: ScheduleViewModelProtocol?
+    
+    private let logger = Logger(label: "ScheduleView")
     
     // MARK: - UI Elements
     private lazy var button: UIButton = {
@@ -39,6 +38,7 @@ final class ScheduleViewController: UIViewController {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.isScrollEnabled = false
         tableView.backgroundColor = .ypWhite
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         return tableView
     }()
     
@@ -47,53 +47,73 @@ final class ScheduleViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         setupConstraints()
-        logger.info("✅ Экран расписания готов к работе.")
     }
     
-    // MARK: - Setup UI
+    deinit {
+        logger.info("🔒 ScheduleView deallocated")
+    }
+    
+    // MARK: - Public Methods
+    func initialize(viewModel: ScheduleViewModelProtocol) {
+        self.viewModel = viewModel
+        bind()
+    }
+    
+    // MARK: - Setup
+    private func bind() {
+        guard let viewModel = viewModel else { return }
+        
+        viewModel.onScheduleReady = { [weak self] schedule in
+            self?.delegate?.didSelectSchedule(schedule)
+            self?.dismiss(animated: true)
+        }
+    }
+    
     private func setupUI() {
         let text = NSLocalizedString("schedule", comment: "")
         title = text
         view.backgroundColor = .ypWhite
-        if let navigationController = navigationController {
-            let appearance = UINavigationBarAppearance()
-            appearance.configureWithOpaqueBackground()
-            appearance.backgroundColor = .ypWhite
-            
-            appearance.shadowColor = .clear
-
-            let titleFont = UIFont.systemFont(ofSize: 16, weight: .medium)
-            let paragraphStyle = NSMutableParagraphStyle()
-            paragraphStyle.minimumLineHeight = 22
-            paragraphStyle.maximumLineHeight = 22
-            paragraphStyle.alignment = .center
-            
-            appearance.titleTextAttributes = [
-                .foregroundColor: UIColor.ypBlack,
-                .font: titleFont,
-                .paragraphStyle: paragraphStyle
-            ]
-            
-            navigationController.navigationBar.standardAppearance = appearance
-            navigationController.navigationBar.scrollEdgeAppearance = appearance
-            navigationController.navigationBar.compactAppearance = appearance
-            
-            navigationItem.titleView = {
-                let label = UILabel()
-                label.text = text
-                label.font = titleFont
-                label.textColor = .ypBlack
-                label.textAlignment = .center
-                return label
-            }()
-        }
-
         
+        setupNavigationBar()
         view.addSubview(button)
         view.addSubview(tableView)
         
         tableView.dataSource = self
         tableView.delegate = self
+    }
+    
+    private func setupNavigationBar() {
+        guard let navigationController = navigationController else { return }
+        
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = .ypWhite
+        appearance.shadowColor = .clear
+
+        let titleFont = UIFont.systemFont(ofSize: 16, weight: .medium)
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.minimumLineHeight = 22
+        paragraphStyle.maximumLineHeight = 22
+        paragraphStyle.alignment = .center
+        
+        appearance.titleTextAttributes = [
+            .foregroundColor: UIColor.ypBlack,
+            .font: titleFont,
+            .paragraphStyle: paragraphStyle
+        ]
+        
+        navigationController.navigationBar.standardAppearance = appearance
+        navigationController.navigationBar.scrollEdgeAppearance = appearance
+        navigationController.navigationBar.compactAppearance = appearance
+        
+        navigationItem.titleView = {
+            let label = UILabel()
+            label.text = NSLocalizedString("schedule", comment: "")
+            label.font = titleFont
+            label.textColor = .ypBlack
+            label.textAlignment = .center
+            return label
+        }()
     }
     
     private func setupConstraints() {
@@ -111,53 +131,35 @@ final class ScheduleViewController: UIViewController {
     }
     
     // MARK: - Actions
-    @objc // изменяет состояние switch вкл/выкл
+    @objc
     private func switchChanged(_ sender: UISwitch) {
-        let day = tableViewData[sender.tag]
-        
-        if sender.isOn {
-            selectedDays.append(day)
-        } else {
-            if let index = selectedDays.firstIndex(of: day) {
-                    selectedDays.remove(at: index)
-                }
-        }
-
-        logger.debug("🔘 Изменен переключатель для '\(day.rawValue)': \(!sender.isOn) -> \(sender.isOn)")
-        logger.trace("📊 Текущее состояние дней: \(selectedDays)")
+        viewModel?.didToggleSwitch(at: sender.tag, isOn: sender.isOn)
     }
     
-    @objc // создает расписание и передает его в CreateTrackerViewController, после чего скрывает экран
+    @objc
     private func doneTapped() {
         logger.info("✅ Пользователь нажал 'Готово'.")
-        let schedule = selectedDays
-        logger.debug("📅 Создано расписание: \(selectedDays)")
-        logger.info("🔄 Передача расписания делегату.")
-        delegate?.didSelectSchedule(schedule)
-        dismiss(animated: true)
-        logger.info("🔒 Экран расписания закрывается")
+        viewModel?.didTapDoneButton()
     }
 }
 
-// MARK: - UITableViewDataSource
-extension ScheduleViewController: UITableViewDataSource {
+// MARK: - UITableViewDataSource & Delegate
+extension ScheduleView: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        tableViewData.count
+        viewModel?.numberOfRows() ?? 0
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell: UITableViewCell
-        
-        if let reusedCell = tableView.dequeueReusableCell(withIdentifier: "cell") {
-            cell = reusedCell
-        } else {
-            cell = UITableViewCell(style: .default, reuseIdentifier: "cell")
+        guard let viewModel = viewModel,
+              let day = viewModel.day(at: indexPath.row) else {
+            return UITableViewCell()
         }
-        let day = tableViewData[indexPath.row]
+        
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         
         let switcher = UISwitch()
         switcher.tag = indexPath.row
-        switcher.isOn = selectedDays.contains(day)
+        switcher.isOn = viewModel.isDaySelected(day)
         switcher.onTintColor = .ypBlue
         switcher.addTarget(self, action: #selector(switchChanged(_:)), for: .valueChanged)
         
@@ -166,13 +168,12 @@ extension ScheduleViewController: UITableViewDataSource {
         cell.backgroundColor = .ypBackground
         cell.selectionStyle = .none
         cell.layer.masksToBounds = true
-        
         cell.textLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
 
         if indexPath.row == 0 {
             cell.layer.cornerRadius = 16
             cell.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        } else if indexPath.row == tableViewData.count - 1 {
+        } else if indexPath.row == (viewModel.numberOfRows() - 1) {
             cell.layer.cornerRadius = 16
             cell.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
         } else {
@@ -185,14 +186,14 @@ extension ScheduleViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         75
     }
-}
-
-extension ScheduleViewController: UITableViewDelegate {
+    
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-            if indexPath.row == tableViewData.count - 1 {
-                cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
-            } else {
-                cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
-            }
+        guard let viewModel = viewModel else { return }
+        
+        if indexPath.row == viewModel.numberOfRows() - 1 {
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
+        } else {
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         }
+    }
 }

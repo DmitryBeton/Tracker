@@ -173,10 +173,15 @@ final class CreateTrackerViewController: UIViewController {
     }
     
     private func showScheduleSelection() {
-        let scheduleVC = ScheduleViewController()
-        scheduleVC.delegate = self
-        let navVC = UINavigationController(rootViewController: scheduleVC)
-        present(navVC, animated: true)
+        let scheduleModel = ScheduleModel()
+        let scheduleViewModel = ScheduleViewModel(for: scheduleModel)
+        let scheduleView = ScheduleView()
+        scheduleView.initialize(viewModel: scheduleViewModel)
+        scheduleView.delegate = self
+
+        let navigationController = UINavigationController(rootViewController: scheduleView)
+        present(navigationController, animated: true)
+        
         logger.info("✅ Экран расписания представлен модально")
     }
     
