@@ -202,16 +202,16 @@ final class TrackersViewController: UIViewController {
     private func showCreateTrackerScreen() {
         logger.info("called: \(#function) \(#line)")
         
-        let createVC = CreateTrackerViewController()
-        createVC.title = "Новая привычка"
-        
-        createVC.onCreateTracker = { [weak self] newTracker, category in
-            self?.logger.info("🔄 Получен новый трекер из CreateTracker: '\(newTracker.name)'")
-            self?.createNewTracker(newTracker, to: category)
+        let createTrackerModel = CreateTrackerModel()
+        let createTrackerViewModel = CreateTrackerViewModel(for: createTrackerModel)
+        let createTrackerVC = CreateTrackerViewController()
+        createTrackerVC.initialize(viewModel: createTrackerViewModel)
+        createTrackerVC.onCreateTracker = { tracker, category in
+            self.createNewTracker(tracker, to: category)
         }
-        
-        let navVC = UINavigationController(rootViewController: createVC)
+        let navVC = UINavigationController(rootViewController: createTrackerVC)
         present(navVC, animated: true)
+
     }
     
     // MARK: - UI Setup

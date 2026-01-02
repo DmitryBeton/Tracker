@@ -7,7 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8CF5A7F32EC4A821001AA648 /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = 8CF5A7F22EC4A821001AA648 /* Logging */; };
+		8C27FE7F2F08284F00FF6263 /* InMemoryLogging in Frameworks */ = {isa = PBXBuildFile; productRef = 8C27FE7E2F08284F00FF6263 /* InMemoryLogging */; };
+		8C27FE812F08284F00FF6263 /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = 8C27FE802F08284F00FF6263 /* Logging */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,7 +41,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8CF5A7F32EC4A821001AA648 /* Logging in Frameworks */,
+				8C27FE812F08284F00FF6263 /* Logging in Frameworks */,
+				8C27FE7F2F08284F00FF6263 /* InMemoryLogging in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -83,7 +85,8 @@
 			);
 			name = Tracker;
 			packageProductDependencies = (
-				8CF5A7F22EC4A821001AA648 /* Logging */,
+				8C27FE7E2F08284F00FF6263 /* InMemoryLogging */,
+				8C27FE802F08284F00FF6263 /* Logging */,
 			);
 			productName = Tracker;
 			productReference = 8C4A6A682EB425DD007F9284 /* Tracker.app */;
@@ -115,7 +118,7 @@
 			mainGroup = 8C4A6A5F2EB425DD007F9284;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				8CF5A7F12EC4A821001AA648 /* XCRemoteSwiftPackageReference "swift-log" */,
+				8C27FE7D2F08284F00FF6263 /* XCRemoteSwiftPackageReference "swift-log" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 8C4A6A692EB425DD007F9284 /* Products */;
@@ -367,20 +370,25 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		8CF5A7F12EC4A821001AA648 /* XCRemoteSwiftPackageReference "swift-log" */ = {
+		8C27FE7D2F08284F00FF6263 /* XCRemoteSwiftPackageReference "swift-log" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/apple/swift-log";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.6.4;
+				minimumVersion = 1.8.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		8CF5A7F22EC4A821001AA648 /* Logging */ = {
+		8C27FE7E2F08284F00FF6263 /* InMemoryLogging */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 8CF5A7F12EC4A821001AA648 /* XCRemoteSwiftPackageReference "swift-log" */;
+			package = 8C27FE7D2F08284F00FF6263 /* XCRemoteSwiftPackageReference "swift-log" */;
+			productName = InMemoryLogging;
+		};
+		8C27FE802F08284F00FF6263 /* Logging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8C27FE7D2F08284F00FF6263 /* XCRemoteSwiftPackageReference "swift-log" */;
 			productName = Logging;
 		};
 /* End XCSwiftPackageProductDependency section */
