@@ -12,19 +12,7 @@ final class TrackersViewController: UIViewController {
     // MARK: - Private properties
     private let logger = Logger(label: "TrackersViewController")
     
-    private var completedRecords: [TrackerRecord] = []
-    private var selectedDate = Date()
-    
-    private lazy var dataProvider: DataProviderProtocol? = {
-        guard let trackerStore = (UIApplication.shared.delegate as? AppDelegate)?.trackerStore else { return  nil }
-        do {
-            try dataProvider = DataProvider(trackerStore)
-            return dataProvider
-        } catch {
-            logger.error("dataProvider init failed: \(#function)")
-            return nil
-        }
-    }()
+    private var viewModel: TrackersViewModel!
     
     // MARK: - UI Elements
     private let collectionView: UICollectionView = {
@@ -67,88 +55,38 @@ final class TrackersViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         logger.info("called: \(#function) \(#line)")
+        
+        setupViewModel()
         setupUI()
-        displayTrackers(for: selectedDate)
+        bindViewModel()
+        viewModel.reloadTrackers(for: viewModel.selectedDate)
         logger.info("✅ Главный экран трекеров готов к работе")
     }
     
-    // MARK: - Private methods
-    private func displayTrackers(for date: Date) {
-        logger.info("called: \(#function) \(#line)")
-        
-        dataProvider?.setCurrentDate(date)
-        completedRecords = dataProvider?.fetchCompletedRecords() ?? []
-        
-        collectionView.reloadData()
-        let hasData = (dataProvider?.numberOfCategories ?? 0) > 0
-        hasData ? hideEmptyState() : showEmptyState()
-    }
-    
-    private func toggleTrackerCompletion(for trackerId: UUID) {
-        logger.info("called: \(#function) \(#line)")
-        
-        if selectedDate > Date() {
-            showFutureDateRestriction()
+    // MARK: - MVVM Binding
+    private func setupViewModel() {
+        guard let trackerStore = (UIApplication.shared.delegate as? AppDelegate)?.trackerStore else {
+            assertionFailure("trackerStore not found")
             return
         }
-        
-        guard let dataProvider else { return }
-        
-        dataProvider.toggleRecord(trackerId: trackerId, date: selectedDate)
-        
-        completedRecords = dataProvider.fetchCompletedRecords()
-        
-        if let indexPath = indexPath(for: trackerId) {
-            collectionView.reloadItems(at: [indexPath])
-        }
-    }
-    
-    private func indexPath(for trackerId: UUID) -> IndexPath? {
-        logger.info("called: \(#function) \(#line)")
-        
-        guard let dataProvider else { return nil }
-        
-        for section in 0..<dataProvider.numberOfCategories {
-            for item in 0..<dataProvider.numberOfTrackersInCategory(section) {
-                let indexPath = IndexPath(item: item, section: section)
-                if dataProvider.tracker(at: indexPath)?.id == trackerId {
-                    return indexPath
-                }
-            }
-        }
-        return nil
-    }
-    
-    private func createNewTracker(_ tracker: Tracker, to category: String) {
-        logger.info("called: \(#function) \(#line)")
-        
         do {
-            try dataProvider?.addTracker(tracker, to: category)
-            logger.debug("✅ Трекер сохранен через DataProvider")
+            let dataProvider = try DataProvider(trackerStore)
+            viewModel = TrackersViewModel(dataProvider: dataProvider)
         } catch {
-            logger.error("❌ Ошибка сохранения трекера: \(error)")
-        }
-        displayTrackers(for: selectedDate)
-    }
-    
-    private func configureCell(_ cell: TrackerCollectionViewCell, with tracker: Tracker) {
-        logger.info("called: \(#function)")
-        
-        let isCompleted = completedRecords.contains {
-            $0.id == tracker.id &&
-            Calendar.current.isDate($0.date, inSameDayAs: selectedDate)
-        }
-        
-        let completedDays = completedRecords.filter {
-            $0.id == tracker.id
-        }.count
-        
-        cell.configure(with: tracker, completedDays: completedDays, isCompletedToday: isCompleted)
-        cell.onDoneButtonTapped = { [weak self] trackerId in
-            self?.toggleTrackerCompletion(for: trackerId)
+            assertionFailure("DataProvider init failed")
         }
     }
     
+    private func bindViewModel() {
+        viewModel.onDataChanged = { [weak self] _ in
+            self?.collectionView.reloadData()
+        }
+        viewModel.onEmptyStateChanged = { [weak self] isEmpty in
+            isEmpty ? self?.showEmptyState() : self?.hideEmptyState()
+        }
+    }
+    
+    // MARK: - Private methods
     private func showFutureDateRestriction() {
         logger.info("called: \(#function)")
         
@@ -206,12 +144,11 @@ final class TrackersViewController: UIViewController {
         let createTrackerViewModel = CreateTrackerViewModel(for: createTrackerModel)
         let createTrackerVC = CreateTrackerViewController()
         createTrackerVC.initialize(viewModel: createTrackerViewModel)
-        createTrackerVC.onCreateTracker = { tracker, category in
-            self.createNewTracker(tracker, to: category)
+        createTrackerVC.onCreateTracker = { [weak self] tracker, category in
+            self?.viewModel.createNewTracker(tracker, to: category)
         }
         let navVC = UINavigationController(rootViewController: createTrackerVC)
         present(navVC, animated: true)
-
     }
     
     // MARK: - UI Setup
@@ -312,33 +249,26 @@ final class TrackersViewController: UIViewController {
     
     @objc private func dateChanged() {
         logger.info("called: \(#function) \(#line)")
-        
-        selectedDate = datePicker.date
-        displayTrackers(for: selectedDate)
+        viewModel.reloadTrackers(for: datePicker.date)
     }
 }
 
 // MARK: - UICollectionViewDataSource & UICollectionViewDelegateFlowLayout
 extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-    // MARK: - Sections & Items
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        dataProvider?.numberOfCategories ?? 0
+        viewModel.numberOfSections
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        dataProvider?.numberOfTrackersInCategory(section) ?? 0
+        viewModel.numberOfItems(inSection: section)
     }
     
     func collectionView(
         _ collectionView: UICollectionView,
         cellForItemAt indexPath: IndexPath
     ) -> UICollectionViewCell {
-        guard let tracker = dataProvider?.tracker(at: indexPath),
-              let id = tracker.id,
-              let name = tracker.name,
-              let color = tracker.color,
-              let emoji = tracker.emoji,
+        guard let tracker = viewModel.tracker(at: indexPath),
               let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: "Cell",
                 for: indexPath
@@ -348,13 +278,23 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
             return UICollectionViewCell()
         }
         
-        configureCell(cell, with: Tracker(id: id, name: name, color: UIColorMarshalling.color(from: color), emoji: emoji))
+        let isCompleted = viewModel.isCompletedToday(trackerId: tracker.id)
+        let completedDays = viewModel.completedDays(for: tracker.id)
+        cell.configure(with: tracker, completedDays: completedDays, isCompletedToday: isCompleted)
+        cell.onDoneButtonTapped = { [weak self] trackerId in
+            guard let self = self else { return }
+            let success = self.viewModel.toggleTrackerCompletion(for: trackerId)
+            if !success {
+                self.showFutureDateRestriction()
+            }
+            if let indexPath = self.viewModel.indexPath(for: trackerId) {
+                collectionView.reloadItems(at: [indexPath])
+            }
+        }
         
         return cell
-        
     }
     
-    // MARK: - Layout (Size & Spacing)
     func collectionView(
         _ collectionView: UICollectionView,
         willDisplay cell: UICollectionViewCell,
@@ -405,8 +345,6 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         9
     }
     
-    // MARK: - Section Headers
-    
     func collectionView(
         _ collectionView: UICollectionView,
         viewForSupplementaryElementOfKind kind: String,
@@ -418,14 +356,11 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
                 withReuseIdentifier: TrackerHeaderView.reuseIdentifier,
                 for: indexPath
               ) as? TrackerHeaderView
-                
         else {
             return UICollectionReusableView()
         }
-        
-        let categoryTitle = dataProvider?.categoryTitle(at: indexPath.section) ?? "Категория"
+        let categoryTitle = viewModel.categoryTitle(for: indexPath.section)
         header.configure(with: categoryTitle)
-        
         return header
     }
     

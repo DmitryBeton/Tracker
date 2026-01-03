@@ -10,20 +10,24 @@ import CoreData
 import Logging
 
 protocol DataProviderProtocol {
+    // для отображения коллекции
     var numberOfCategories: Int { get }
+    func categoryTitle(at index: Int) -> String
     func numberOfTrackersInCategory(_ section: Int) -> Int
     func tracker(at: IndexPath) -> TrackerCoreData?
-    func categoryTitle(at index: Int) -> String
-    func addTracker(_ tracker: Tracker, to: String) throws
-    func deleteRecord(at indexPath: IndexPath) throws
-    
-    func setCurrentDate(_ date: Date)
-    
     func fetchCompletedRecords() -> [TrackerRecord]
+
+    // TrackerView Changes
+    func setCurrentDate(_ date: Date)
     func toggleRecord(trackerId: UUID, date: Date)
+
+    // CreateTracker
+    func addTracker(_ tracker: Tracker, to: String) throws
     
-    func addCategory(_ title: String) throws
+    // CreateCategory
     func fetchAllCategories() -> [String]
+    func addCategory(_ title: String) throws
+
 }
 
 // MARK: - DataProvider
@@ -89,7 +93,7 @@ extension DataProvider: DataProviderProtocol {
     
     func addCategory(_ title: String) {
         do {
-            try trackerCategoryStore.tryCreateCategory(withTitle: title)
+            try trackerCategoryStore.createCategory(withTitle: title)
             print("успешно сохранили")
 
 
@@ -176,14 +180,8 @@ extension DataProvider: DataProviderProtocol {
     
     func addTracker(_ tracker: Tracker, to categoryTitle: String) throws {
         logger.info("called: \(#function)")
-        let category = try trackerCategoryStore.findOrCreateCategory(withTitle: categoryTitle)
+        let category = try trackerCategoryStore.findCategory(withTitle: categoryTitle)
         try trackerStore.addTracker(tracker, to: category)
-    }
-    
-    func deleteRecord(at indexPath: IndexPath) throws {
-        logger.info("called: \(#function)")
-        let trackerToDelete = trackerStore.fetchedResultsController.object(at: indexPath)
-        try trackerStore.deleteTracker(trackerToDelete)
     }
     
     // Установить текущую дату и обновить фильтрацию
