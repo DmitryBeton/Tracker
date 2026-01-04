@@ -198,4 +198,36 @@ extension CategoryView: UITableViewDataSource, UITableViewDelegate {
         viewModel.didSelectRow(at: indexPath.row)
     }
     
+    func tableView(_ tableView: UITableView,
+                   contextMenuConfigurationForRowAt indexPath: IndexPath,
+                   point: CGPoint) -> UIContextMenuConfiguration? {
+        
+        return UIContextMenuConfiguration(
+            identifier: nil,
+            previewProvider: nil,
+            actionProvider: { suggestedActions in
+                
+                let deleteAction = UIAction(
+                    title: "Удалить",
+                    image: UIImage(systemName: "trash"),
+                    attributes: .destructive
+                ) { _ in
+                    self.viewModel.deleteCategory(on: indexPath)
+                }
+                
+                let editAction = UIAction(
+                    title: "Редактировать",
+                    image: UIImage(systemName: "pencil")
+                ) { _ in
+//                    self.editItem(at: indexPath)
+                }
+                
+                return UIMenu(title: "", children: [
+                    editAction,
+                    deleteAction
+                ])
+            }
+        )
+    }
+    
 }

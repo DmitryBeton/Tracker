@@ -10,6 +10,7 @@ import Foundation
 protocol CategoryModelProtocol {
     func fetchCategories() -> [String]
     func addCategory(_ name: String) throws
+    func deleteCategory(_ name: String) throws
 }
 
 final class CategoryModel: CategoryModelProtocol {
@@ -27,4 +28,10 @@ final class CategoryModel: CategoryModelProtocol {
     func addCategory(_ name: String) throws {
         try dataProvider.addCategory(name)
     }
+    
+    func deleteCategory(_ name: String) throws {
+        try dataProvider.deleteCategory(name)
+    }
+
 }
+

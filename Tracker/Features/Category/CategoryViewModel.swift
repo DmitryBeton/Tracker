@@ -5,7 +5,7 @@
 //  Created by Дмитрий Чалов on 23.12.2025.
 //
 
-import Foundation
+import UIKit
 
 protocol CategoryViewModelProtocol: AnyObject {
     // Замыкания для обновления UI
@@ -19,6 +19,7 @@ protocol CategoryViewModelProtocol: AnyObject {
     func titleForRow(at index: Int) -> String
     func didSelectRow(at index: Int)
     func addCategory(_ name: String)
+    func deleteCategory(on indexPath: IndexPath)
 }
 
 final class CategoryViewModel: CategoryViewModelProtocol {
@@ -58,6 +59,11 @@ final class CategoryViewModel: CategoryViewModelProtocol {
     
     func addCategory(_ name: String) {
         try? model.addCategory(name)
+        loadCategories()
+    }
+    
+    func deleteCategory(on indexPath: IndexPath) {
+        try? model.deleteCategory(categories[indexPath.row])
         loadCategories()
     }
 }

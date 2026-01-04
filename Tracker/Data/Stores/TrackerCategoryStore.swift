@@ -10,6 +10,10 @@ import Logging
 
 // MARK: - TrackerCategoryStore
 final class TrackerCategoryStore {
+    enum StoreError: Error {
+        case categoryNotFound(String)
+    }
+    
     private let context: NSManagedObjectContext
     
     init(context: NSManagedObjectContext) {
@@ -17,14 +21,23 @@ final class TrackerCategoryStore {
     }
     
     func createCategory(withTitle title: String) throws {
-        let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "title == %@", title)
-        fetchRequest.fetchLimit = 1
-        
         let newCategory = TrackerCategoryCoreData(context: context)
         newCategory.id = UUID()
         newCategory.title = title
         try context.save()
+    }
+    
+    func deleteCategory(withTitle title: String) throws {
+        let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "title == %@", title)
+        fetchRequest.fetchLimit = 1
+        
+        let results = try context.fetch(fetchRequest)
+        if let category = results.first {
+            context.delete(category)
+            try context.save()
+        }
+         else { throw StoreError.categoryNotFound(title) }
     }
     
     func findCategory(withTitle title: String) throws -> TrackerCategoryCoreData {
@@ -33,7 +46,10 @@ final class TrackerCategoryStore {
         fetchRequest.fetchLimit = 1
         
         let results = try context.fetch(fetchRequest)
-        return results.first!
+        guard let category = results.first else {
+            throw StoreError.categoryNotFound(title)
+        }
+        return category
     }
     
     func fetchAllCategories() throws -> [TrackerCategoryCoreData] {

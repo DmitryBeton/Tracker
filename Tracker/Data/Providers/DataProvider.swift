@@ -27,7 +27,7 @@ protocol DataProviderProtocol {
     // CreateCategory
     func fetchAllCategories() -> [String]
     func addCategory(_ title: String) throws
-
+    func deleteCategory(_ title: String) throws
 }
 
 // MARK: - DataProvider
@@ -94,6 +94,17 @@ extension DataProvider: DataProviderProtocol {
     func addCategory(_ title: String) {
         do {
             try trackerCategoryStore.createCategory(withTitle: title)
+            print("успешно сохранили")
+
+
+        } catch {
+            print("ошибка сохраниеия")
+        }
+    }
+    
+    func deleteCategory(_ title: String) {
+        do {
+            try trackerCategoryStore.deleteCategory(withTitle: title)
             print("успешно сохранили")
 
 
