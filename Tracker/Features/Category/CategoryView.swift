@@ -82,7 +82,7 @@ final class CategoryView: UIViewController {
     
     // MARK: - Bind
     private func bind() {
-        viewModel.onDataChanged = { [weak self] in
+        viewModel.onDataChanged = { [weak self] _ in
             self?.tableView.reloadData()
         }
         

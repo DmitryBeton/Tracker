@@ -9,9 +9,9 @@ import Foundation
 
 protocol CategoryViewModelProtocol: AnyObject {
     // Замыкания для обновления UI
-    var onDataChanged: (() -> Void)? { get set }
-    var onEmptyStateChanged: ((Bool) -> Void)? { get set }
-    var onCategorySelected: ((String) -> Void)? { get set }
+    var onDataChanged: Binding<Void>? { get set }
+    var onEmptyStateChanged: Binding<Bool>? { get set }
+    var onCategorySelected: Binding<String>? { get set }
     
     // Методы для работы с данными
     func loadCategories()
@@ -24,9 +24,9 @@ protocol CategoryViewModelProtocol: AnyObject {
 final class CategoryViewModel: CategoryViewModelProtocol {
     
     // MARK: - Bindings
-    var onDataChanged: (() -> Void)?
-    var onEmptyStateChanged: ((Bool) -> Void)?
-    var onCategorySelected: ((String) -> Void)?
+    var onDataChanged: Binding<Void>?
+    var onEmptyStateChanged: Binding<Bool>?
+    var onCategorySelected: Binding<String>?
     
     // MARK: - Private
     private let model: CategoryModelProtocol
@@ -41,7 +41,7 @@ final class CategoryViewModel: CategoryViewModelProtocol {
     func loadCategories() {
         categories = model.fetchCategories()
         onEmptyStateChanged?(categories.isEmpty)
-        onDataChanged?()
+        onDataChanged?(())
     }
     
     func numberOfRows() -> Int {

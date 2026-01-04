@@ -9,7 +9,7 @@ import Foundation
 
 final class CreateCategoryViewModel {
     
-    var onButtonStateChanged: ((Bool) -> Void)?
+    var onButtonStateChanged: Binding<Bool>?
     
     private(set) var name: String = "" {
         didSet {

@@ -11,7 +11,7 @@ final class CreateCategoryView: UIViewController {
     
     // MARK: - Properties
     private let viewModel: CreateCategoryViewModel
-    var onCreateCategory: ((String) -> Void)?
+    var onCreateCategory: Binding<String>?
     
     // MARK: - UI
     private lazy var textField: UITextField = {
