@@ -19,7 +19,8 @@ protocol CategoryViewModelProtocol: AnyObject {
     func titleForRow(at index: Int) -> String
     func didSelectRow(at index: Int)
     func addCategory(_ name: String)
-    func deleteCategory(on indexPath: IndexPath)
+    func deleteCategory(at indexPath: IndexPath)
+    func editCategory(at indexPath: IndexPath, to name: String)
 }
 
 final class CategoryViewModel: CategoryViewModelProtocol {
@@ -62,8 +63,14 @@ final class CategoryViewModel: CategoryViewModelProtocol {
         loadCategories()
     }
     
-    func deleteCategory(on indexPath: IndexPath) {
+    func deleteCategory(at indexPath: IndexPath) {
         try? model.deleteCategory(categories[indexPath.row])
         loadCategories()
     }
+    
+    func editCategory(at indexPath: IndexPath, to name: String) {
+        try? model.editCategory(oldName: categories[indexPath.row], newName: name)
+        loadCategories()
+    }
+
 }

@@ -16,11 +16,11 @@ protocol DataProviderProtocol {
     func numberOfTrackersInCategory(_ section: Int) -> Int
     func tracker(at: IndexPath) -> TrackerCoreData?
     func fetchCompletedRecords() -> [TrackerRecord]
-
+    
     // TrackerView Changes
     func setCurrentDate(_ date: Date)
     func toggleRecord(trackerId: UUID, date: Date)
-
+    
     // CreateTracker
     func addTracker(_ tracker: Tracker, to: String) throws
     
@@ -28,6 +28,7 @@ protocol DataProviderProtocol {
     func fetchAllCategories() -> [String]
     func addCategory(_ title: String) throws
     func deleteCategory(_ title: String) throws
+    func editCategory(oldTitle: String, newTitle: String) throws
 }
 
 // MARK: - DataProvider
@@ -113,8 +114,18 @@ extension DataProvider: DataProviderProtocol {
         }
     }
     
+    func editCategory(oldTitle: String, newTitle: String) {
+        do {
+            try trackerCategoryStore.editCategory(withTitle: oldTitle, newTitle: newTitle)
+            print("успешно сохранили")
+
+
+        } catch {
+            print("ошибка сохраниеия")
+        }
+    }
+    
     func fetchCompletedRecords() -> [TrackerRecord] {
-        logger.info("called: \(#function)")
         return (try? trackerRecordStore.fetchAllRecords()) ?? []
     }
 
@@ -140,12 +151,10 @@ extension DataProvider: DataProviderProtocol {
     }
 
     var numberOfCategories: Int {
-        logger.info("called: \(#function)")
         return trackerStore.fetchedResultsController.sections?.count ?? 0
     }
     
     func numberOfTrackersInCategory(_ section: Int) -> Int {
-        logger.info("called: \(#function)")
         guard let sections = trackerStore.fetchedResultsController.sections,
               section < sections.count else {
             print("⚠️ Ошибка: запрошенной секции \(section) не существует")
@@ -157,7 +166,6 @@ extension DataProvider: DataProviderProtocol {
     }
     
     func tracker(at indexPath: IndexPath) -> TrackerCoreData? {
-        logger.info("called: \(#function)")
         guard let sections = trackerStore.fetchedResultsController.sections,
               indexPath.section < sections.count,
               indexPath.row < sections[indexPath.section].numberOfObjects else {
@@ -168,7 +176,6 @@ extension DataProvider: DataProviderProtocol {
     }
     
     func categoryTitle(at index: Int) -> String {
-        logger.info("called: \(#function)")
         guard let sections = trackerStore.fetchedResultsController.sections,
               index < sections.count else {
             print("⚠️ Секция \(index) не существует")

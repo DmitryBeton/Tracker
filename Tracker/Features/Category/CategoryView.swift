@@ -108,6 +108,31 @@ final class CategoryView: UIViewController {
         present(UINavigationController(rootViewController: createVC), animated: true)
     }
     
+    private func editTapped(at indexPath: IndexPath, titleNow: String) {
+        let editVM = EditCategoryViewModel()
+        let editVC = EditCategoryView(viewModel: editVM, title: titleNow)
+    
+        editVC.onEditCategory = { [weak self] name in
+            print("EditView -> createTapped() -> \(name)")
+            self?.viewModel.editCategory(at: indexPath, to: name)
+        }
+        
+        present(UINavigationController(rootViewController: editVC), animated: true)
+    }
+    
+    private func deleteTapped(index: IndexPath) {
+        let alert = UIAlertController(
+            title: "",
+            message: "Эта категория точно не нужна?",
+            preferredStyle: .actionSheet
+        )
+        alert.addAction(UIAlertAction(title: "Удалить", style: .destructive) { [weak self] _ in self?.viewModel.deleteCategory(at: index) })
+        alert.addAction(UIAlertAction(title: "Отменить", style: .default))
+
+        present(alert, animated: true)
+
+    }
+    
     // MARK: - UI Setup
     private func setupUI() {
         let text = NSLocalizedString("category", comment: "")
@@ -202,6 +227,7 @@ extension CategoryView: UITableViewDataSource, UITableViewDelegate {
                    contextMenuConfigurationForRowAt indexPath: IndexPath,
                    point: CGPoint) -> UIContextMenuConfiguration? {
         
+
         return UIContextMenuConfiguration(
             identifier: nil,
             previewProvider: nil,
@@ -212,14 +238,17 @@ extension CategoryView: UITableViewDataSource, UITableViewDelegate {
                     image: UIImage(systemName: "trash"),
                     attributes: .destructive
                 ) { _ in
-                    self.viewModel.deleteCategory(on: indexPath)
+                    self.deleteTapped(index: indexPath)
                 }
                 
                 let editAction = UIAction(
                     title: "Редактировать",
                     image: UIImage(systemName: "pencil")
                 ) { _ in
-//                    self.editItem(at: indexPath)
+                    if let cell = tableView.cellForRow(at: indexPath) as? CategoryTableViewCell {
+                        let categoryTitle = cell.getCategory()
+                        self.editTapped(at: indexPath, titleNow: categoryTitle)
+                    }
                 }
                 
                 return UIMenu(title: "", children: [

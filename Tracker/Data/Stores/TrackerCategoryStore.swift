@@ -40,6 +40,19 @@ final class TrackerCategoryStore {
          else { throw StoreError.categoryNotFound(title) }
     }
     
+    func editCategory(withTitle title: String, newTitle: String) throws {
+        let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "title == %@", title)
+        fetchRequest.fetchLimit = 1
+        
+        let results = try context.fetch(fetchRequest)
+        if let category = results.first {
+            category.title = newTitle
+            try context.save()
+        }
+         else { throw StoreError.categoryNotFound(title) }
+    }
+    
     func findCategory(withTitle title: String) throws -> TrackerCategoryCoreData {
         let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "title == %@", title)

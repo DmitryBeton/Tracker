@@ -58,3 +58,7 @@
 "friday_short" = "Пт";
 "saturday_short" = "Сб";
 "sunday_short" = "Вс";
+
+// Edit
+"edit_category" = "Редактирование категории";
+

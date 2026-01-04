@@ -11,6 +11,7 @@ protocol CategoryModelProtocol {
     func fetchCategories() -> [String]
     func addCategory(_ name: String) throws
     func deleteCategory(_ name: String) throws
+    func editCategory(oldName: String, newName: String) throws
 }
 
 final class CategoryModel: CategoryModelProtocol {
@@ -31,6 +32,10 @@ final class CategoryModel: CategoryModelProtocol {
     
     func deleteCategory(_ name: String) throws {
         try dataProvider.deleteCategory(name)
+    }
+    
+    func editCategory(oldName: String, newName: String) throws {
+        try dataProvider.editCategory(oldTitle: oldName, newTitle: newName)
     }
 
 }

@@ -38,6 +38,10 @@ final class CategoryTableViewCell: UITableViewCell {
         configureCorners(isFirst: isFirst, isLast: isLast, isSingle: isSingle)
     }
     
+    func getCategory() -> String {
+        titleLabel.text ?? ""
+    }
+    
     // MARK: - Private Methods
     private func setupUI() {
         backgroundColor = .ypBackground

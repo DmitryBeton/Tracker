@@ -58,3 +58,7 @@
 "friday_short" = "Fri";
 "saturday_short" = "Sat";
 "sunday_short" = "Sun";
+
+// Edit
+"edit_category" = "Editing a category";
+
