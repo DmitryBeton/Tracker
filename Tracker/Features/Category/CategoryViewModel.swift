@@ -71,6 +71,7 @@ final class CategoryViewModel: CategoryViewModelProtocol {
     func editCategory(at indexPath: IndexPath, to name: String) {
         try? model.editCategory(oldName: categories[indexPath.row], newName: name)
         loadCategories()
+        onCategorySelected?(categories[indexPath.row])
     }
 
 }
