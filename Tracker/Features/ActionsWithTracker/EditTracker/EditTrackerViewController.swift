@@ -387,12 +387,12 @@ final class EditTrackerViewController: UIViewController {
     @objc
     private func editTapped() {
         guard let viewModel = viewModel,
-              let tracker = viewModel.editTracker(),
-              let category = viewModel.currentCategory else {
+              let tracker = viewModel.editTracker()
+        else {
             return
         }
         
-        logger.info("🎯 Создание трекера: '\(tracker.name)'")
+        logger.info("🎯 Изменение трекера: '\(tracker.name)'")
         onEditTracker?(tracker)
         closeCreateTracker()
     }

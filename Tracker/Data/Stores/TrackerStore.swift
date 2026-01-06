@@ -12,6 +12,7 @@ import Logging
 enum StoreError: Error {
     case trackerNotFound(UUID)
     case fetchFailed(Error)
+    case saveFailed(Error)
 }
 
 // MARK: - TrackerStore
@@ -97,9 +98,31 @@ final class TrackerStore: NSObject {
     }
     
     func editTracker(_ tracker: Tracker) throws {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", tracker.id as CVarArg)
         
+        guard let existingTracker = try context.fetch(fetchRequest).first else {
+            throw StoreError.trackerNotFound(tracker.id)
+        }
+        
+        existingTracker.id = tracker.id
+        existingTracker.name = tracker.name
+        existingTracker.emoji = tracker.emoji
+        existingTracker.color = UIColorMarshalling.hexString(from: tracker.color)
+        
+        if let schedule = tracker.schedule as NSObject? {
+            existingTracker.schedule = schedule
+        } else {
+            existingTracker.schedule = nil
+        }
+        
+        do {
+            try context.save()
+        } catch {
+            throw StoreError.saveFailed(error)
+        }
     }
-    
+
     func fetchTrackers(with predicate: NSPredicate? = nil) throws -> [TrackerCoreData] {
         let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
         fetchRequest.predicate = predicate

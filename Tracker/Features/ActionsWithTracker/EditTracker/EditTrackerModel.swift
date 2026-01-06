@@ -15,6 +15,7 @@ final class EditTrackerModel {
     init(dataProvider: DataProviderProtocol, trackerEditing: Tracker) {
         self.dataProvider = dataProvider
         self.tracker = trackerEditing
+        
         self.trackerData.id = tracker.id
         self.trackerData.name = tracker.name
         self.trackerData.category = getCategory()
@@ -100,8 +101,8 @@ final class EditTrackerModel {
               trackerData.color != .clear else {
             return nil
         }
-        
         return Tracker(
+            id: trackerData.id,
             name: trackerData.name,
             color: trackerData.color,
             emoji: trackerData.emoji,

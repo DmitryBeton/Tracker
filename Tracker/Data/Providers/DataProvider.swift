@@ -88,7 +88,7 @@ final class DataProvider: NSObject {
 extension DataProvider: DataProviderProtocol {
     func getSchedule(for tracker: UUID) -> [WeekDay] {
         do {
-            print("успешно сохранили")
+            print("получение расписания")
             return try trackerStore.getSchedule(for: tracker)
         } catch {
             print("ошибка сохраниеия")
@@ -110,7 +110,7 @@ extension DataProvider: DataProviderProtocol {
     
     func getCategoryTitle(for tracker: UUID) -> String  {
         do {
-            print("успешно сохранили")
+            print("получение категории")
             return try trackerCategoryStore.getCategoryTitle(for: tracker)
         } catch {
             print("ошибка сохраниеия")
