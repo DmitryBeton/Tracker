@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class CreateTrackerViewModel {
+final class EditTrackerViewModel {
     
     // MARK: - Bindings
     var onNameStateChange: Binding<(text: String, warning: String?)?>?
@@ -41,6 +41,10 @@ final class CreateTrackerViewModel {
     }
     
     // MARK: - Current Properties
+    var currentName: String? {
+        model.trackerData.name
+    }
+
     var currentCategory: String? {
         model.trackerData.category
     }
@@ -58,10 +62,10 @@ final class CreateTrackerViewModel {
     }
 
     // MARK: - Dependencies
-    private let model: CreateTrackerModel
+    private let model: EditTrackerModel
     
     // MARK: - Initialization
-    init(for model: CreateTrackerModel) {
+    init(for model: EditTrackerModel) {
         self.model = model
     }
     
@@ -138,8 +142,8 @@ final class CreateTrackerViewModel {
         }
     }
     
-    func createTracker() -> Tracker? {
-        return model.createTracker()
+    func editTracker() -> Tracker? {
+        return model.editTracker()
     }
     
     private func formatScheduleText(_ schedule: [WeekDay]) -> String {
@@ -149,5 +153,24 @@ final class CreateTrackerViewModel {
             let sortedSchedule = schedule.sorted { $0.rawValue < $1.rawValue }
             return sortedSchedule.map { $0.shortName }.joined(separator: ", ")
         }
+    }
+    
+    func displayedScheduleText(_ schedule: [WeekDay]?) -> String {
+        guard let schedule else {
+            return ""
+        }
+        if schedule.count == 7 {
+            return NSLocalizedString("every_day", comment: "")
+        } else {
+            let sortedSchedule = schedule.sorted { $0.rawValue < $1.rawValue }
+            return sortedSchedule.map { $0.shortName }.joined(separator: ", ")
+        }
+
+    }
+    
+    func daysCompleted() -> Int {
+        let records = model.daysCompleted()
+        let id = model.trackerData.id
+        return records.filter { $0.id == id }.count
     }
 }

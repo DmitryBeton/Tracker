@@ -7,39 +7,23 @@
 
 import UIKit
 
-struct TrackerData {
-    var name: String = ""
-    var category: String = ""
-    var schedule: [WeekDay]?
-    var emoji: String = ""
-    var color: UIColor = .clear
-}
-
-enum CreateTrackerValidationError: Error, LocalizedError {
-    case nameTooLong
-    case categoryNotSelected
-    case scheduleNotSelected
-    case emojiNotSelected
-    case colorNotSelected
+final class EditTrackerModel {
     
-    var errorDescription: String? {
-        switch self {
-        case .nameTooLong:
-            return NSLocalizedString("symbol_limit", comment: "")
-        case .categoryNotSelected:
-            return NSLocalizedString("select_category", comment: "")
-        case .scheduleNotSelected:
-            return NSLocalizedString("select_schedule", comment: "")
-        case .emojiNotSelected:
-            return NSLocalizedString("select_emoji", comment: "")
-        case .colorNotSelected:
-            return NSLocalizedString("select_color", comment: "")
-        }
+    private let dataProvider: DataProviderProtocol
+    private let tracker: Tracker
+    
+    init(dataProvider: DataProviderProtocol, trackerEditing: Tracker) {
+        self.dataProvider = dataProvider
+        self.tracker = trackerEditing
+        self.trackerData.id = tracker.id
+        self.trackerData.name = tracker.name
+        self.trackerData.category = getCategory()
+        self.trackerData.schedule = getSchedule()
+        self.trackerData.emoji = tracker.emoji
+        self.trackerData.color = tracker.color
+
     }
-}
 
-final class CreateTrackerModel {
-    
     private let maxNameLength = 38
     let emojiItems = [
         "🙂", "😻", "🌺", "🐶", "❤️", "😱",
@@ -53,7 +37,15 @@ final class CreateTrackerModel {
         .ypColorSelection13, .ypColorSelection14, .ypColorSelection15, .ypColorSelection16, .ypColorSelection17, .ypColorSelection18
     ]
     
-    private(set) var trackerData = TrackerData()
+    private(set) var trackerData = TrackerEditedData()
+    
+    private func getCategory() -> String {
+        dataProvider.getCategoryTitle(for: tracker.id)
+    }
+
+    private func getSchedule() -> [WeekDay] {
+        dataProvider.getSchedule(for: tracker.id)
+    }
     
     func updateName(_ name: String) -> Result<String, CreateTrackerValidationError> {
         if name.count > maxNameLength {
@@ -100,7 +92,7 @@ final class CreateTrackerModel {
         return .success(())
     }
     
-    func createTracker() -> Tracker? {
+    func editTracker() -> Tracker? {
         guard !trackerData.name.isEmpty,
               !trackerData.category.isEmpty,
               let schedule = trackerData.schedule,
@@ -124,4 +116,9 @@ final class CreateTrackerModel {
                !trackerData.emoji.isEmpty &&
                trackerData.color != .clear
     }
+    
+    func daysCompleted() -> [TrackerRecord] {
+        dataProvider.fetchCompletedRecords()
+    }
+    
 }

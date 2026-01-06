@@ -8,15 +8,15 @@
 import UIKit
 import Logging
 
-final class CreateTrackerViewController: UIViewController {
+final class EditTrackerViewController: UIViewController {
     
     // MARK: - Dependences
     private let logger = Logger(label: "CreateTrackerViewController")
-    private var viewModel: CreateTrackerViewModel?
+    private var viewModel: EditTrackerViewModel?
     
     // MARK: - Properties
     private var tableViewTopConstraint: NSLayoutConstraint?
-    var onCreateTracker: ((Tracker, String) -> Void)?
+    var onEditTracker: Binding<Tracker>?
     
     // MARK: - UI Elements
     private let scrollView: UIScrollView = {
@@ -32,6 +32,37 @@ final class CreateTrackerViewController: UIViewController {
         return view
     }()
     
+    private lazy var daysLabel: UILabel = {
+        let label = UILabel()
+
+        let daysString = String.localizedStringWithFormat(
+            NSLocalizedString("countOfDays", comment: "Number of completed days"),
+            viewModel?.daysCompleted() ?? 0
+        )
+
+        label.text = daysString
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.textAlignment = .center
+
+        label.font = .systemFont(ofSize: 32, weight: .bold)
+
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.minimumLineHeight = 38
+        paragraphStyle.maximumLineHeight = 38
+        paragraphStyle.alignment = .center
+
+        label.attributedText = NSAttributedString(
+            string: daysString,
+            attributes: [
+                .font: label.font as Any,
+                .paragraphStyle: paragraphStyle,
+                .kern: 0
+            ]
+        )
+
+        return label
+    }()
+
     private lazy var textField: UITextField = {
         let textField = UITextField()
         let text = NSLocalizedString("enter_name_of_tracker", comment: "")
@@ -47,6 +78,7 @@ final class CreateTrackerViewController: UIViewController {
         textField.font = UIFont.systemFont(ofSize: 17, weight: .regular)
         textField.enablesReturnKeyAutomatically = true
         textField.clearButtonMode = .whileEditing
+        textField.text? = viewModel?.currentName ?? "❌ Error ❌"
         return textField
     }()
     
@@ -103,14 +135,14 @@ final class CreateTrackerViewController: UIViewController {
     
     private lazy var addButton: UIButton = {
         let button = UIButton()
-        let text = NSLocalizedString("create", comment: "")
+        let text = NSLocalizedString("save", comment: "")
         button.setTitle(text, for: .normal)
         button.setTitleColor(.ypWhite, for: .normal)
         button.backgroundColor = .ypGray
         button.layer.cornerRadius = 16
         button.isEnabled = false
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(self, action: #selector(createTapped), for: .touchUpInside)
+        button.addTarget(self, action: #selector(editTapped), for: .touchUpInside)
         return button
     }()
     
@@ -124,7 +156,7 @@ final class CreateTrackerViewController: UIViewController {
     }
     
     // MARK: - Initialization
-    func initialize(viewModel: CreateTrackerViewModel) {
+    func initialize(viewModel: EditTrackerViewModel) {
         self.viewModel = viewModel
         bind()
     }
@@ -220,7 +252,7 @@ final class CreateTrackerViewController: UIViewController {
     
     // MARK: - Setup UI
     private func setupUI() {
-        let titleText = NSLocalizedString("new_tracker", comment: "")
+        let titleText = NSLocalizedString("edit_tracker", comment: "")
         title = titleText
         view.backgroundColor = .ypWhite
         
@@ -264,7 +296,7 @@ final class CreateTrackerViewController: UIViewController {
         
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
-        
+        contentView.addSubview(daysLabel)
         contentView.addSubview(textField)
         contentView.addSubview(warningLabel)
         contentView.addSubview(tableView)
@@ -290,7 +322,13 @@ final class CreateTrackerViewController: UIViewController {
             contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
             contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
             
-            textField.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 24),
+            daysLabel.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 24),
+            daysLabel.heightAnchor.constraint(equalToConstant: 38),
+            daysLabel.widthAnchor.constraint(equalToConstant: 343),
+            daysLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+
+            
+            textField.topAnchor.constraint(equalTo: daysLabel.bottomAnchor, constant: 40),
             textField.heightAnchor.constraint(equalToConstant: 75),
             textField.widthAnchor.constraint(equalToConstant: 343),
             textField.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
@@ -347,21 +385,21 @@ final class CreateTrackerViewController: UIViewController {
     }
     
     @objc
-    private func createTapped() {
+    private func editTapped() {
         guard let viewModel = viewModel,
-              let tracker = viewModel.createTracker(),
+              let tracker = viewModel.editTracker(),
               let category = viewModel.currentCategory else {
             return
         }
         
         logger.info("🎯 Создание трекера: '\(tracker.name)'")
-        onCreateTracker?(tracker, category)
+        onEditTracker?(tracker)
         closeCreateTracker()
     }
 }
 
 // MARK: - ScheduleViewControllerDelegate
-extension CreateTrackerViewController: ScheduleViewControllerDelegate {
+extension EditTrackerViewController: ScheduleViewControllerDelegate {
     func didSelectSchedule(_ schedule: [WeekDay]) {
         logger.info("✅ Получено новое расписание: '\(schedule)'")
         viewModel?.didSelectSchedule(schedule)
@@ -369,7 +407,7 @@ extension CreateTrackerViewController: ScheduleViewControllerDelegate {
 }
 
 // MARK: - CategoryViewDelegate
-extension CreateTrackerViewController: CategoryViewDelegate {
+extension EditTrackerViewController: CategoryViewDelegate {
     func didSelectCategory(_ category: String) {
         logger.info("✅ Получен заголовок категории: '\(category)'")
         viewModel?.didSelectCategory(category)
@@ -377,7 +415,7 @@ extension CreateTrackerViewController: CategoryViewDelegate {
 }
 
 // MARK: - UITextFieldDelegate
-extension CreateTrackerViewController: UITextFieldDelegate {
+extension EditTrackerViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         logger.debug("⌨️ Пользователь нажал Done на клавиатуре")
         textField.resignFirstResponder()
@@ -386,9 +424,9 @@ extension CreateTrackerViewController: UITextFieldDelegate {
 }
 
 // MARK: - UITableViewDataSource
-extension CreateTrackerViewController: UITableViewDataSource {
+extension EditTrackerViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel?.tableViewItems.count ?? 0
+        viewModel?.tableViewItems.count ?? 0
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -418,8 +456,11 @@ extension CreateTrackerViewController: UITableViewDataSource {
         
         if indexPath.row == 0 {
             cell.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+            cell.detailTextLabel?.text = viewModel.currentCategory
         } else {
             cell.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+            cell.detailTextLabel?.text = viewModel.displayedScheduleText(viewModel.currentSchedule)
+
         }
         return cell
     }
@@ -430,7 +471,7 @@ extension CreateTrackerViewController: UITableViewDataSource {
 }
 
 // MARK: - UITableViewDelegate
-extension CreateTrackerViewController: UITableViewDelegate {
+extension EditTrackerViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
@@ -454,7 +495,7 @@ extension CreateTrackerViewController: UITableViewDelegate {
 }
 
 // MARK: - UICollectionViewDataSource
-extension CreateTrackerViewController: UICollectionViewDataSource {
+extension EditTrackerViewController: UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return viewModel?.sectionsTitles.count ?? 0
     }
@@ -479,7 +520,13 @@ extension CreateTrackerViewController: UICollectionViewDataSource {
                 assertionFailure("Unable to dequeue EmojiCollectionViewCell")
                 return UICollectionViewCell()
             }
-            cell.setEmoji(viewModel.emojiItems[indexPath.row])
+            let emoji = viewModel.emojiItems[indexPath.row]
+            let selectedEmoji = viewModel.currentEmoji
+            cell.setEmoji(emoji)
+            if emoji == selectedEmoji {
+                cell.isSelected = true
+                cell.setSelected(true)
+            }
             return cell
         } else {
             guard let cell = collectionView.dequeueReusableCell(
@@ -489,14 +536,22 @@ extension CreateTrackerViewController: UICollectionViewDataSource {
                 assertionFailure("Unable to dequeue ColorCollectionViewCell")
                 return UICollectionViewCell()
             }
+            let color = viewModel.colorItems[indexPath.row]
+            let selectedColor = viewModel.currentColor
             cell.setColor(viewModel.colorItems[indexPath.row])
+            if let color = color.cgColor.components,
+                let selectedColor = selectedColor?.cgColor.components,
+            color == selectedColor{
+                cell.isSelected = true
+                cell.setSelected(true)
+            }
             return cell
         }
     }
 }
 
 // MARK: - UICollectionViewDelegate
-extension CreateTrackerViewController: UICollectionViewDelegateFlowLayout {
+extension EditTrackerViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let viewModel = viewModel else { return }
         
