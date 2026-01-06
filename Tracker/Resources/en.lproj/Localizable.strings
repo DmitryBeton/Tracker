@@ -61,4 +61,5 @@
 
 // Edit
 "edit_category" = "Editing a category";
-
+"edit_tracker" = "Editing a habit";
+"save" = "save";

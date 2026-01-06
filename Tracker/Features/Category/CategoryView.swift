@@ -235,7 +235,6 @@ extension CategoryView: UITableViewDataSource, UITableViewDelegate {
                 
                 let deleteAction = UIAction(
                     title: "Удалить",
-                    image: UIImage(systemName: "trash"),
                     attributes: .destructive
                 ) { _ in
                     self.deleteTapped(index: indexPath)
@@ -243,7 +242,6 @@ extension CategoryView: UITableViewDataSource, UITableViewDelegate {
                 
                 let editAction = UIAction(
                     title: "Редактировать",
-                    image: UIImage(systemName: "pencil")
                 ) { _ in
                     if let cell = tableView.cellForRow(at: indexPath) as? CategoryTableViewCell {
                         let categoryTitle = cell.getCategory()

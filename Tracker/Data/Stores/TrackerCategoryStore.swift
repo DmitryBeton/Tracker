@@ -11,7 +11,20 @@ import Logging
 // MARK: - TrackerCategoryStore
 final class TrackerCategoryStore {
     enum StoreError: Error {
+        case trackerNotFound(UUID)
         case categoryNotFound(String)
+        case fetchFailed(Error)
+        
+        var localizedDescription: String {
+            switch self {
+            case .trackerNotFound(let id):
+                return "Tracker with ID \(id) not found"
+            case .categoryNotFound(let title):
+                return "Category \(title) not found for tracker"
+            case .fetchFailed(let error):
+                return "Fetch failed: \(error.localizedDescription)"
+            }
+        }
     }
     
     private let context: NSManagedObjectContext
@@ -68,5 +81,28 @@ final class TrackerCategoryStore {
     func fetchAllCategories() throws -> [TrackerCategoryCoreData] {
         let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
         return try context.fetch(fetchRequest)
+    }
+    
+    func getCategoryTitle(for trackerId: UUID) throws -> String {
+        let trackerFetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        trackerFetchRequest.predicate = NSPredicate(format: "id == %@", trackerId as CVarArg)
+        trackerFetchRequest.fetchLimit = 1
+        
+        trackerFetchRequest.relationshipKeyPathsForPrefetching = ["category"]
+        
+        do {
+            guard let tracker = try context.fetch(trackerFetchRequest).first else {
+                throw StoreError.trackerNotFound(trackerId)
+            }
+            
+            if let category = tracker.value(forKey: "category") as? TrackerCategoryCoreData,
+               let title = category.title {
+                return title
+            }
+            
+            throw StoreError.categoryNotFound("error")
+        } catch {
+            throw StoreError.fetchFailed(error)
+        }
     }
 }

@@ -79,6 +79,28 @@ final class TrackersViewModel {
         reloadTrackers(for: selectedDate)
     }
     
+    func deleteTracker(_ tracker: UUID) {
+        logger.info("called: \(#function)")
+        do {
+            try dataProvider.deleteTracker(tracker)
+            logger.debug("✅ Tracker persisted")
+        } catch {
+            logger.error("❌ Error saving tracker: \(error)")
+        }
+        reloadTrackers(for: selectedDate)
+    }
+    
+    func editTracker(_ tracker: Tracker) {
+        logger.info("called: \(#function)")
+        do {
+            try dataProvider.editTracker(tracker)
+            logger.debug("✅ Tracker persisted")
+        } catch {
+            logger.error("❌ Error saving tracker: \(error)")
+        }
+        reloadTrackers(for: selectedDate)
+    }
+    
     func indexPath(for trackerId: UUID) -> IndexPath? {
         logger.info("called: \(#function)")
         for section in 0..<dataProvider.numberOfCategories {

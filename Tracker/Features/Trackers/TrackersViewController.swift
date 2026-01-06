@@ -251,11 +251,65 @@ final class TrackersViewController: UIViewController {
         logger.info("called: \(#function) \(#line)")
         viewModel.reloadTrackers(for: datePicker.date)
     }
+    
+    private func editTapped(onTracker: Tracker) {
+        guard let trackerStore = (UIApplication.shared.delegate as? AppDelegate)?.trackerStore else {
+            assertionFailure("trackerStore not found")
+            return
+        }
+        
+        let dataProvider: DataProviderProtocol
+        do {
+            dataProvider = try DataProvider(trackerStore)
+        } catch {
+            assertionFailure("DataProvider init failed")
+            return
+        }
+
+        let editM = EditTrackerModel(dataProvider: dataProvider, trackerEditing: onTracker)
+        let editVM = EditTrackerViewModel(for: editM)
+        let editVC = EditTrackerViewController()
+        editVC.initialize(viewModel: editVM)
+    
+        editVC.onEditTracker = { [weak self] tracker in
+            print("EditView -> editTapped() -> \(tracker)")
+            self?.viewModel.editTracker(tracker)
+        }
+        
+        present(UINavigationController(rootViewController: editVC), animated: true)
+    }
 }
 
 // MARK: - UICollectionViewDataSource & UICollectionViewDelegateFlowLayout
 extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-    
+    func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemsAt indexPaths: [IndexPath], point: CGPoint) -> UIContextMenuConfiguration? {
+        guard indexPaths.count > 0 else {
+            return nil
+        }
+        
+        let indexPath = indexPaths[0]
+        
+        return UIContextMenuConfiguration(actionProvider: { actions in
+            return UIMenu(children: [
+                UIAction(title: "Закрепить") { [weak self] _ in
+                    
+                },
+                UIAction(title: "Редактировать") { [weak self] _ in
+                    guard let tracker = self?.viewModel.tracker(at: indexPath) else {
+                        return
+                    }
+                    self?.editTapped(onTracker: tracker)
+                },
+                UIAction(title: "Удалить", attributes: .destructive) { [weak self] _ in
+                    guard let tracker = self?.viewModel.tracker(at: indexPath) else {
+                        return
+                    }
+                    self?.viewModel.deleteTracker(tracker.id)
+                }
+            ])
+        })
+    }
+
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         viewModel.numberOfSections
     }
@@ -291,7 +345,6 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
                 collectionView.reloadItems(at: [indexPath])
             }
         }
-        
         return cell
     }
     

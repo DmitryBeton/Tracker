@@ -23,12 +23,17 @@ protocol DataProviderProtocol {
     
     // CreateTracker
     func addTracker(_ tracker: Tracker, to: String) throws
+    func deleteTracker(_ trackerId: UUID) throws
+    func editTracker(_ tracker: Tracker) throws
     
     // CreateCategory
     func fetchAllCategories() -> [String]
     func addCategory(_ title: String) throws
     func deleteCategory(_ title: String) throws
     func editCategory(oldTitle: String, newTitle: String) throws
+    
+    func getCategoryTitle(for tracker: UUID) -> String
+    func getSchedule(for tracker: UUID) -> [WeekDay]
 }
 
 // MARK: - DataProvider
@@ -81,6 +86,17 @@ final class DataProvider: NSObject {
 
 // MARK: - DataProviderProtocol
 extension DataProvider: DataProviderProtocol {
+    func getSchedule(for tracker: UUID) -> [WeekDay] {
+        do {
+            print("успешно сохранили")
+            return try trackerStore.getSchedule(for: tracker)
+        } catch {
+            print("ошибка сохраниеия")
+            return []
+        }
+    }
+    
+    // MARK: - Categories
     func fetchAllCategories() -> [String] {
         var categories: [String] = []
         do {
@@ -90,6 +106,37 @@ extension DataProvider: DataProviderProtocol {
             print("ошибка загрузки категорий")
         }
         return categories
+    }
+    
+    func getCategoryTitle(for tracker: UUID) -> String  {
+        do {
+            print("успешно сохранили")
+            return try trackerCategoryStore.getCategoryTitle(for: tracker)
+        } catch {
+            print("ошибка сохраниеия")
+            return "Error: Category Not Found"
+        }
+    }
+    
+    func categoryTitle(at index: Int) -> String {
+        guard let sections = trackerStore.fetchedResultsController.sections,
+              index < sections.count else {
+            print("⚠️ Секция \(index) не существует")
+            return "Категория"
+        }
+        let sectionInfo = sections[index]
+        guard let objects = sectionInfo.objects as? [TrackerCoreData],
+              let firstObject = objects.first else {
+            print("⚠️ Секция \(index) пустая")
+            return "Категория \(index + 1)"
+        }
+        guard let categoryEntity = firstObject.category,
+              let title = categoryEntity.title, !title.isEmpty
+        else {
+            print("⚠️ Ошибка получения трекера из секции \(index)")
+            return "Без категории"
+        }
+        return title
     }
     
     func addCategory(_ title: String) {
@@ -125,6 +172,22 @@ extension DataProvider: DataProviderProtocol {
         }
     }
     
+    var numberOfCategories: Int {
+        return trackerStore.fetchedResultsController.sections?.count ?? 0
+    }
+    
+    func numberOfTrackersInCategory(_ section: Int) -> Int {
+        guard let sections = trackerStore.fetchedResultsController.sections,
+              section < sections.count else {
+            print("⚠️ Ошибка: запрошенной секции \(section) не существует")
+            return 0
+        }
+        
+        let numberOfObjects = sections[section].numberOfObjects
+        return numberOfObjects
+    }
+    
+    // MARK: - Records
     func fetchCompletedRecords() -> [TrackerRecord] {
         return (try? trackerRecordStore.fetchAllRecords()) ?? []
     }
@@ -150,21 +213,7 @@ extension DataProvider: DataProviderProtocol {
         }
     }
 
-    var numberOfCategories: Int {
-        return trackerStore.fetchedResultsController.sections?.count ?? 0
-    }
-    
-    func numberOfTrackersInCategory(_ section: Int) -> Int {
-        guard let sections = trackerStore.fetchedResultsController.sections,
-              section < sections.count else {
-            print("⚠️ Ошибка: запрошенной секции \(section) не существует")
-            return 0
-        }
-        
-        let numberOfObjects = sections[section].numberOfObjects
-        return numberOfObjects
-    }
-    
+    // MARK: - Trackers
     func tracker(at indexPath: IndexPath) -> TrackerCoreData? {
         guard let sections = trackerStore.fetchedResultsController.sections,
               indexPath.section < sections.count,
@@ -175,33 +224,31 @@ extension DataProvider: DataProviderProtocol {
         return trackerStore.fetchedResultsController.object(at: indexPath)
     }
     
-    func categoryTitle(at index: Int) -> String {
-        guard let sections = trackerStore.fetchedResultsController.sections,
-              index < sections.count else {
-            print("⚠️ Секция \(index) не существует")
-            return "Категория"
-        }
-        let sectionInfo = sections[index]
-        guard let objects = sectionInfo.objects as? [TrackerCoreData],
-              let firstObject = objects.first else {
-            print("⚠️ Секция \(index) пустая")
-            return "Категория \(index + 1)"
-        }
-        guard let categoryEntity = firstObject.category,
-              let title = categoryEntity.title, !title.isEmpty
-        else {
-            print("⚠️ Ошибка получения трекера из секции \(index)")
-            return "Без категории"
-        }
-        return title
-    }
-    
     func addTracker(_ tracker: Tracker, to categoryTitle: String) throws {
         logger.info("called: \(#function)")
         let category = try trackerCategoryStore.findCategory(withTitle: categoryTitle)
         try trackerStore.addTracker(tracker, to: category)
     }
     
+    func deleteTracker(_ trackerId: UUID) throws {
+        do {
+            try trackerStore.deleteTracker(trackerId)
+            print("успешно сохранили")
+        } catch {
+            print("ошибка сохраниеия")
+        }
+    }
+    
+    func editTracker(_ tracker: Tracker) throws {
+        do {
+            try trackerStore.editTracker(tracker)
+            print("успешно сохранили")
+        } catch {
+            print("ошибка сохраниеия")
+        }
+    }
+
+    // MARK: - Other
     // Установить текущую дату и обновить фильтрацию
     func setCurrentDate(_ date: Date) {
         logger.info("called: \(#function)")
