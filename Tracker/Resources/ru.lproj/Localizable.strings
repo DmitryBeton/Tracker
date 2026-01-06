@@ -63,3 +63,10 @@
 "edit_category" = "Редактирование категории";
 "edit_tracker" = "Редактирование привычки";
 "save" = "Сохранить";
+
+// Filters
+"all_trackers" = "Все трекеры";
+"today" = "Трекеры на сегодня";
+"completed" = "Завершенные";
+"not_completed" = "Не завершенные";
+"title_filters" = "Фильтры";

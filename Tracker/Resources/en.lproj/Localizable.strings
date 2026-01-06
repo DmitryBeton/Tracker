@@ -63,3 +63,10 @@
 "edit_category" = "Editing a category";
 "edit_tracker" = "Editing a habit";
 "save" = "save";
+
+// Filters
+"all_trackers" = "All trackers";
+"today" = "Trackers today";
+"completed" = "Completed";
+"not_completed" = "Not completed";
+"title_filters" = "Filters";

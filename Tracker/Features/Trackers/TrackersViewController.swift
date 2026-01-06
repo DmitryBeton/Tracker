@@ -48,6 +48,17 @@ final class TrackersViewController: UIViewController {
         return label
     }()
     
+    private lazy var filterButton: UIButton = {
+        let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setTitle("Фильтры", for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.backgroundColor = .ypColorSelection3
+        button.layer.cornerRadius = 16
+        button.addTarget(self, action: #selector(filterTapped), for: .touchUpInside)
+        return button
+    }()
+    
     private let datePicker = UIDatePicker()
     private let searchController = UISearchController()
     
@@ -104,6 +115,7 @@ final class TrackersViewController: UIViewController {
         
         guard emptyStateView.isHidden else { return }
         
+        filterButton.isHidden = true
         emptyStateView.isHidden = false
         emptyStateView.alpha = 0
         emptyStateView.transform = CGAffineTransform(translationX: 0, y: 20)
@@ -124,6 +136,7 @@ final class TrackersViewController: UIViewController {
         logger.info("called: \(#function)")
         
         guard !emptyStateView.isHidden else { return }
+        filterButton.isHidden = false
         
         UIView.animate(
             withDuration: 0.2,
@@ -159,6 +172,7 @@ final class TrackersViewController: UIViewController {
         setupNavigation()
         
         view.addSubview(collectionView)
+        view.addSubview(filterButton)
         view.addSubview(emptyStateView)
         emptyStateView.addSubview(dizzyImage)
         emptyStateView.addSubview(label)
@@ -189,6 +203,11 @@ final class TrackersViewController: UIViewController {
             
             label.topAnchor.constraint(equalTo: dizzyImage.bottomAnchor, constant: 8),
             label.centerXAnchor.constraint(equalTo: emptyStateView.centerXAnchor),
+            
+            filterButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            filterButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            filterButton.heightAnchor.constraint(equalToConstant: 50),
+            filterButton.widthAnchor.constraint(equalToConstant: 114)
         ])
     }
     
@@ -277,6 +296,16 @@ final class TrackersViewController: UIViewController {
         }
         
         present(UINavigationController(rootViewController: editVC), animated: true)
+    }
+    
+    @objc private func filterTapped() {
+        let filterVM = FilterViewModel()
+        let filterVC = FilterViewController(viewModel: filterVM)
+        filterVC.onFilterChanged = { [weak self] filter in
+            self?.viewModel.filterTrackers(by: filter)
+        }
+        let navVC = UINavigationController(rootViewController: filterVC)
+        present(navVC, animated: true)
     }
 }
 

@@ -19,6 +19,7 @@ protocol DataProviderProtocol {
     
     // TrackerView Changes
     func setCurrentDate(_ date: Date)
+    func setFilters(_ filters: [Filter])
     func toggleRecord(trackerId: UUID, date: Date)
     
     // CreateTracker
@@ -86,6 +87,10 @@ final class DataProvider: NSObject {
 
 // MARK: - DataProviderProtocol
 extension DataProvider: DataProviderProtocol {
+    func setFilters(_ filters: [Filter]) {
+        // TODO: - Добавить смену Predicate, чтобы помимио даты сортирровка была по фильтрам
+    }
+    
     func getSchedule(for tracker: UUID) -> [WeekDay] {
         do {
             print("получение расписания")

@@ -113,4 +113,8 @@ final class TrackersViewModel {
         }
         return nil
     }
+    
+    func filterTrackers(by filters: [Filter]) {
+        dataProvider.setFilters(filters)
+    }
 }
