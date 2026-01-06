@@ -51,7 +51,7 @@ final class TrackersViewModel {
     func reloadTrackers(for date: Date) {
         logger.info("called: \(#function)")
         selectedDate = date
-        dataProvider.setCurrentDate(date)
+        dataProvider.setDate(date)
         completedRecords = dataProvider.fetchCompletedRecords()
         onDataChanged?(())
         onEmptyStateChanged?(dataProvider.numberOfCategories == 0)
@@ -114,7 +114,16 @@ final class TrackersViewModel {
         return nil
     }
     
-    func filterTrackers(by filters: [Filter]) {
-        dataProvider.setFilters(filters)
+    func filterTrackers(by filter: Filter) {
+        if filter == .todayTrackers {
+            dataProvider.setDate(Date())
+        }
+        dataProvider.setFilter(filter)
+        filter == .todayTrackers ? reloadTrackers(for: Date()) : reloadTrackers(for: selectedDate)
+        
+    }
+    
+    func getDataProvider() -> DataProviderProtocol {
+        dataProvider
     }
 }

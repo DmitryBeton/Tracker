@@ -272,20 +272,7 @@ final class TrackersViewController: UIViewController {
     }
     
     private func editTapped(onTracker: Tracker) {
-        guard let trackerStore = (UIApplication.shared.delegate as? AppDelegate)?.trackerStore else {
-            assertionFailure("trackerStore not found")
-            return
-        }
-        
-        let dataProvider: DataProviderProtocol
-        do {
-            dataProvider = try DataProvider(trackerStore)
-        } catch {
-            assertionFailure("DataProvider init failed")
-            return
-        }
-
-        let editM = EditTrackerModel(dataProvider: dataProvider, trackerEditing: onTracker)
+        let editM = EditTrackerModel(dataProvider: viewModel.getDataProvider(), trackerEditing: onTracker)
         let editVM = EditTrackerViewModel(for: editM)
         let editVC = EditTrackerViewController()
         editVC.initialize(viewModel: editVM)
@@ -299,7 +286,7 @@ final class TrackersViewController: UIViewController {
     }
     
     @objc private func filterTapped() {
-        let filterVM = FilterViewModel()
+        let filterVM = FilterViewModel(dataProvider: viewModel.getDataProvider())
         let filterVC = FilterViewController(viewModel: filterVM)
         filterVC.onFilterChanged = { [weak self] filter in
             self?.viewModel.filterTrackers(by: filter)

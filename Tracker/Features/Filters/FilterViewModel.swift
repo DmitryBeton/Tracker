@@ -11,6 +11,13 @@ final class FilterViewModel {
     
     private var selectedFilter: Filter = .allTrackers
     
+    private let dataProvider: DataProviderProtocol
+    
+    init(dataProvider: DataProviderProtocol) {
+        self.dataProvider = dataProvider
+        selectedFilter = dataProvider.getCurrentFilter()
+    }
+
     let tableViewItems: [String] =
     [
         NSLocalizedString("all_trackers", comment: ""),
@@ -42,5 +49,9 @@ final class FilterViewModel {
         default:
             selectedFilter = .allTrackers
         }
+    }
+    
+    func getFilter() -> Filter {
+        selectedFilter
     }
 }

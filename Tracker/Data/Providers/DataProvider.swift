@@ -10,31 +10,36 @@ import CoreData
 import Logging
 
 protocol DataProviderProtocol {
-    // для отображения коллекции
+    // CollectionView
     var numberOfCategories: Int { get }
     func categoryTitle(at index: Int) -> String
     func numberOfTrackersInCategory(_ section: Int) -> Int
     func tracker(at: IndexPath) -> TrackerCoreData?
-    func fetchCompletedRecords() -> [TrackerRecord]
-    
-    // TrackerView Changes
-    func setCurrentDate(_ date: Date)
-    func setFilters(_ filters: [Filter])
-    func toggleRecord(trackerId: UUID, date: Date)
-    
-    // CreateTracker
+    func fetchAllCategories() -> [String]
+    func getCategoryTitle(for tracker: UUID) -> String
+
+    // Add/Delete
     func addTracker(_ tracker: Tracker, to: String) throws
     func deleteTracker(_ trackerId: UUID) throws
-    func editTracker(_ tracker: Tracker) throws
     
-    // CreateCategory
-    func fetchAllCategories() -> [String]
     func addCategory(_ title: String) throws
     func deleteCategory(_ title: String) throws
+
+    // Editing
+    func editTracker(_ tracker: Tracker) throws
     func editCategory(oldTitle: String, newTitle: String) throws
-    
-    func getCategoryTitle(for tracker: UUID) -> String
+
+    // Schedule
     func getSchedule(for tracker: UUID) -> [WeekDay]
+
+    // Records
+    func toggleRecord(trackerId: UUID, date: Date)
+    func fetchCompletedRecords() -> [TrackerRecord]
+
+    // Filter
+    func setFilter(_ filter: Filter)
+    func setDate(_ date: Date)
+    func getCurrentFilter() -> Filter
 }
 
 // MARK: - DataProvider
@@ -51,6 +56,7 @@ final class DataProvider: NSObject {
     private let trackerRecordStore: TrackerRecordStore
     
     private var currentDate: Date = Date()
+    private var currentFilter: Filter = .allTrackers
     
     init(_ dataStore: DataStore) throws {
         guard let context = dataStore.managedObjectContext else {
@@ -61,36 +67,10 @@ final class DataProvider: NSObject {
         self.trackerCategoryStore = TrackerCategoryStore(context: context)
         self.trackerRecordStore = TrackerRecordStore(context: context)
     }
-    
-    private func getPredicateForCurrentDate() -> NSPredicate? {
-        logger.info("called: \(#function)")
-        guard let currentWeekDay = WeekDay.fromDate(currentDate) else {
-            logger.error("❌ Не удалось определить день недели для даты: \(currentDate)")
-            return NSPredicate(value: false)
-        }
-        return createComplexPredicate(for: currentWeekDay)
-    }
-    
-    private func createComplexPredicate(for weekDay: WeekDay) -> NSPredicate? {
-        logger.info("called: \(#function)")
-        let dayString = "\(weekDay.rawValue)"
-        return NSPredicate(format: "schedule CONTAINS %@", dayString)
-    }
-    
-    // Обновить предикат при смене даты
-    private func updatePredicate() {
-        logger.info("called: \(#function)")
-        let predicate = getPredicateForCurrentDate()
-        trackerStore.updateFetchedResultsControllerPredicate(predicate)
-    }
 }
 
 // MARK: - DataProviderProtocol
 extension DataProvider: DataProviderProtocol {
-    func setFilters(_ filters: [Filter]) {
-        // TODO: - Добавить смену Predicate, чтобы помимио даты сортирровка была по фильтрам
-    }
-    
     func getSchedule(for tracker: UUID) -> [WeekDay] {
         do {
             print("получение расписания")
@@ -252,12 +232,112 @@ extension DataProvider: DataProviderProtocol {
             print("ошибка сохраниеия")
         }
     }
+}
 
-    // MARK: - Other
-    // Установить текущую дату и обновить фильтрацию
-    func setCurrentDate(_ date: Date) {
-        logger.info("called: \(#function)")
-        self.currentDate = date
-        updatePredicate()
+// MARK: - Filters
+extension DataProvider {
+    func createPredicate(for filter: Filter, date: Date) -> NSPredicate? {
+        logger.info("called: \(#function) filter: \(filter.rawValue), date: \(date)")
+        
+        switch filter {
+        case .allTrackers:
+            return createDatePredicate(for: date)
+        case .todayTrackers:
+            return createDatePredicate(for: date)
+            
+        case .completed:
+            return createCompletedPredicate(for: date)
+            
+        case .notCompleted:
+            return createNotCompletedPredicate(for: date)
+        }
+    }
+    
+    // MARK: - Private Methods for Create Predicate
+    
+    private func createDatePredicate(for date: Date) -> NSPredicate? {
+        guard let weekDay = WeekDay.fromDate(date) else {
+            logger.error("❌ Не удалось определить день недели для даты: \(date)")
+            return NSPredicate(value: false)
+        }
+        
+        let dayString = "\(weekDay.rawValue)"
+        return NSPredicate(format: "schedule CONTAINS %@", dayString)
+    }
+    
+    private func createCompletedPredicate(for date: Date) -> NSPredicate? {
+        guard let datePredicate = createDatePredicate(for: date) else {
+            return NSPredicate(value: false)
+        }
+        
+        let completedTrackerIds = getCompletedTrackerIds(for: date)
+        
+        if completedTrackerIds.isEmpty {
+            return NSPredicate(value: false)
+        }
+        
+        let completedPredicate = NSPredicate(format: "id IN %@", completedTrackerIds)
+        return NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, completedPredicate])
+    }
+    
+    private func createNotCompletedPredicate(for date: Date) -> NSPredicate? {
+        guard let datePredicate = createDatePredicate(for: date) else {
+            return NSPredicate(value: false)
+        }
+        
+        let completedTrackerIds = getCompletedTrackerIds(for: date)
+        
+        if completedTrackerIds.isEmpty {
+            return datePredicate
+        }
+        
+        let notCompletedPredicate = NSPredicate(format: "NOT (id IN %@)", completedTrackerIds)
+        return NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, notCompletedPredicate])
+    }
+    
+    private func getCompletedTrackerIds(for date: Date) -> [UUID] {
+        let day = Calendar.current.startOfDay(for: date)
+        let records = fetchCompletedRecords()
+        
+        return records
+            .filter { Calendar.current.isDate($0.date, inSameDayAs: day) }
+            .compactMap { $0.id }
+    }
+    
+    // MARK: - Public Methods
+    
+    /// - Parameter filter: Выбранный фильтр
+    func setFilter(_ filter: Filter) {
+        logger.info("called: \(#function) with filter: \(filter.rawValue)")
+        
+        currentFilter = filter
+        
+        let predicate = createPredicate(for: filter, date: currentDate)
+        trackerStore.updateFetchedResultsControllerPredicate(predicate)
+        logger.info("✅ Filter applied: \(filter.rawValue), date: \(currentDate)")
+    }
+    
+    /// - Parameter date: Новая дата
+    func setDate(_ date: Date) {
+        logger.info("called: \(#function) with date: \(date)")
+        
+        currentDate = date
+        
+        let predicate = createPredicate(for: currentFilter, date: date)
+        trackerStore.updateFetchedResultsControllerPredicate(predicate)
+ 
+        logger.info("✅ Date changed to: \(date), current filter: \(currentFilter.rawValue)")
+    }
+    
+    func getCurrentFilter() -> Filter {
+        return currentFilter
+    }
+    
+    func getCurrentDate() -> Date {
+        return currentDate
+    }
+    
+    func resetFilter() {
+        setFilter(.allTrackers)
     }
 }

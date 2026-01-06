@@ -11,7 +11,7 @@ import UIKit
 final class FilterViewController: UIViewController {
     // MARK: - Dependencies
     private var viewModel: FilterViewModel
-    var onFilterChanged: Binding<[Filter]>?
+    var onFilterChanged: Binding<Filter>?
     
     // MARK: - UI Elements
     private var tableView: UITableView = {
@@ -84,7 +84,7 @@ extension FilterViewController: UITableViewDelegate, UITableViewDataSource {
                 
         let isSelected = viewModel.isSelected(at: indexPath.row)
         
-        if isSelected {
+        if isSelected && indexPath.row != 0 && indexPath.row != 1  {
             cell.accessoryType = .checkmark
             cell.tintColor = .ypBlue
         } else {
@@ -104,6 +104,7 @@ extension FilterViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         viewModel.selectFilter(at: indexPath.row)
+        onFilterChanged?(viewModel.getFilter())
         tableView.reloadData()
     }
 
