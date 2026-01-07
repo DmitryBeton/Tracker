@@ -234,14 +234,14 @@ extension CategoryView: UITableViewDataSource, UITableViewDelegate {
             actionProvider: { suggestedActions in
                 
                 let deleteAction = UIAction(
-                    title: "Удалить",
+                    title: NSLocalizedString("delete", comment: ""),
                     attributes: .destructive
                 ) { _ in
                     self.deleteTapped(index: indexPath)
                 }
                 
                 let editAction = UIAction(
-                    title: "Редактировать",
+                    title: NSLocalizedString("edit", comment: ""),
                 ) { _ in
                     if let cell = tableView.cellForRow(at: indexPath) as? CategoryTableViewCell {
                         let categoryTitle = cell.getCategory()

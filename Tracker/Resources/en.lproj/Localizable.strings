@@ -64,6 +64,10 @@
 "edit_tracker" = "Editing a habit";
 "save" = "save";
 
+"pin" = "Pin";
+"edit" = "Edit";
+"delete" = "Delete";
+
 // Filters
 "all_trackers" = "All trackers";
 "today" = "Trackers today";

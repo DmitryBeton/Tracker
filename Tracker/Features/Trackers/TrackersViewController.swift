@@ -346,16 +346,16 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         
         return UIContextMenuConfiguration(actionProvider: { actions in
             return UIMenu(children: [
-                UIAction(title: "Закрепить") { [weak self] _ in
+                UIAction(title: NSLocalizedString("pin", comment: "")) { [weak self] _ in
                     
                 },
-                UIAction(title: "Редактировать") { [weak self] _ in
+                UIAction(title: NSLocalizedString("edit", comment: "")) { [weak self] _ in
                     guard let tracker = self?.viewModel.tracker(at: indexPath) else {
                         return
                     }
                     self?.editTapped(onTracker: tracker)
                 },
-                UIAction(title: "Удалить", attributes: .destructive) { [weak self] _ in
+                UIAction(title: NSLocalizedString("delete", comment: ""), attributes: .destructive) { [weak self] _ in
                     guard let tracker = self?.viewModel.tracker(at: indexPath) else {
                         return
                     }
