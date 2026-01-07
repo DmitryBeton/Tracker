@@ -205,6 +205,15 @@ final class TrackersViewController: UIViewController {
             withReuseIdentifier: TrackerHeaderView.reuseIdentifier
         )
         
+        // Add swipe gestures for date switching
+        let swipeLeft = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipeGesture(_:)))
+        swipeLeft.direction = .left
+        view.addGestureRecognizer(swipeLeft)
+        
+        let swipeRight = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipeGesture(_:)))
+        swipeRight.direction = .right
+        view.addGestureRecognizer(swipeRight)
+
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             collectionView.leftAnchor.constraint(equalTo: view.leftAnchor),
@@ -272,6 +281,22 @@ final class TrackersViewController: UIViewController {
         searchController.searchBar.placeholder = searchText
         navigationItem.searchController = searchController
         navigationItem.hidesSearchBarWhenScrolling = false
+    }
+
+    // MARK: - Swipe Gesture Handling
+    @objc private func handleSwipeGesture(_ gesture: UISwipeGestureRecognizer) {
+        let current = viewModel.selectedDate
+        var newDate: Date?
+        if gesture.direction == .left {
+            // Next day
+            newDate = Calendar.current.date(byAdding: .day, value: 1, to: current)
+        } else if gesture.direction == .right {
+            // Previous day
+            newDate = Calendar.current.date(byAdding: .day, value: -1, to: current)
+        }
+        guard let date = newDate else { return }
+        datePicker.setDate(date, animated: true)
+        viewModel.reloadTrackers(for: date)
     }
     
     // MARK: - Actions
