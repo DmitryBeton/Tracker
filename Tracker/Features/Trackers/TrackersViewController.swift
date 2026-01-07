@@ -431,22 +431,26 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
     }
     
     func collectionView(
-        _ collectionView: UICollectionView,
-        willDisplay cell: UICollectionViewCell,
-        forItemAt indexPath: IndexPath
+    _ collectionView: UICollectionView,
+    willDisplay cell: UICollectionViewCell,
+    forItemAt indexPath: IndexPath
+) {
+    cell.alpha = 0
+    cell.transform = CGAffineTransform(scaleX: 0.85, y: 0.85).concatenating(
+        CGAffineTransform(translationX: 0, y: 40)
+    )
+    
+    UIView.animate(
+        withDuration: 0.50,
+        delay: 0.04 * Double(indexPath.item),
+        usingSpringWithDamping: 0.7,
+        initialSpringVelocity: 0.6,
+        options: [.curveEaseOut]
     ) {
-        cell.alpha = 0
-        cell.transform = CGAffineTransform(translationX: 0, y: 20)
-        
-        UIView.animate(
-            withDuration: 0.35,
-            delay: 0.03 * Double(indexPath.item),
-            options: [.curveEaseOut]
-        ) {
-            cell.alpha = 1
-            cell.transform = .identity
-        }
+        cell.alpha = 1
+        cell.transform = .identity
     }
+}
     
     func collectionView(
         _ collectionView: UICollectionView,
