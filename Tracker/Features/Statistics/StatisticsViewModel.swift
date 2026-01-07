@@ -11,10 +11,10 @@ final class StatisticsViewModel {
     private let dataProvider: DataProviderProtocol
 
     private let tableSourceData = [
-        "The best period",
-        "Ideal days",
-        "Trackers completed",
-        "Среднее значение"
+        NSLocalizedString("best_period", comment: ""),
+        NSLocalizedString("ideal_days", comment: ""),
+        NSLocalizedString("trackers_completed", comment: ""),
+        NSLocalizedString("average_value", comment: "")
     ]
     
     // MARK: - Initialization
@@ -23,7 +23,6 @@ final class StatisticsViewModel {
     }
 
     func statInfo(for index: Int) -> (value: String, description: String) {
-        print(6)
         switch index {
         case 0: return (getBestPeriod(), tableSourceData[0])
         case 1: return (getIdealDays(), tableSourceData[1])
@@ -34,7 +33,6 @@ final class StatisticsViewModel {
     }
 
     var isEmpty: Bool {
-        print(5)
         return (0..<tableSourceData.count).allSatisfy {
             statInfo(for: $0).value == "0"
         }
@@ -73,7 +71,6 @@ final class StatisticsViewModel {
     
     /// Идеальные дни: количество дней, в течение которых все трекеры были завершены
     func getIdealDays() -> String {
-        print(2)
         let records = dataProvider.fetchCompletedRecords()
         let allTrackers = dataProvider.fetchAllTrackers()
         if allTrackers.isEmpty { return "0" }

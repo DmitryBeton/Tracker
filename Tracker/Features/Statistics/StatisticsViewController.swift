@@ -28,7 +28,7 @@ final class StatisticsViewController: UIViewController {
     private let noDataLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Анализировать пока нечего"
+        label.text = NSLocalizedString("no_data_for_analysis", comment: "")
         label.textColor = .ypBlack
         return label
     }()
@@ -71,7 +71,7 @@ final class StatisticsViewController: UIViewController {
 
     // MARK: - Setup
     private func setupUI() {
-        title = "Cтатистика"
+        title = NSLocalizedString("statistics", comment: "")
         
         view.backgroundColor = .ypWhite
 

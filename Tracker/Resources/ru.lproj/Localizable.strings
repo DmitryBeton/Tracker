@@ -71,3 +71,12 @@
 "not_completed" = "Не завершенные";
 "title_filters" = "Фильтры";
 "not_found" = "Ничего не найдено";
+
+// Statistic
+"no_data_for_analysis" = "Анализировать пока нечего";
+"statistics" = "Cтатистика";
+"description" = "Описание";
+"best_period" = "Лучший период";
+"ideal_days" = "Идеальные дни";
+"trackers_completed" = "Трекеров завершено";
+"average_value" = "Среднее значение";

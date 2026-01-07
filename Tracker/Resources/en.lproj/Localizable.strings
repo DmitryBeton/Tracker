@@ -71,3 +71,12 @@
 "not_completed" = "Not completed";
 "title_filters" = "Filters";
 "not_found" = "Nothing was found";
+
+// Statistic
+"no_data_for_analysis" = "There is nothing to analyze yet";
+"statistics" = "Statistics";
+"description" = "Description";
+"best_period" = "Best period";
+"ideal_days" = "Ideal days";
+"trackers_completed" = "Trackers completed";
+"average_value" = "Average value";

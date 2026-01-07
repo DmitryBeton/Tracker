@@ -23,7 +23,7 @@ final class StatisticsTableViewCell: UITableViewCell {
     private lazy var descriptionLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Description"
+        label.text = NSLocalizedString("description", comment: "")
         label.font = .systemFont(ofSize: 12, weight: .regular)
         return label
     }()
