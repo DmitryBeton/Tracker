@@ -53,7 +53,7 @@ final class TrackersViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitle("Фильтры", for: .normal)
         button.setTitleColor(.white, for: .normal)
-        button.backgroundColor = .ypColorSelection3
+        button.backgroundColor = .ypBlue
         button.layer.cornerRadius = 16
         button.addTarget(self, action: #selector(filterTapped), for: .touchUpInside)
         return button
@@ -290,6 +290,10 @@ final class TrackersViewController: UIViewController {
         let filterVC = FilterViewController(viewModel: filterVM)
         filterVC.onFilterChanged = { [weak self] filter in
             self?.viewModel.filterTrackers(by: filter)
+            guard let isActive = self?.viewModel.isFilterActive() else {
+                return
+            }
+            self?.filterButton.backgroundColor = isActive ? .ypRed : .ypBlue
         }
         let navVC = UINavigationController(rootViewController: filterVC)
         present(navVC, animated: true)

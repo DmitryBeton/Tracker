@@ -123,6 +123,11 @@ final class TrackersViewModel {
         
     }
     
+    func isFilterActive() -> Bool {
+        let filter = dataProvider.getCurrentFilter()
+        return filter != .allTrackers && filter != .todayTrackers
+    }
+    
     func getDataProvider() -> DataProviderProtocol {
         dataProvider
     }
