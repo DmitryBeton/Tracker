@@ -20,6 +20,7 @@ final class TrackersViewController: UIViewController {
         let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
         cv.backgroundColor = .ypWhite
         cv.translatesAutoresizingMaskIntoConstraints = false
+        cv.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
         return cv
     }()
     
