@@ -36,6 +36,8 @@
 
 "every_day" = "Every day";
 
+"future_date_warning" = "You can't mark trackers for future dates.";
+
 // Onboarding
 "technologies" = "These are the technologies!";
 "about_tracking" = "Track only what you want";
@@ -68,6 +70,8 @@
 "edit" = "Edit";
 "delete" = "Delete";
 
+"wanna_delete_tracker" = "Are you sure you want to delete the tracker?";
+
 // Filters
 "all_trackers" = "All trackers";
 "today" = "Trackers today";
@@ -75,6 +79,7 @@
 "not_completed" = "Not completed";
 "title_filters" = "Filters";
 "not_found" = "Nothing was found";
+"unavailable" = "Unavailable";
 
 // Statistic
 "no_data_for_analysis" = "There is nothing to analyze yet";

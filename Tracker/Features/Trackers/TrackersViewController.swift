@@ -53,7 +53,7 @@ final class TrackersViewController: UIViewController {
     private lazy var filterButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle("Фильтры", for: .normal)
+        button.setTitle(NSLocalizedString("title_filters", comment: ""), for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .ypBlue
         button.layer.cornerRadius = 16
@@ -107,8 +107,8 @@ final class TrackersViewController: UIViewController {
         logger.info("called: \(#function)")
         
         let alert = UIAlertController(
-            title: "Недоступно",
-            message: "Нельзя отмечать трекеры на будущие даты.",
+            title: NSLocalizedString("unavailable", comment: ""),
+            message: NSLocalizedString("future_date_warning", comment: ""),
             preferredStyle: .alert
         )
         alert.addAction(UIAlertAction(title: "ОК", style: .default))
@@ -329,6 +329,20 @@ final class TrackersViewController: UIViewController {
         present(UINavigationController(rootViewController: editVC), animated: true)
     }
     
+    private func deleteTapped(tracker: Tracker) {
+        let alert = UIAlertController(
+            title: "",
+            message: NSLocalizedString("wanna_delete_tracker", comment: ""),
+            preferredStyle: .actionSheet
+        )
+        alert.addAction(UIAlertAction(title: NSLocalizedString("delete", comment: ""), style: .destructive) { [weak self] _ in self?.viewModel.deleteTracker(tracker.id) })
+        alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .default))
+
+        present(alert, animated: true)
+
+    }
+
+    
     @objc private func filterTapped() {
         analyticsService.report(event: "click", params: ["screen": "main", "item" : "filter"])
 
@@ -385,7 +399,7 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
                         return
                     }
                     self?.analyticsService.report(event: "click", params: ["screen": "main", "item" : "delete"])
-                    self?.viewModel.deleteTracker(tracker.id)
+                    self?.deleteTapped(tracker: tracker)
                 }
             ])
         })

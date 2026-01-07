@@ -36,6 +36,8 @@
 
 "every_day" = "Каждый день";
 
+"future_date_warning" = "Нельзя отмечать трекеры на будущие даты.";
+
 // Onboarding
 "technologies" = "Вот это технологии!";
 "about_tracking" = "Отслеживайте только то, что хотите";
@@ -68,6 +70,8 @@
 "edit" = "Редактировать";
 "delete" = "Удалить";
 
+"wanna_delete_tracker" = "Уверены что хотите удалить трекер?";
+
 // Filters
 "all_trackers" = "Все трекеры";
 "today" = "Трекеры на сегодня";
@@ -75,6 +79,7 @@
 "not_completed" = "Не завершенные";
 "title_filters" = "Фильтры";
 "not_found" = "Ничего не найдено";
+"unavailable" = "Недоступно";
 
 // Statistic
 "no_data_for_analysis" = "Анализировать пока нечего";
