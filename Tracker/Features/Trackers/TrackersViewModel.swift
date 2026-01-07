@@ -4,7 +4,7 @@ import Logging
 protocol TrackersViewModelProtocol {
     var onDataChanged: Binding<Void>? { get set }
     var onEmptyStateChanged: Binding<Bool>? { get set }
-
+    
     var completedRecords: [TrackerRecord] { get }
     var selectedDate: Date { get }
     
@@ -16,7 +16,7 @@ protocol TrackersViewModelProtocol {
     func completedDays(for trackerId: UUID) -> Int
     func isCompletedToday(trackerId: UUID) -> Bool
     func toggleTrackerCompletion(for trackerId: UUID) -> Bool
-
+    
     func reloadTrackers(for date: Date)
     
     func createNewTracker(_ tracker: Tracker, to category: String)
@@ -28,7 +28,7 @@ protocol TrackersViewModelProtocol {
     func filterTrackers(by filter: Filter)
     func isFilterActive() -> Bool
     func searchTrackers(with text: String?)
-
+    
     func getDataProvider() -> DataProviderProtocol?
 }
 

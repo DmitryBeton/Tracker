@@ -17,7 +17,7 @@ final class FilterViewModel {
         self.dataProvider = dataProvider
         selectedFilter = dataProvider.getCurrentFilter()
     }
-
+    
     let tableViewItems: [String] =
     [
         NSLocalizedString("all_trackers", comment: ""),

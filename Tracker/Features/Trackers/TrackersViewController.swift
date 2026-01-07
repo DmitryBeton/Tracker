@@ -205,7 +205,6 @@ final class TrackersViewController: UIViewController {
             withReuseIdentifier: TrackerHeaderView.reuseIdentifier
         )
         
-        // Add swipe gestures for date switching
         let swipeLeft = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipeGesture(_:)))
         swipeLeft.direction = .left
         view.addGestureRecognizer(swipeLeft)
@@ -213,7 +212,7 @@ final class TrackersViewController: UIViewController {
         let swipeRight = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipeGesture(_:)))
         swipeRight.direction = .right
         view.addGestureRecognizer(swipeRight)
-
+        
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             collectionView.leftAnchor.constraint(equalTo: view.leftAnchor),
@@ -282,16 +281,14 @@ final class TrackersViewController: UIViewController {
         navigationItem.searchController = searchController
         navigationItem.hidesSearchBarWhenScrolling = false
     }
-
+    
     // MARK: - Swipe Gesture Handling
     @objc private func handleSwipeGesture(_ gesture: UISwipeGestureRecognizer) {
         let current = viewModel.selectedDate
         var newDate: Date?
         if gesture.direction == .left {
-            // Next day
             newDate = Calendar.current.date(byAdding: .day, value: 1, to: current)
         } else if gesture.direction == .right {
-            // Previous day
             newDate = Calendar.current.date(byAdding: .day, value: -1, to: current)
         }
         guard let date = newDate else { return }
@@ -320,7 +317,7 @@ final class TrackersViewController: UIViewController {
         let editVM = EditTrackerViewModel(for: editM)
         let editVC = EditTrackerViewController()
         editVC.initialize(viewModel: editVM)
-    
+        
         editVC.onEditTracker = { [weak self] tracker in
             print("EditView -> editTapped() -> \(tracker)")
             self?.viewModel.editTracker(tracker)
@@ -337,15 +334,15 @@ final class TrackersViewController: UIViewController {
         )
         alert.addAction(UIAlertAction(title: NSLocalizedString("delete", comment: ""), style: .destructive) { [weak self] _ in self?.viewModel.deleteTracker(tracker.id) })
         alert.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .default))
-
+        
         present(alert, animated: true)
-
+        
     }
-
+    
     
     @objc private func filterTapped() {
         analyticsService.report(event: "click", params: ["screen": "main", "item" : "filter"])
-
+        
         guard let dataProvider = viewModel.getDataProvider() else {
             return
         }
@@ -368,7 +365,7 @@ final class TrackersViewController: UIViewController {
 
 // MARK: - SearchController
 extension TrackersViewController: UISearchResultsUpdating {
-   func updateSearchResults(for searchController: UISearchController) {
+    func updateSearchResults(for searchController: UISearchController) {
         let text = searchController.searchBar.text
         viewModel.searchTrackers(with: text?.isEmpty == false ? text : nil)
     }
@@ -404,7 +401,7 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
             ])
         })
     }
-
+    
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         viewModel.numberOfSections
     }
@@ -445,26 +442,26 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
     }
     
     func collectionView(
-    _ collectionView: UICollectionView,
-    willDisplay cell: UICollectionViewCell,
-    forItemAt indexPath: IndexPath
-) {
-    cell.alpha = 0
-    cell.transform = CGAffineTransform(scaleX: 0.85, y: 0.85).concatenating(
-        CGAffineTransform(translationX: 0, y: 40)
-    )
-    
-    UIView.animate(
-        withDuration: 0.50,
-        delay: 0.04 * Double(indexPath.item),
-        usingSpringWithDamping: 0.7,
-        initialSpringVelocity: 0.6,
-        options: [.curveEaseOut]
+        _ collectionView: UICollectionView,
+        willDisplay cell: UICollectionViewCell,
+        forItemAt indexPath: IndexPath
     ) {
-        cell.alpha = 1
-        cell.transform = .identity
+        cell.alpha = 0
+        cell.transform = CGAffineTransform(scaleX: 0.85, y: 0.85).concatenating(
+            CGAffineTransform(translationX: 0, y: 40)
+        )
+        
+        UIView.animate(
+            withDuration: 0.50,
+            delay: 0.04 * Double(indexPath.item),
+            usingSpringWithDamping: 0.7,
+            initialSpringVelocity: 0.6,
+            options: [.curveEaseOut]
+        ) {
+            cell.alpha = 1
+            cell.transform = .identity
+        }
     }
-}
     
     func collectionView(
         _ collectionView: UICollectionView,

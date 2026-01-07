@@ -12,7 +12,7 @@ final class EditCategoryView: UIViewController {
     // MARK: - Properties
     private let viewModel: EditCategoryViewModel
     var onEditCategory: Binding<String>?
-
+    
     // MARK: - UI
     private lazy var textField: UITextField = {
         let textField = UITextField()
@@ -133,7 +133,7 @@ final class EditCategoryView: UIViewController {
                 return label
             }()
         }
-
+        
         view.backgroundColor = .ypWhite
         
         view.addSubview(textField)

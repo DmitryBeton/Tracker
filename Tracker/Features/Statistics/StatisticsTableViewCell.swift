@@ -10,7 +10,7 @@ import UIKit
 final class StatisticsTableViewCell: UITableViewCell {
     // MARK: - Static Properties
     static let reuseIdentifier = "StatisticTableViewCell"
-
+    
     // MARK: - UI Elements
     private lazy var numberLabel: UILabel = {
         let label = UILabel()
@@ -31,7 +31,7 @@ final class StatisticsTableViewCell: UITableViewCell {
     // MARK: - Gradient Border
     private let gradientBorderLayer = CAGradientLayer()
     private let borderShapeLayer = CAShapeLayer()
-
+    
     // MARK: - Initialization
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -43,14 +43,14 @@ final class StatisticsTableViewCell: UITableViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     
     // MARK: - Layout
     override func layoutSubviews() {
         super.layoutSubviews()
         updateGradientBorderFrame()
     }
-
+    
     // MARK: - Setup
     private func setupUI() {
         self.addSubview(numberLabel)
@@ -75,27 +75,27 @@ final class StatisticsTableViewCell: UITableViewCell {
             UIColor(red: 70/255, green: 230/255, blue: 157/255, alpha: 1).cgColor,
             UIColor(red: 253/255, green: 76/255, blue: 73/255, alpha: 1).cgColor
         ]
-
+        
         gradientBorderLayer.startPoint = CGPoint(x: 0, y: 0.5)
         gradientBorderLayer.endPoint   = CGPoint(x: 1, y: 0.5)
-
+        
         borderShapeLayer.fillColor = UIColor.clear.cgColor
         borderShapeLayer.strokeColor = UIColor.black.cgColor
         borderShapeLayer.lineWidth = 1
-
+        
         gradientBorderLayer.mask = borderShapeLayer
         contentView.layer.addSublayer(gradientBorderLayer)
     }
-
+    
     private func updateGradientBorderFrame() {
         gradientBorderLayer.frame = contentView.bounds
-
+        
         let cornerRadius: CGFloat = 16
         let path = UIBezierPath(
             roundedRect: contentView.bounds.insetBy(dx: 0.5, dy: 0.5),
             cornerRadius: cornerRadius
         )
-
+        
         borderShapeLayer.path = path.cgPath
         borderShapeLayer.frame = contentView.bounds
     }

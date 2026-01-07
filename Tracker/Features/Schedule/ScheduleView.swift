@@ -89,7 +89,7 @@ final class ScheduleView: UIViewController {
         appearance.configureWithOpaqueBackground()
         appearance.backgroundColor = .ypWhite
         appearance.shadowColor = .clear
-
+        
         let titleFont = UIFont.systemFont(ofSize: 16, weight: .medium)
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.minimumLineHeight = 22
@@ -169,7 +169,7 @@ extension ScheduleView: UITableViewDataSource, UITableViewDelegate {
         cell.selectionStyle = .none
         cell.layer.masksToBounds = true
         cell.textLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
-
+        
         if indexPath.row == 0 {
             cell.layer.cornerRadius = 16
             cell.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]

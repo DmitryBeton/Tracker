@@ -16,7 +16,7 @@ final class EditTrackerViewModel {
     var onScheduleStateChange: Binding<String?>?
     var onEmojiStateChange: Binding<String?>?
     var onColorStateChange: Binding<UIColor?>?
-
+    
     // MARK: - Data for collection & table
     var emojiItems: [String] {
         model.emojiItems
@@ -44,7 +44,7 @@ final class EditTrackerViewModel {
     var currentName: String? {
         model.trackerData.name
     }
-
+    
     var currentCategory: String? {
         model.trackerData.category
     }
@@ -60,7 +60,7 @@ final class EditTrackerViewModel {
     var currentColor: UIColor? {
         model.trackerData.color
     }
-
+    
     // MARK: - Dependencies
     private let model: EditTrackerModel
     
@@ -105,7 +105,7 @@ final class EditTrackerViewModel {
         case .success:
             let scheduleText = formatScheduleText(schedule)
             onScheduleStateChange?(scheduleText)
-
+            
             onCreateButtonStateChange?(model.isFormValid())
             
         case .failure:
@@ -113,7 +113,7 @@ final class EditTrackerViewModel {
             onCreateButtonStateChange?(false)
         }
     }
-
+    
     func didSelectEmoji(_ emoji: String) {
         let result = model.updateEmoji(emoji)
         
@@ -165,7 +165,7 @@ final class EditTrackerViewModel {
             let sortedSchedule = schedule.sorted { $0.rawValue < $1.rawValue }
             return sortedSchedule.map { $0.shortName }.joined(separator: ", ")
         }
-
+        
     }
     
     func daysCompleted() -> Int {

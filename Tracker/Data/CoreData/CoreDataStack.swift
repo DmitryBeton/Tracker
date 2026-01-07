@@ -11,15 +11,15 @@ import Logging
 // MARK: - DataStore
 final class DataStore {
     private let logger = Logger(label: "DataStore")
-
+    
     private let modelName = "Tracker"
     private let storeURL = NSPersistentContainer
-                                .defaultDirectoryURL()
-                                .appendingPathComponent("data-store.sqlite")
+        .defaultDirectoryURL()
+        .appendingPathComponent("data-store.sqlite")
     
     private let container: NSPersistentContainer
     private let context: NSManagedObjectContext
-
+    
     enum StoreError: Error {
         case modelNotFound
         case failedToLoadPersistentContainer(Error)

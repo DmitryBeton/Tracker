@@ -17,7 +17,7 @@ final class TabBarController: UITabBarController {
     
     var viewModel: TrackersViewModelProtocol?
     var statisticsViewModel: StatisticsViewModel?
-
+    
     private func setupViewControllers() {
         let textTrackers = NSLocalizedString("tabbar_trackers", comment: "")
         let textStatistic = NSLocalizedString("tabbar_statistic", comment: "")
@@ -33,9 +33,9 @@ final class TabBarController: UITabBarController {
         } catch {
             assertionFailure("DataProvider init failed")
         }
-
+        
         guard let viewModel,
-            let statisticsViewModel else {
+              let statisticsViewModel else {
             return
         }
         

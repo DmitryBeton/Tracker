@@ -58,7 +58,7 @@ final class StatisticsViewController: UIViewController {
         setupConstraints()
         noDataStateView.isHidden = !viewModel.isEmpty
         tableView.isHidden = viewModel.isEmpty
-
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -67,8 +67,8 @@ final class StatisticsViewController: UIViewController {
         tableView.isHidden = viewModel.isEmpty
         tableView.reloadData()
     }
-
-
+    
+    
     // MARK: - Setup
     private func setupUI() {
         title = NSLocalizedString("statistics", comment: "")
@@ -87,9 +87,9 @@ final class StatisticsViewController: UIViewController {
         navigationController?.navigationBar.standardAppearance = appearance
         navigationController?.navigationBar.scrollEdgeAppearance = appearance
         navigationController?.navigationBar.compactAppearance = appearance
-
+        
         view.backgroundColor = .ypWhite
-
+        
         view.addSubview(tableView)
         view.addSubview(noDataStateView)
         noDataStateView.addSubview(noDataImage)
@@ -131,7 +131,7 @@ extension StatisticsViewController: UITableViewDataSource & UITableViewDelegate 
     func numberOfSections(in tableView: UITableView) -> Int {
         4
     }
-
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         1
     }
@@ -149,12 +149,12 @@ extension StatisticsViewController: UITableViewDataSource & UITableViewDelegate 
         cell.configuration(count: stat.value, text: stat.description)
         return cell
     }
-
+    
     
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         12
     }
-
+    
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
         UIView()
     }

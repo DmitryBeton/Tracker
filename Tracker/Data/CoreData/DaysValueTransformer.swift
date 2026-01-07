@@ -10,14 +10,14 @@ import Logging
 @objc
 final class DaysValueTransformer: ValueTransformer {
     private let logger = Logger(label: "DataStore")
-
+    
     static func register() {
         ValueTransformer.setValueTransformer(
             DaysValueTransformer(),
             forName: NSValueTransformerName(rawValue: String(describing: DaysValueTransformer.self))
         )
     }
-
+    
     override class func transformedValueClass() -> AnyClass { NSData.self }
     override class func allowsReverseTransformation() -> Bool { true }
     
@@ -26,7 +26,7 @@ final class DaysValueTransformer: ValueTransformer {
         guard let days = value as? [WeekDay] else { return nil }
         return try? JSONEncoder().encode(days)
     }
-
+    
     override func reverseTransformedValue(_ value: Any?) -> Any? {
         logger.info("called: \(#function) \(#line)")
         guard let data = value as? NSData else { return nil }

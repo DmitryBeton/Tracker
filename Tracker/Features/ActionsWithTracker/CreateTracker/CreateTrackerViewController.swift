@@ -160,7 +160,7 @@ final class CreateTrackerViewController: UIViewController {
                     cell.detailTextLabel?.text = category
                 }
             }
-
+            
         }
         
         viewModel.onScheduleStateChange = { [weak self] scheduleText in

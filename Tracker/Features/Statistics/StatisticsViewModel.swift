@@ -9,7 +9,7 @@ import Foundation
 
 final class StatisticsViewModel {
     private let dataProvider: DataProviderProtocol
-
+    
     private let tableSourceData = [
         NSLocalizedString("best_period", comment: ""),
         NSLocalizedString("ideal_days", comment: ""),
@@ -21,7 +21,7 @@ final class StatisticsViewModel {
     init(dataProvider: DataProviderProtocol) {
         self.dataProvider = dataProvider
     }
-
+    
     func statInfo(for index: Int) -> (value: String, description: String) {
         switch index {
         case 0: return (getBestPeriod(), tableSourceData[0])
@@ -31,13 +31,13 @@ final class StatisticsViewModel {
         default: return ("", "")
         }
     }
-
+    
     var isEmpty: Bool {
         return (0..<tableSourceData.count).allSatisfy {
             statInfo(for: $0).value == "0"
         }
     }
-
+    
     /// Лучший период: самая длинная серия последовательных завершений для любого трекера
     func getBestPeriod() -> String {
         let records = dataProvider.fetchCompletedRecords()
@@ -74,13 +74,13 @@ final class StatisticsViewModel {
         let records = dataProvider.fetchCompletedRecords()
         let allTrackers = dataProvider.fetchAllTrackers()
         if allTrackers.isEmpty { return "0" }
-
+        
         var completionsByDay: [Date: Set<UUID>] = [:]
         for record in records {
             let day = Calendar.current.startOfDay(for: record.date)
             completionsByDay[day, default: []].insert(record.id)
         }
-
+        
         let trackerIDs = Set(allTrackers.map { $0.id })
         let idealDaysCount = completionsByDay.values.filter { $0 == trackerIDs }.count
         return "\(idealDaysCount)"
@@ -96,12 +96,12 @@ final class StatisticsViewModel {
     func averageTrackersCompletion() -> String {
         let records = dataProvider.fetchCompletedRecords()
         guard !records.isEmpty else { return "0" }
- 
+        
         let daysSet = Set(records.map { Calendar.current.startOfDay(for: $0.date) })
         let totalDays = daysSet.count
         guard totalDays > 0 else { return "0" }
         let average = Double(records.count) / Double(totalDays)
-
+        
         let formatted = String(format: "%.1f", average)
         return formatted
     }

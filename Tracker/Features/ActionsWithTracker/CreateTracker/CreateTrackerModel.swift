@@ -88,9 +88,9 @@ final class CreateTrackerModel {
     
     func isFormValid() -> Bool {
         return !trackerData.name.isEmpty &&
-               !trackerData.category.isEmpty &&
-               trackerData.schedule != nil &&
-               !trackerData.emoji.isEmpty &&
-               trackerData.color != .clear
+        !trackerData.category.isEmpty &&
+        trackerData.schedule != nil &&
+        !trackerData.emoji.isEmpty &&
+        trackerData.color != .clear
     }
 }

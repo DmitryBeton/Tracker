@@ -73,5 +73,5 @@ final class CategoryViewModel: CategoryViewModelProtocol {
         loadCategories()
         onCategorySelected?(categories[indexPath.row])
     }
-
+    
 }

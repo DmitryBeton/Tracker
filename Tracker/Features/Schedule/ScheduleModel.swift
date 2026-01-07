@@ -13,7 +13,7 @@ final class ScheduleModel {
     // MARK: - Properties
     private(set) var selectedDays: [WeekDay] = []
     let tableViewData: [WeekDay] = WeekDay.allCases
-        
+    
     // MARK: - Public Methods
     func isDaySelected(_ day: WeekDay) -> Bool {
         selectedDays.contains(day)

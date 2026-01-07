@@ -124,14 +124,14 @@ final class OnboardingViewController: UIPageViewController {
 // MARK: - UIPageViewControllerDataSource
 extension OnboardingViewController: UIPageViewControllerDataSource {
     func pageViewController(_ pageViewController: UIPageViewController,
-                          viewControllerBefore viewController: UIViewController) -> UIViewController? {
+                            viewControllerBefore viewController: UIViewController) -> UIViewController? {
         guard let index = pages.firstIndex(of: viewController) else { return nil }
         let previousIndex = index - 1
         return previousIndex >= 0 ? pages[previousIndex] : pages.last
     }
     
     func pageViewController(_ pageViewController: UIPageViewController,
-                          viewControllerAfter viewController: UIViewController) -> UIViewController? {
+                            viewControllerAfter viewController: UIViewController) -> UIViewController? {
         guard let index = pages.firstIndex(of: viewController) else { return nil }
         let nextIndex = index + 1
         return nextIndex < pages.count ? pages[nextIndex] : pages.first
@@ -141,9 +141,9 @@ extension OnboardingViewController: UIPageViewControllerDataSource {
 // MARK: - UIPageViewControllerDelegate
 extension OnboardingViewController: UIPageViewControllerDelegate {
     func pageViewController(_ pageViewController: UIPageViewController,
-                          didFinishAnimating finished: Bool,
-                          previousViewControllers: [UIViewController],
-                          transitionCompleted completed: Bool) {
+                            didFinishAnimating finished: Bool,
+                            previousViewControllers: [UIViewController],
+                            transitionCompleted completed: Bool) {
         if completed,
            let currentViewController = pageViewController.viewControllers?.first,
            let currentIndex = pages.firstIndex(of: currentViewController) {

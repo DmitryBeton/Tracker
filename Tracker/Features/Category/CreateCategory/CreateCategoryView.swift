@@ -130,7 +130,7 @@ final class CreateCategoryView: UIViewController {
                 return label
             }()
         }
-
+        
         view.backgroundColor = .ypWhite
         
         view.addSubview(textField)

@@ -34,23 +34,23 @@ final class EditTrackerViewController: UIViewController {
     
     private lazy var daysLabel: UILabel = {
         let label = UILabel()
-
+        
         let daysString = String.localizedStringWithFormat(
             NSLocalizedString("countOfDays", comment: "Number of completed days"),
             viewModel?.daysCompleted() ?? 0
         )
-
+        
         label.text = daysString
         label.translatesAutoresizingMaskIntoConstraints = false
         label.textAlignment = .center
-
+        
         label.font = .systemFont(ofSize: 32, weight: .bold)
-
+        
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.minimumLineHeight = 38
         paragraphStyle.maximumLineHeight = 38
         paragraphStyle.alignment = .center
-
+        
         label.attributedText = NSAttributedString(
             string: daysString,
             attributes: [
@@ -59,10 +59,10 @@ final class EditTrackerViewController: UIViewController {
                 .kern: 0
             ]
         )
-
+        
         return label
     }()
-
+    
     private lazy var textField: UITextField = {
         let textField = UITextField()
         let text = NSLocalizedString("enter_name_of_tracker", comment: "")
@@ -192,7 +192,7 @@ final class EditTrackerViewController: UIViewController {
                     cell.detailTextLabel?.text = category
                 }
             }
-
+            
         }
         
         viewModel.onScheduleStateChange = { [weak self] scheduleText in
@@ -326,7 +326,7 @@ final class EditTrackerViewController: UIViewController {
             daysLabel.heightAnchor.constraint(equalToConstant: 38),
             daysLabel.widthAnchor.constraint(equalToConstant: 343),
             daysLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-
+            
             
             textField.topAnchor.constraint(equalTo: daysLabel.bottomAnchor, constant: 40),
             textField.heightAnchor.constraint(equalToConstant: 75),
@@ -460,7 +460,7 @@ extension EditTrackerViewController: UITableViewDataSource {
         } else {
             cell.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
             cell.detailTextLabel?.text = viewModel.displayedScheduleText(viewModel.currentSchedule)
-
+            
         }
         return cell
     }
@@ -540,8 +540,8 @@ extension EditTrackerViewController: UICollectionViewDataSource {
             let selectedColor = viewModel.currentColor
             cell.setColor(viewModel.colorItems[indexPath.row])
             if let color = color.cgColor.components,
-                let selectedColor = selectedColor?.cgColor.components,
-            color == selectedColor{
+               let selectedColor = selectedColor?.cgColor.components,
+               color == selectedColor{
                 cell.isSelected = true
                 cell.setSelected(true)
             }

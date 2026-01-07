@@ -28,17 +28,17 @@ final class ColorCollectionViewCell: UICollectionViewCell {
     required init?(coder: NSCoder) {
         nil
     }
-
+    
     // MARK: - Public Methods
     func setColor(_ color: UIColor) {
         view.backgroundColor = color
         layer.borderColor = color.withAlphaComponent(0.3).cgColor
     }
-
+    
     func setSelected(_ isSelected: Bool) {
         layer.borderWidth = isSelected ? 3 : 0
     }
-
+    
     // MARK: - Setups
     private func setupUI() {
         layer.cornerRadius = 8

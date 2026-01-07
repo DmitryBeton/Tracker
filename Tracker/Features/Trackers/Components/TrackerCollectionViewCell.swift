@@ -105,7 +105,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
     
     private func dayWord(for countOfDays: Int) -> String {
-                        
+        
         let daysString = String.localizedStringWithFormat(
             NSLocalizedString("countOfDays", comment: "Number of completed days"),
             countOfDays

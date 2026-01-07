@@ -16,7 +16,7 @@ final class CreateTrackerViewModel {
     var onScheduleStateChange: Binding<String?>?
     var onEmojiStateChange: Binding<String?>?
     var onColorStateChange: Binding<UIColor?>?
-
+    
     // MARK: - Data for collection & table
     var emojiItems: [String] {
         model.emojiItems
@@ -56,7 +56,7 @@ final class CreateTrackerViewModel {
     var currentColor: UIColor? {
         model.trackerData.color
     }
-
+    
     // MARK: - Dependencies
     private let model: CreateTrackerModel
     
@@ -101,7 +101,7 @@ final class CreateTrackerViewModel {
         case .success:
             let scheduleText = formatScheduleText(schedule)
             onScheduleStateChange?(scheduleText)
-
+            
             onCreateButtonStateChange?(model.isFormValid())
             
         case .failure:
@@ -109,7 +109,7 @@ final class CreateTrackerViewModel {
             onCreateButtonStateChange?(false)
         }
     }
-
+    
     func didSelectEmoji(_ emoji: String) {
         let result = model.updateEmoji(emoji)
         

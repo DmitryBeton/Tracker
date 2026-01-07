@@ -28,12 +28,12 @@ final class EmojiCollectionViewCell: UICollectionViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     // MARK: - Public Methods
     func setEmoji(_ emoji: String) {
         emojiLabel.text = emoji
     }
-
+    
     func setSelected(_ isSelected: Bool) {
         if isSelected {
             backgroundColor = .ypLightGray
@@ -41,7 +41,7 @@ final class EmojiCollectionViewCell: UICollectionViewCell {
             backgroundColor = .clear
         }
     }
-
+    
     // MARK: - Setups
     private func setupUI() {
         layer.cornerRadius = 16

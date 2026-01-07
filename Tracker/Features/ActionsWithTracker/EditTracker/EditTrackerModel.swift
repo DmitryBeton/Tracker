@@ -22,9 +22,9 @@ final class EditTrackerModel {
         self.trackerData.schedule = getSchedule()
         self.trackerData.emoji = tracker.emoji
         self.trackerData.color = tracker.color
-
+        
     }
-
+    
     private let maxNameLength = 38
     let emojiItems = [
         "🙂", "😻", "🌺", "🐶", "❤️", "😱",
@@ -43,7 +43,7 @@ final class EditTrackerModel {
     private func getCategory() -> String {
         dataProvider.getCategoryTitle(for: tracker.id)
     }
-
+    
     private func getSchedule() -> [WeekDay] {
         dataProvider.getSchedule(for: tracker.id)
     }
@@ -112,10 +112,10 @@ final class EditTrackerModel {
     
     func isFormValid() -> Bool {
         return !trackerData.name.isEmpty &&
-               !trackerData.category.isEmpty &&
-               trackerData.schedule != nil &&
-               !trackerData.emoji.isEmpty &&
-               trackerData.color != .clear
+        !trackerData.category.isEmpty &&
+        trackerData.schedule != nil &&
+        !trackerData.emoji.isEmpty &&
+        trackerData.color != .clear
     }
     
     func daysCompleted() -> [TrackerRecord] {

@@ -18,6 +18,7 @@ final class FilterViewController: UIViewController {
         let tableView = UITableView()
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         tableView.isScrollEnabled = false
+        tableView.backgroundColor = .ypWhite
         return tableView
     }()
     
@@ -40,12 +41,12 @@ final class FilterViewController: UIViewController {
     private func setupUI() {
         let text = NSLocalizedString("title_filters", comment: "")
         title = text
-
+        
         view.backgroundColor = .ypWhite
         
         tableView.delegate = self
         tableView.dataSource = self
-
+        
         tableView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(tableView)
         NSLayoutConstraint.activate([
@@ -53,7 +54,7 @@ final class FilterViewController: UIViewController {
             tableView.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor, constant: -16),
             tableView.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor, constant: 16),
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24)
-
+            
         ])
     }
 }
@@ -71,7 +72,7 @@ extension FilterViewController: UITableViewDelegate, UITableViewDataSource {
         } else {
             cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
         }
-                
+        
         cell.textLabel?.text = viewModel.tableViewItems[indexPath.row]
         
         cell.backgroundColor = .ypBackground
@@ -81,7 +82,7 @@ extension FilterViewController: UITableViewDelegate, UITableViewDataSource {
         
         cell.detailTextLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
         cell.textLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
-                
+        
         let isSelected = viewModel.isSelected(at: indexPath.row)
         
         if isSelected && indexPath.row != 0 && indexPath.row != 1  {
@@ -90,7 +91,7 @@ extension FilterViewController: UITableViewDelegate, UITableViewDataSource {
         } else {
             cell.accessoryType = .none
         }
-
+        
         switch indexPath.row {
         case 0:
             cell.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
@@ -101,15 +102,15 @@ extension FilterViewController: UITableViewDelegate, UITableViewDataSource {
         }
         return cell
     }
-
+    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         viewModel.selectFilter(at: indexPath.row)
         onFilterChanged?(viewModel.getFilter())
         self.dismiss(animated: true)
     }
-
+    
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         75
     }
-
+    
 }

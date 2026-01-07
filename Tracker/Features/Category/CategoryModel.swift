@@ -37,6 +37,6 @@ final class CategoryModel: CategoryModelProtocol {
     func editCategory(oldName: String, newName: String) throws {
         try dataProvider.editCategory(oldTitle: oldName, newTitle: newName)
     }
-
+    
 }
 

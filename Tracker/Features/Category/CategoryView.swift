@@ -111,7 +111,7 @@ final class CategoryView: UIViewController {
     private func editTapped(at indexPath: IndexPath, titleNow: String) {
         let editVM = EditCategoryViewModel()
         let editVC = EditCategoryView(viewModel: editVM, title: titleNow)
-    
+        
         editVC.onEditCategory = { [weak self] name in
             print("EditView -> createTapped() -> \(name)")
             self?.viewModel.editCategory(at: indexPath, to: name)
@@ -128,9 +128,9 @@ final class CategoryView: UIViewController {
         )
         alert.addAction(UIAlertAction(title: "Удалить", style: .destructive) { [weak self] _ in self?.viewModel.deleteCategory(at: index) })
         alert.addAction(UIAlertAction(title: "Отменить", style: .default))
-
+        
         present(alert, animated: true)
-
+        
     }
     
     // MARK: - UI Setup
@@ -167,7 +167,7 @@ final class CategoryView: UIViewController {
                 return label
             }()
         }
-
+        
         title = text
         
         view.backgroundColor = .ypWhite
@@ -258,7 +258,7 @@ extension CategoryView: UITableViewDataSource, UITableViewDelegate {
                    contextMenuConfigurationForRowAt indexPath: IndexPath,
                    point: CGPoint) -> UIContextMenuConfiguration? {
         
-
+        
         return UIContextMenuConfiguration(
             identifier: nil,
             previewProvider: nil,
