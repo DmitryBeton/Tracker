@@ -131,4 +131,15 @@ final class TrackersViewModel {
     func getDataProvider() -> DataProviderProtocol {
         dataProvider
     }
+    
+    // MARK: - Search
+    func searchTrackers(with text: String?) {
+        logger.info("called: \(#function)")
+        dataProvider.setSearchText(text)
+        reloadTrackers(for: selectedDate)
+        // Keep current selectedDate/filter; only update records and notify bindings
+//        completedRecords = dataProvider.fetchCompletedRecords()
+//        onDataChanged?(())
+//        onEmptyStateChanged?(dataProvider.numberOfCategories == 0)
+    }
 }

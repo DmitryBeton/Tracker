@@ -177,6 +177,7 @@ final class TrackersViewController: UIViewController {
         emptyStateView.addSubview(dizzyImage)
         emptyStateView.addSubview(label)
         
+        searchController.searchResultsUpdater = self
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.register(
@@ -297,6 +298,14 @@ final class TrackersViewController: UIViewController {
         }
         let navVC = UINavigationController(rootViewController: filterVC)
         present(navVC, animated: true)
+    }
+}
+
+// MARK: - SearchController
+extension TrackersViewController: UISearchResultsUpdating {
+   func updateSearchResults(for searchController: UISearchController) {
+        let text = searchController.searchBar.text
+        viewModel.searchTrackers(with: text?.isEmpty == false ? text : nil)
     }
 }
 

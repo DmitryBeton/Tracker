@@ -39,6 +39,7 @@ protocol DataProviderProtocol {
     // Filter
     func setFilter(_ filter: Filter)
     func setDate(_ date: Date)
+    func setSearchText(_ text: String?)
     func getCurrentFilter() -> Filter
 }
 
@@ -57,6 +58,7 @@ final class DataProvider: NSObject {
     
     private var currentDate: Date = Date()
     private var currentFilter: Filter = .allTrackers
+    private var currentSearchText: String? = nil
     
     init(_ dataStore: DataStore) throws {
         guard let context = dataStore.managedObjectContext else {
@@ -309,26 +311,40 @@ extension DataProvider {
     /// - Parameter filter: Выбранный фильтр
     func setFilter(_ filter: Filter) {
         logger.info("called: \(#function) with filter: \(filter.rawValue)")
-        
         currentFilter = filter
-        
-        let predicate = createPredicate(for: filter, date: currentDate)
+        let predicate = createCombinedPredicate()
         trackerStore.updateFetchedResultsControllerPredicate(predicate)
         logger.info("✅ Filter applied: \(filter.rawValue), date: \(currentDate)")
     }
-    
+
     /// - Parameter date: Новая дата
     func setDate(_ date: Date) {
         logger.info("called: \(#function) with date: \(date)")
-        
         currentDate = date
-        
-        let predicate = createPredicate(for: currentFilter, date: date)
+        let predicate = createCombinedPredicate()
         trackerStore.updateFetchedResultsControllerPredicate(predicate)
- 
         logger.info("✅ Date changed to: \(date), current filter: \(currentFilter.rawValue)")
     }
-    
+
+    func setSearchText(_ text: String?) {
+        currentSearchText = text
+        let predicate = createCombinedPredicate()
+        trackerStore.updateFetchedResultsControllerPredicate(predicate)
+    }
+
+    private func createCombinedPredicate() -> NSPredicate? {
+        let basePredicate = createPredicate(for: currentFilter, date: currentDate)
+        guard let text = currentSearchText, !text.isEmpty else {
+            return basePredicate
+        }
+        let searchPredicate = NSPredicate(format: "name CONTAINS[cd] %@", text)
+        if let base = basePredicate {
+            return NSCompoundPredicate(andPredicateWithSubpredicates: [base, searchPredicate])
+        } else {
+            return searchPredicate
+        }
+    }
+
     func getCurrentFilter() -> Filter {
         return currentFilter
     }
