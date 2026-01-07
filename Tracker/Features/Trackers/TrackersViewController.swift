@@ -13,6 +13,7 @@ final class TrackersViewController: UIViewController {
     private let logger = Logger(label: "TrackersViewController")
     
     private var viewModel: TrackersViewModelProtocol
+    private let analyticsService = AnalyticsService()
     
     // MARK: - UI Elements
     private let collectionView: UICollectionView = {
@@ -284,6 +285,7 @@ final class TrackersViewController: UIViewController {
     // MARK: - Actions
     @objc private func addTapped() {
         logger.info("called: \(#function) \(#line)")
+        analyticsService.report(event: "click", params: ["screen": "main", "item" : "add_track"])
         showCreateTrackerScreen()
     }
     
@@ -293,6 +295,7 @@ final class TrackersViewController: UIViewController {
     }
     
     private func editTapped(onTracker: Tracker) {
+        analyticsService.report(event: "click", params: ["screen": "main", "item" : "edit"])
         guard let dataProvider = viewModel.getDataProvider() else {
             return
         }
@@ -310,6 +313,8 @@ final class TrackersViewController: UIViewController {
     }
     
     @objc private func filterTapped() {
+        analyticsService.report(event: "click", params: ["screen": "main", "item" : "filter"])
+
         guard let dataProvider = viewModel.getDataProvider() else {
             return
         }
@@ -362,6 +367,7 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
                     guard let tracker = self?.viewModel.tracker(at: indexPath) else {
                         return
                     }
+                    self?.analyticsService.report(event: "click", params: ["screen": "main", "item" : "delete"])
                     self?.viewModel.deleteTracker(tracker.id)
                 }
             ])
@@ -395,6 +401,7 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         cell.configure(with: tracker, completedDays: completedDays, isCompletedToday: isCompleted)
         cell.onDoneButtonTapped = { [weak self] trackerId in
             guard let self = self else { return }
+            analyticsService.report(event: "click", params: ["screen": "main", "item" : "track"])
             let success = self.viewModel.toggleTrackerCompletion(for: trackerId)
             if !success {
                 self.showFutureDateRestriction()
