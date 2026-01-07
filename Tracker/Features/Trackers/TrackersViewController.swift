@@ -115,6 +115,16 @@ final class TrackersViewController: UIViewController {
         
         guard emptyStateView.isHidden else { return }
         
+        if let text = searchController.searchBar.searchTextField.text,
+           !text.isEmpty || viewModel.isFilterActive()
+        {
+            dizzyImage.image = UIImage(resource: .notFound)
+            label.text = NSLocalizedString("not_found", comment: "")
+        } else {
+            dizzyImage.image = UIImage(resource: .dizzy)
+            label.text = NSLocalizedString("what_we_will_be_tracking", comment: "")
+        }
+        
         filterButton.isHidden = true
         emptyStateView.isHidden = false
         emptyStateView.alpha = 0
@@ -295,6 +305,9 @@ final class TrackersViewController: UIViewController {
                 return
             }
             self?.filterButton.backgroundColor = isActive ? .ypRed : .ypBlue
+            if filter == .todayTrackers {
+                self?.datePicker.setDate(Date(), animated: true)
+            }
         }
         let navVC = UINavigationController(rootViewController: filterVC)
         present(navVC, animated: true)

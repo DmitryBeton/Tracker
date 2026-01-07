@@ -105,7 +105,7 @@ extension FilterViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         viewModel.selectFilter(at: indexPath.row)
         onFilterChanged?(viewModel.getFilter())
-        tableView.reloadData()
+        self.dismiss(animated: true)
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
