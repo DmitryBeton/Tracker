@@ -16,6 +16,7 @@ final class TabBarController: UITabBarController {
     }
     
     var viewModel: TrackersViewModelProtocol?
+    var statisticsViewModel: StatisticsViewModel?
 
     private func setupViewControllers() {
         let textTrackers = NSLocalizedString("tabbar_trackers", comment: "")
@@ -28,11 +29,13 @@ final class TabBarController: UITabBarController {
         do {
             let dataProvider = try DataProvider(trackerStore)
             viewModel = TrackersViewModel(dataProvider: dataProvider)
+            statisticsViewModel = StatisticsViewModel(dataProvider: dataProvider)
         } catch {
             assertionFailure("DataProvider init failed")
         }
 
-        guard let viewModel else {
+        guard let viewModel,
+            let statisticsViewModel else {
             return
         }
         
@@ -44,9 +47,9 @@ final class TabBarController: UITabBarController {
             tag: 1
         )
         
-        let statisticViewModel = StatisticsViewModel()
-        let statisticsViewController = StatisticsViewController(viewModel: statisticViewModel)
+        let statisticsViewController = StatisticsViewController(viewModel: statisticsViewModel)
         let statisticsNavigationController = UINavigationController(rootViewController: statisticsViewController)
+        statisticsNavigationController.navigationBar.prefersLargeTitles = true
         statisticsNavigationController.tabBarItem = UITabBarItem(
             title: textStatistic,
             image: UIImage(resource: .tabStatistic),

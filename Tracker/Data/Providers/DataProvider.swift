@@ -17,6 +17,7 @@ protocol DataProviderProtocol {
     func tracker(at: IndexPath) -> TrackerCoreData?
     func fetchAllCategories() -> [String]
     func getCategoryTitle(for tracker: UUID) -> String
+    func fetchAllTrackers() -> [Tracker]
 
     // Add/Delete
     func addTracker(_ tracker: Tracker, to: String) throws
@@ -73,6 +74,27 @@ final class DataProvider: NSObject {
 
 // MARK: - DataProviderProtocol
 extension DataProvider: DataProviderProtocol {
+    func fetchAllTrackers() -> [Tracker] {
+        print(101)
+        do {
+            let trackerCoreDatas = try trackerStore.fetchTrackers()
+            return trackerCoreDatas.compactMap { coreData in
+                guard let id = coreData.id,
+                      let name = coreData.name,
+                      let colorString = coreData.color,
+                      let emoji = coreData.emoji else {
+                    return nil
+                }
+                let color = UIColorMarshalling.color(from: colorString)
+                let schedule = coreData.schedule as? [WeekDay]
+                return Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule)
+            }
+        } catch {
+            print("Error fetching trackers: \(error)")
+            return []
+        }
+    }
+
     func getSchedule(for tracker: UUID) -> [WeekDay] {
         do {
             print("получение расписания")

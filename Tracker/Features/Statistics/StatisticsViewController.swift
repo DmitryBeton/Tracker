@@ -35,6 +35,9 @@ final class StatisticsViewController: UIViewController {
     
     private let tableView: UITableView = {
         let table = UITableView()
+        table.translatesAutoresizingMaskIntoConstraints = false
+        table.backgroundColor = .ypWhite
+        table.rowHeight = 90
         return table
     }()
     // MARK: - Initialization
@@ -53,18 +56,36 @@ final class StatisticsViewController: UIViewController {
         
         setupUI()
         setupConstraints()
-        noDataStateView.isHidden = true
+        noDataStateView.isHidden = !viewModel.isEmpty
+        tableView.isHidden = viewModel.isEmpty
+
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        noDataStateView.isHidden = !viewModel.isEmpty
+        tableView.isHidden = viewModel.isEmpty
+        tableView.reloadData()
+    }
+
+
     // MARK: - Setup
     private func setupUI() {
         title = "Cтатистика"
         
         view.backgroundColor = .ypWhite
 
+        view.addSubview(tableView)
         view.addSubview(noDataStateView)
         noDataStateView.addSubview(noDataImage)
         noDataStateView.addSubview(noDataLabel)
+        
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.register(
+            StatisticsTableViewCell.self,
+            forCellReuseIdentifier: StatisticsTableViewCell.reuseIdentifier
+        )
     }
     
     private func setupConstraints() {
@@ -77,7 +98,50 @@ final class StatisticsViewController: UIViewController {
             
             noDataLabel.topAnchor.constraint(equalTo: noDataImage.bottomAnchor, constant: 8),
             noDataLabel.centerXAnchor.constraint(equalTo: noDataImage.centerXAnchor),
+            
+            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 77),
+            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12),
+            tableView.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor, constant: -12),
+            tableView.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor, constant: 12),
         ])
+    }
+    
+    // MARK: - Public Methods
+    func changeStateView(isHidden: Bool) {
+        noDataStateView.isHidden = isHidden
+    }
+}
+
+extension StatisticsViewController: UITableViewDataSource & UITableViewDelegate {
+    func numberOfSections(in tableView: UITableView) -> Int {
+        4
+    }
+
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        1
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(
+            withIdentifier: StatisticsTableViewCell.reuseIdentifier,
+            for: indexPath
+        ) as? StatisticsTableViewCell else {
+            assertionFailure("Failed to dequeue StatisticsTableViewCell")
+            return UITableViewCell()
+        }
+        
+        let stat = viewModel.statInfo(for: indexPath.section)
+        cell.configuration(count: stat.value, text: stat.description)
+        return cell
+    }
+
+    
+    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        12
+    }
+
+    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        UIView()
     }
     
 }

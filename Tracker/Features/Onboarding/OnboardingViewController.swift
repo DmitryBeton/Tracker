@@ -22,10 +22,15 @@ final class OnboardingViewController: UIPageViewController {
         let button = UIButton()
         let text = NSLocalizedString("technologies", comment: "")
         button.setTitle(text, for: .normal)
-        button.setTitleColor(.ypWhite, for: .normal)
+        button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         button.titleLabel?.textAlignment = .center
-        button.backgroundColor = .ypBlack
+        button.backgroundColor = UIColor(
+            red: 26/255,
+            green: 27/255,
+            blue: 34/255,
+            alpha: 1.0
+        )
         button.layer.cornerRadius = 16
         button.addTarget(self, action: #selector(openTracker), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -35,7 +40,12 @@ final class OnboardingViewController: UIPageViewController {
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 32, weight: .bold)
-        label.textColor = .ypBlack
+        label.textColor = UIColor(
+            red: 26/255,
+            green: 27/255,
+            blue: 34/255,
+            alpha: 1.0
+        )
         label.numberOfLines = 0
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
