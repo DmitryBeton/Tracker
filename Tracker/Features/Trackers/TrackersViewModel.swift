@@ -1,7 +1,38 @@
 import UIKit
 import Logging
 
-final class TrackersViewModel {
+protocol TrackersViewModelProtocol {
+    var onDataChanged: Binding<Void>? { get set }
+    var onEmptyStateChanged: Binding<Bool>? { get set }
+
+    var completedRecords: [TrackerRecord] { get }
+    var selectedDate: Date { get }
+    
+    var numberOfSections: Int { get }
+    func categoryTitle(for section: Int) -> String
+    func numberOfItems(inSection section: Int) -> Int
+    func tracker(at indexPath: IndexPath) -> Tracker?
+    
+    func completedDays(for trackerId: UUID) -> Int
+    func isCompletedToday(trackerId: UUID) -> Bool
+    func toggleTrackerCompletion(for trackerId: UUID) -> Bool
+
+    func reloadTrackers(for date: Date)
+    
+    func createNewTracker(_ tracker: Tracker, to category: String)
+    func deleteTracker(_ tracker: UUID)
+    func editTracker(_ tracker: Tracker)
+    
+    func indexPath(for trackerId: UUID) -> IndexPath?
+    
+    func filterTrackers(by filter: Filter)
+    func isFilterActive() -> Bool
+    func searchTrackers(with text: String?)
+
+    func getDataProvider() -> DataProviderProtocol?
+}
+
+final class TrackersViewModel: TrackersViewModelProtocol {
     // MARK: - Bindings
     var onDataChanged: Binding<Void>?
     var onEmptyStateChanged: Binding<Bool>?
@@ -128,7 +159,7 @@ final class TrackersViewModel {
         return filter != .allTrackers && filter != .todayTrackers
     }
     
-    func getDataProvider() -> DataProviderProtocol {
+    func getDataProvider() -> DataProviderProtocol? {
         dataProvider
     }
     

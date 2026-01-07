@@ -12,7 +12,7 @@ final class TrackersViewController: UIViewController {
     // MARK: - Private properties
     private let logger = Logger(label: "TrackersViewController")
     
-    private var viewModel: TrackersViewModel!
+    private var viewModel: TrackersViewModelProtocol
     
     // MARK: - UI Elements
     private let collectionView: UICollectionView = {
@@ -68,7 +68,7 @@ final class TrackersViewController: UIViewController {
         super.viewDidLoad()
         logger.info("called: \(#function) \(#line)")
         
-        setupViewModel()
+//        setupViewModel()
         setupUI()
         bindViewModel()
         viewModel.reloadTrackers(for: viewModel.selectedDate)
@@ -76,18 +76,27 @@ final class TrackersViewController: UIViewController {
     }
     
     // MARK: - MVVM Binding
-    private func setupViewModel() {
-        guard let trackerStore = (UIApplication.shared.delegate as? AppDelegate)?.trackerStore else {
-            assertionFailure("trackerStore not found")
-            return
-        }
-        do {
-            let dataProvider = try DataProvider(trackerStore)
-            viewModel = TrackersViewModel(dataProvider: dataProvider)
-        } catch {
-            assertionFailure("DataProvider init failed")
-        }
+    init(viewModel: TrackersViewModelProtocol) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
     }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+//    private func setupViewModel() {
+//        guard let trackerStore = (UIApplication.shared.delegate as? AppDelegate)?.trackerStore else {
+//            assertionFailure("trackerStore not found")
+//            return
+//        }
+//        do {
+//            let dataProvider = try DataProvider(trackerStore)
+//            viewModel = TrackersViewModel(dataProvider: dataProvider)
+//        } catch {
+//            assertionFailure("DataProvider init failed")
+//        }
+//    }
     
     private func bindViewModel() {
         viewModel.onDataChanged = { [weak self] _ in
@@ -284,7 +293,10 @@ final class TrackersViewController: UIViewController {
     }
     
     private func editTapped(onTracker: Tracker) {
-        let editM = EditTrackerModel(dataProvider: viewModel.getDataProvider(), trackerEditing: onTracker)
+        guard let dataProvider = viewModel.getDataProvider() else {
+            return
+        }
+        let editM = EditTrackerModel(dataProvider: dataProvider, trackerEditing: onTracker)
         let editVM = EditTrackerViewModel(for: editM)
         let editVC = EditTrackerViewController()
         editVC.initialize(viewModel: editVM)
@@ -298,7 +310,10 @@ final class TrackersViewController: UIViewController {
     }
     
     @objc private func filterTapped() {
-        let filterVM = FilterViewModel(dataProvider: viewModel.getDataProvider())
+        guard let dataProvider = viewModel.getDataProvider() else {
+            return
+        }
+        let filterVM = FilterViewModel(dataProvider: dataProvider)
         let filterVC = FilterViewController(viewModel: filterVM)
         filterVC.onFilterChanged = { [weak self] filter in
             self?.viewModel.filterTrackers(by: filter)

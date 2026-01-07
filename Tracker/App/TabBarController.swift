@@ -15,11 +15,28 @@ final class TabBarController: UITabBarController {
         setupViewControllers()
     }
     
+    var viewModel: TrackersViewModelProtocol?
+
     private func setupViewControllers() {
         let textTrackers = NSLocalizedString("tabbar_trackers", comment: "")
         let textStatistic = NSLocalizedString("tabbar_statistic", comment: "")
         
-        let trackerViewController = TrackersViewController()
+        guard let trackerStore = (UIApplication.shared.delegate as? AppDelegate)?.trackerStore else {
+            assertionFailure("trackerStore not found")
+            return
+        }
+        do {
+            let dataProvider = try DataProvider(trackerStore)
+            viewModel = TrackersViewModel(dataProvider: dataProvider)
+        } catch {
+            assertionFailure("DataProvider init failed")
+        }
+
+        guard let viewModel else {
+            return
+        }
+        
+        let trackerViewController = TrackersViewController(viewModel: viewModel)
         let trackerNavigationController = UINavigationController(rootViewController: trackerViewController)
         trackerNavigationController.tabBarItem = UITabBarItem(
             title: textTrackers,
