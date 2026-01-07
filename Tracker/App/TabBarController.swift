@@ -49,7 +49,6 @@ final class TabBarController: UITabBarController {
         
         let statisticsViewController = StatisticsViewController(viewModel: statisticsViewModel)
         let statisticsNavigationController = UINavigationController(rootViewController: statisticsViewController)
-        statisticsNavigationController.navigationBar.prefersLargeTitles = true
         statisticsNavigationController.tabBarItem = UITabBarItem(
             title: textStatistic,
             image: UIImage(resource: .tabStatistic),

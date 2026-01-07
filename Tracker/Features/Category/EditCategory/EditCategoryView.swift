@@ -102,7 +102,38 @@ final class EditCategoryView: UIViewController {
     private func setupUI() {
         let text = NSLocalizedString("edit_category", comment: "")
         title = text
-        
+        if let navigationController = navigationController {
+            let appearance = UINavigationBarAppearance()
+            appearance.configureWithOpaqueBackground()
+            appearance.backgroundColor = .ypWhite
+            appearance.shadowColor = .clear
+            
+            let titleFont = UIFont.systemFont(ofSize: 16, weight: .medium)
+            let paragraphStyle = NSMutableParagraphStyle()
+            paragraphStyle.minimumLineHeight = 22
+            paragraphStyle.maximumLineHeight = 22
+            paragraphStyle.alignment = .center
+            
+            appearance.titleTextAttributes = [
+                .foregroundColor: UIColor.ypBlack,
+                .font: titleFont,
+                .paragraphStyle: paragraphStyle
+            ]
+            
+            navigationController.navigationBar.standardAppearance = appearance
+            navigationController.navigationBar.scrollEdgeAppearance = appearance
+            navigationController.navigationBar.compactAppearance = appearance
+            
+            navigationItem.titleView = {
+                let label = UILabel()
+                label.text = text
+                label.font = titleFont
+                label.textColor = .ypBlack
+                label.textAlignment = .center
+                return label
+            }()
+        }
+
         view.backgroundColor = .ypWhite
         
         view.addSubview(textField)

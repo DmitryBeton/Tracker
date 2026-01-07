@@ -72,7 +72,22 @@ final class StatisticsViewController: UIViewController {
     // MARK: - Setup
     private func setupUI() {
         title = NSLocalizedString("statistics", comment: "")
+        navigationController?.navigationBar.prefersLargeTitles = true
         
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = .ypWhite
+        appearance.shadowColor = .clear
+        
+        appearance.largeTitleTextAttributes = [
+            .foregroundColor: UIColor.ypBlack,
+            .font: UIFont.systemFont(ofSize: 34, weight: .bold)
+        ]
+        
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        navigationController?.navigationBar.compactAppearance = appearance
+
         view.backgroundColor = .ypWhite
 
         view.addSubview(tableView)
