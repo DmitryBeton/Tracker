@@ -61,7 +61,15 @@ final class TrackersViewController: UIViewController {
         return button
     }()
     
-    private let datePicker = UIDatePicker()
+    private let datePicker: UIDatePicker = {
+        let datePicker = UIDatePicker()
+        datePicker.preferredDatePickerStyle = .compact
+        datePicker.layer.masksToBounds = true
+        datePicker.layer.cornerRadius = 8
+        datePicker.datePickerMode = .date
+        return datePicker
+    }()
+    
     private let searchController = UISearchController()
     
     // MARK: - Lifecycle
@@ -69,7 +77,6 @@ final class TrackersViewController: UIViewController {
         super.viewDidLoad()
         logger.info("called: \(#function) \(#line)")
         
-//        setupViewModel()
         setupUI()
         bindViewModel()
         viewModel.reloadTrackers(for: viewModel.selectedDate)
@@ -85,19 +92,6 @@ final class TrackersViewController: UIViewController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-//    private func setupViewModel() {
-//        guard let trackerStore = (UIApplication.shared.delegate as? AppDelegate)?.trackerStore else {
-//            assertionFailure("trackerStore not found")
-//            return
-//        }
-//        do {
-//            let dataProvider = try DataProvider(trackerStore)
-//            viewModel = TrackersViewModel(dataProvider: dataProvider)
-//        } catch {
-//            assertionFailure("DataProvider init failed")
-//        }
-//    }
     
     private func bindViewModel() {
         viewModel.onDataChanged = { [weak self] _ in
@@ -269,8 +263,6 @@ final class TrackersViewController: UIViewController {
         addButton.tintColor = .ypBlack
         navigationItem.leftBarButtonItem = addButton
         
-        datePicker.preferredDatePickerStyle = .compact
-        datePicker.datePickerMode = .date
         datePicker.addTarget(self, action: #selector(dateChanged), for: .valueChanged)
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
         

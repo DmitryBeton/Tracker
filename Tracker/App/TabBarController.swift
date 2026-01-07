@@ -44,7 +44,8 @@ final class TabBarController: UITabBarController {
             tag: 1
         )
         
-        let statisticsViewController = StatisticsViewController()
+        let statisticViewModel = StatisticsViewModel()
+        let statisticsViewController = StatisticsViewController(viewModel: statisticViewModel)
         let statisticsNavigationController = UINavigationController(rootViewController: statisticsViewController)
         statisticsNavigationController.tabBarItem = UITabBarItem(
             title: textStatistic,

@@ -168,9 +168,5 @@ final class TrackersViewModel: TrackersViewModelProtocol {
         logger.info("called: \(#function)")
         dataProvider.setSearchText(text)
         reloadTrackers(for: selectedDate)
-        // Keep current selectedDate/filter; only update records and notify bindings
-//        completedRecords = dataProvider.fetchCompletedRecords()
-//        onDataChanged?(())
-//        onEmptyStateChanged?(dataProvider.numberOfCategories == 0)
     }
 }
