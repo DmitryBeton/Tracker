@@ -18,30 +18,30 @@ enum WeekDay: Int, CaseIterable, Codable {
     
     var fullName: String {
         switch self {
-        case .monday: NSLocalizedString("monday_full", comment: "")
-        case .tuesday: NSLocalizedString("tuesday_full", comment: "")
-        case .wednesday: NSLocalizedString("wednesday_full", comment: "")
-        case .thursday: NSLocalizedString("thursday_full", comment: "")
-        case .friday: NSLocalizedString("friday_full", comment: "")
-        case .saturday: NSLocalizedString("saturday_full", comment: "")
-        case .sunday: NSLocalizedString("sunday_full", comment: "")
+        case .monday: return Localizable.WeekDay.monday.full.localized
+        case .tuesday: return Localizable.WeekDay.tuesday.full.localized
+        case .wednesday: return Localizable.WeekDay.wednesday.full.localized
+        case .thursday: return Localizable.WeekDay.thursday.full.localized
+        case .friday: return Localizable.WeekDay.friday.full.localized
+        case .saturday: return Localizable.WeekDay.saturday.full.localized
+        case .sunday: return Localizable.WeekDay.sunday.full.localized
         }
     }
     
     var shortName: String {
         switch self {
-        case .monday: NSLocalizedString("monday_short", comment: "")
-        case .tuesday: NSLocalizedString("tuesday_short", comment: "")
-        case .wednesday: NSLocalizedString("wednesday_short", comment: "")
-        case .thursday: NSLocalizedString("thursday_short", comment: "")
-        case .friday: NSLocalizedString("friday_short", comment: "")
-        case .saturday: NSLocalizedString("saturday_short", comment: "")
-        case .sunday: NSLocalizedString("sunday_short", comment: "")
+        case .monday: return Localizable.WeekDay.monday.short.localized
+        case .tuesday: return Localizable.WeekDay.tuesday.short.localized
+        case .wednesday: return Localizable.WeekDay.wednesday.short.localized
+        case .thursday: return Localizable.WeekDay.thursday.short.localized
+        case .friday: return Localizable.WeekDay.friday.short.localized
+        case .saturday: return Localizable.WeekDay.saturday.short.localized
+        case .sunday: return Localizable.WeekDay.sunday.short.localized
         }
     }
     
     static func fromDate(_ date: Date) -> WeekDay? {
-        return Calendar.current.weekDay(from: date)
+        Calendar.current.weekDay(from: date)
     }
 }
 
@@ -62,3 +62,4 @@ extension Calendar {
         return mapping[weekday]
     }
 }
+

@@ -503,10 +503,7 @@ extension EditTrackerViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         guard let viewModel = viewModel else { return 0 }
         
-        if section == 0 {
-            return viewModel.emojiItems.count
-        }
-        return viewModel.colorItems.count
+        return section == 0 ? viewModel.emojiItems.count : viewModel.colorItems.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {

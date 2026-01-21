@@ -10,6 +10,25 @@ import Logging
 
 final class CreateTrackerViewController: UIViewController {
     
+    // MARK: - UI Constants
+    private enum UIConstants {
+        static let maxNameLength: Int = 38
+        static let normalTopShift: CGFloat = 24
+        static let warningTopShift: CGFloat = 62
+        static let textFieldHeight: CGFloat = 75
+        static let textFieldTop: CGFloat = 24
+        static let warningLabelTop: CGFloat = 8
+        static let tableWidth: CGFloat = 343
+        static let tableHeight: CGFloat = 150
+        static let collectionTop: CGFloat = 32
+        static let collectionHeight: CGFloat = 500
+        static let cancelButtonSideInset: CGFloat = 20
+        static let addButtonSideInset: CGFloat = 20
+        static let bottomButtonsHeight: CGFloat = 60
+        static let cancelButtonWidth: CGFloat = 166
+        static let addButtonWidth: CGFloat = 161
+    }
+    
     // MARK: - Dependences
     private let logger = Logger(label: "CreateTrackerViewController")
     private var viewModel: CreateTrackerViewModel?
@@ -130,20 +149,21 @@ final class CreateTrackerViewController: UIViewController {
     }
     
     private func bind() {
-        guard let viewModel = viewModel else { return }
+        guard let viewModel else { return }
         
         viewModel.onNameStateChange = { [weak self] nameState in
             guard let self = self, let nameState = nameState else { return }
             
             self.textField.text = nameState.text
+            guard let text = self.textField.text?.prefix(UIConstants.maxNameLength) else { return }
             if let warning = nameState.warning {
-                self.textField.text = String(self.textField.text!.prefix(38))
+                self.textField.text = String(text)
                 self.warningLabel.isHidden = false
                 self.warningLabel.text = warning
-                self.tableViewTopConstraint?.constant = 62
+                self.tableViewTopConstraint?.constant = UIConstants.warningTopShift
             } else {
                 self.warningLabel.isHidden = true
-                self.tableViewTopConstraint?.constant = 24
+                self.tableViewTopConstraint?.constant = UIConstants.normalTopShift
             }
         }
         
@@ -275,7 +295,7 @@ final class CreateTrackerViewController: UIViewController {
     }
     
     private func setupConstraints() {
-        tableViewTopConstraint = tableView.topAnchor.constraint(equalTo: textField.bottomAnchor, constant: 24)
+        tableViewTopConstraint = tableView.topAnchor.constraint(equalTo: textField.bottomAnchor, constant: UIConstants.normalTopShift)
         tableViewTopConstraint?.isActive = true
         
         NSLayoutConstraint.activate([
@@ -290,34 +310,34 @@ final class CreateTrackerViewController: UIViewController {
             contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
             contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
             
-            textField.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 24),
-            textField.heightAnchor.constraint(equalToConstant: 75),
-            textField.widthAnchor.constraint(equalToConstant: 343),
+            textField.topAnchor.constraint(equalTo: contentView.topAnchor, constant: UIConstants.textFieldTop),
+            textField.heightAnchor.constraint(equalToConstant: UIConstants.textFieldHeight),
+            textField.widthAnchor.constraint(equalToConstant: UIConstants.tableWidth),
             textField.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             
-            warningLabel.topAnchor.constraint(equalTo: textField.bottomAnchor, constant: 8),
+            warningLabel.topAnchor.constraint(equalTo: textField.bottomAnchor, constant: UIConstants.warningLabelTop),
             warningLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             warningLabel.heightAnchor.constraint(equalToConstant: 22),
             
             tableView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            tableView.widthAnchor.constraint(equalToConstant: 343),
-            tableView.heightAnchor.constraint(equalToConstant: 150),
+            tableView.widthAnchor.constraint(equalToConstant: UIConstants.tableWidth),
+            tableView.heightAnchor.constraint(equalToConstant: UIConstants.tableHeight),
             
-            collectionView.topAnchor.constraint(equalTo: tableView.bottomAnchor, constant: 32),
+            collectionView.topAnchor.constraint(equalTo: tableView.bottomAnchor, constant: UIConstants.collectionTop),
             collectionView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             collectionView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            collectionView.heightAnchor.constraint(equalToConstant: 500),
+            collectionView.heightAnchor.constraint(equalToConstant: UIConstants.collectionHeight),
             
             cancelButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            cancelButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            cancelButton.widthAnchor.constraint(equalToConstant: 166),
-            cancelButton.heightAnchor.constraint(equalToConstant: 60),
+            cancelButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: UIConstants.cancelButtonSideInset),
+            cancelButton.widthAnchor.constraint(equalToConstant: UIConstants.cancelButtonWidth),
+            cancelButton.heightAnchor.constraint(equalToConstant: UIConstants.bottomButtonsHeight),
             
             addButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            addButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
-            addButton.widthAnchor.constraint(equalToConstant: 161),
-            addButton.heightAnchor.constraint(equalToConstant: 60),
+            addButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -UIConstants.addButtonSideInset),
+            addButton.widthAnchor.constraint(equalToConstant: UIConstants.addButtonWidth),
+            addButton.heightAnchor.constraint(equalToConstant: UIConstants.bottomButtonsHeight),
         ])
     }
     
@@ -596,3 +616,4 @@ extension CreateTrackerViewController: UICollectionViewDelegateFlowLayout {
         CGSize(width: collectionView.frame.width, height: 40)
     }
 }
+

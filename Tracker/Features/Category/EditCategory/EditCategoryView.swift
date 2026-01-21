@@ -53,8 +53,9 @@ final class EditCategoryView: UIViewController {
         self.textField.text = title
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
     
     // MARK: - Lifecycle

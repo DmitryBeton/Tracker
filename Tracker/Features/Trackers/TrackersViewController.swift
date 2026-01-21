@@ -382,7 +382,7 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         
         return UIContextMenuConfiguration(actionProvider: { actions in
             return UIMenu(children: [
-                UIAction(title: NSLocalizedString("pin", comment: "")) { [weak self] _ in
+                UIAction(title: NSLocalizedString("pin", comment: "")) { _ in
                     
                 },
                 UIAction(title: NSLocalizedString("edit", comment: "")) { [weak self] _ in

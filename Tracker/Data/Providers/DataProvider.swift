@@ -59,7 +59,7 @@ final class DataProvider: NSObject {
     
     private var currentDate: Date = Date()
     private var currentFilter: Filter = .allTrackers
-    private var currentSearchText: String? = nil
+    private var currentSearchText: String?
     
     init(_ dataStore: DataStore) throws {
         guard let context = dataStore.managedObjectContext else {
@@ -100,7 +100,7 @@ extension DataProvider: DataProviderProtocol {
             print("получение расписания")
             return try trackerStore.getSchedule(for: tracker)
         } catch {
-            print("ошибка сохраниеия")
+            print("ошибка сохранения")
             return []
         }
     }
@@ -122,7 +122,7 @@ extension DataProvider: DataProviderProtocol {
             print("получение категории")
             return try trackerCategoryStore.getCategoryTitle(for: tracker)
         } catch {
-            print("ошибка сохраниеия")
+            print("ошибка сохранения")
             return "Error: Category Not Found"
         }
     }
@@ -155,7 +155,7 @@ extension DataProvider: DataProviderProtocol {
 
 
         } catch {
-            print("ошибка сохраниеия")
+            print("ошибка сохранения")
         }
     }
     
@@ -166,7 +166,7 @@ extension DataProvider: DataProviderProtocol {
 
 
         } catch {
-            print("ошибка сохраниеия")
+            print("ошибка сохранения")
         }
     }
     
@@ -177,7 +177,7 @@ extension DataProvider: DataProviderProtocol {
 
 
         } catch {
-            print("ошибка сохраниеия")
+            print("ошибка сохранения")
         }
     }
     
@@ -244,7 +244,7 @@ extension DataProvider: DataProviderProtocol {
             try trackerStore.deleteTracker(trackerId)
             print("успешно сохранили")
         } catch {
-            print("ошибка сохраниеия")
+            print("ошибка сохранения")
         }
     }
     
@@ -253,7 +253,7 @@ extension DataProvider: DataProviderProtocol {
             try trackerStore.editTracker(tracker)
             print("успешно сохранили")
         } catch {
-            print("ошибка сохраниеия")
+            print("ошибка сохранения")
         }
     }
 }

@@ -16,13 +16,16 @@ final class EditTrackerModel {
         self.dataProvider = dataProvider
         self.tracker = trackerEditing
         
-        self.trackerData.id = tracker.id
-        self.trackerData.name = tracker.name
-        self.trackerData.category = getCategory()
-        self.trackerData.schedule = getSchedule()
-        self.trackerData.emoji = tracker.emoji
-        self.trackerData.color = tracker.color
+        let category = getCategory()
+        let schedule = getSchedule()
         
+        self.trackerData = TrackerEditedData()
+            .withID(tracker.id)
+            .withName(tracker.name)
+            .withCategory(category)
+            .withSchedule(schedule)
+            .withEmoji(tracker.emoji)
+            .withColor(tracker.color)
     }
     
     private let maxNameLength = 38
@@ -52,8 +55,7 @@ final class EditTrackerModel {
         if name.count > maxNameLength {
             return .failure(.nameTooLong)
         }
-        
-        trackerData.name = name
+        trackerData = trackerData.withName(name)
         return .success(name)
     }
     
@@ -61,8 +63,7 @@ final class EditTrackerModel {
         if category.isEmpty {
             return .failure(.categoryNotSelected)
         }
-        
-        trackerData.category = category
+        trackerData = trackerData.withCategory(category)
         return .success(())
     }
     
@@ -70,8 +71,7 @@ final class EditTrackerModel {
         if schedule.isEmpty {
             return .failure(.scheduleNotSelected)
         }
-        
-        trackerData.schedule = schedule
+        trackerData = trackerData.withSchedule(schedule)
         return .success(())
     }
     
@@ -79,8 +79,7 @@ final class EditTrackerModel {
         if emoji.isEmpty {
             return .failure(.emojiNotSelected)
         }
-        
-        trackerData.emoji = emoji
+        trackerData = trackerData.withEmoji(emoji)
         return .success(())
     }
     
@@ -88,8 +87,7 @@ final class EditTrackerModel {
         if color == .clear {
             return .failure(.colorNotSelected)
         }
-        
-        trackerData.color = color
+        trackerData = trackerData.withColor(color)
         return .success(())
     }
     
