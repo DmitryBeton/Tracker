@@ -20,7 +20,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         if OnboardingManager.shared.hasSeenOnboarding {
             window.rootViewController = TabBarController()
         } else {
-
+            
             let onboardingVC = OnboardingViewController()
             
             onboardingVC.onShowOnboarding = { [weak self] hasSeen in
