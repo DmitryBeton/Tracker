@@ -72,6 +72,7 @@
 
 "wanna_delete_tracker" = "Are you sure you want to delete the tracker?";
 
+"delete_category" = "Is this category definitely not needed?";
 // Filters
 "all_trackers" = "All trackers";
 "today" = "Trackers today";

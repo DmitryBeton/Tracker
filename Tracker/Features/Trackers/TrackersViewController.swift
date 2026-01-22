@@ -42,7 +42,7 @@ final class TrackersViewController: UIViewController {
     
     private let label: UILabel = {
         let label = UILabel()
-        let text = NSLocalizedString("what_we_will_be_tracking", comment: "")
+        let text = Localizable.Other.whatWeWillBeTracking.localized
         label.text = text
         label.font = .systemFont(ofSize: 12, weight: .medium)
         label.textColor = .ypBlack
@@ -53,7 +53,7 @@ final class TrackersViewController: UIViewController {
     private lazy var filterButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle(NSLocalizedString("title_filters", comment: ""), for: .normal)
+        button.setTitle(Localizable.Filters.titleFilters.localized, for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .ypBlue
         button.layer.cornerRadius = 16
@@ -107,8 +107,8 @@ final class TrackersViewController: UIViewController {
         logger.info("called: \(#function)")
         
         let alert = UIAlertController(
-            title: NSLocalizedString("unavailable", comment: ""),
-            message: NSLocalizedString("future_date_warning", comment: ""),
+            title: Localizable.Filters.unavailable.localized,
+            message: Localizable.Other.futureDateWarning.localized,
             preferredStyle: .alert
         )
         alert.addAction(UIAlertAction(title: "ОК", style: .default))
@@ -124,10 +124,10 @@ final class TrackersViewController: UIViewController {
            !text.isEmpty || viewModel.isFilterActive()
         {
             dizzyImage.image = UIImage(resource: .notFound)
-            label.text = NSLocalizedString("not_found", comment: "")
+            label.text = Localizable.Filters.notFound.localized
         } else {
             dizzyImage.image = UIImage(resource: .dizzy)
-            label.text = NSLocalizedString("what_we_will_be_tracking", comment: "")
+            label.text = Localizable.Other.whatWeWillBeTracking.localized
         }
         
         filterButton.isHidden = true
@@ -238,7 +238,7 @@ final class TrackersViewController: UIViewController {
     private func setupNavigation() {
         logger.info("called: \(#function) \(#line)")
         
-        let text = NSLocalizedString("title_trackers", comment: "")
+        let text = Localizable.Other.titleTrackers.localized
         title = text
         navigationController?.navigationBar.prefersLargeTitles = true
         
@@ -276,7 +276,7 @@ final class TrackersViewController: UIViewController {
         
         searchController.obscuresBackgroundDuringPresentation = false
         
-        let searchText = NSLocalizedString("search", comment: "")
+        let searchText = Localizable.Other.search.localized
         searchController.searchBar.placeholder = searchText
         navigationItem.searchController = searchController
         navigationItem.hidesSearchBarWhenScrolling = false
@@ -329,7 +329,7 @@ final class TrackersViewController: UIViewController {
     private func deleteTapped(tracker: Tracker) {
         let alert = UIAlertController(
             title: "",
-            message: NSLocalizedString("wanna_delete_tracker", comment: ""),
+            message: Localizable.Edit.wannaDeleteTracker.localized,
             preferredStyle: .actionSheet
         )
         alert.addAction(UIAlertAction(title: NSLocalizedString("delete", comment: ""), style: .destructive) { [weak self] _ in self?.viewModel.deleteTracker(tracker.id) })
@@ -382,16 +382,16 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         
         return UIContextMenuConfiguration(actionProvider: { actions in
             return UIMenu(children: [
-                UIAction(title: NSLocalizedString("pin", comment: "")) { _ in
+                UIAction(title: Localizable.Edit.pin.localized) { _ in
                     
                 },
-                UIAction(title: NSLocalizedString("edit", comment: "")) { [weak self] _ in
+                UIAction(title: Localizable.Edit.edit.localized) { [weak self] _ in
                     guard let tracker = self?.viewModel.tracker(at: indexPath) else {
                         return
                     }
                     self?.editTapped(onTracker: tracker)
                 },
-                UIAction(title: NSLocalizedString("delete", comment: ""), attributes: .destructive) { [weak self] _ in
+                UIAction(title: Localizable.Edit.delete.localized, attributes: .destructive) { [weak self] _ in
                     guard let tracker = self?.viewModel.tracker(at: indexPath) else {
                         return
                     }

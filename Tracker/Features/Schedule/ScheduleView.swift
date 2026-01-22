@@ -23,7 +23,7 @@ final class ScheduleView: UIViewController {
     // MARK: - UI Elements
     private lazy var button: UIButton = {
         let button = UIButton()
-        let text = NSLocalizedString("ready", comment: "")
+        let text = Localizable.Other.ready.localized
         button.setTitle(text, for: .normal)
         button.setTitleColor(.ypWhite, for: .normal)
         button.backgroundColor = .ypBlack
@@ -70,7 +70,7 @@ final class ScheduleView: UIViewController {
     }
     
     private func setupUI() {
-        let text = NSLocalizedString("schedule", comment: "")
+        let text = Localizable.Other.schedule.localized
         title = text
         view.backgroundColor = .ypWhite
         
@@ -108,7 +108,7 @@ final class ScheduleView: UIViewController {
         
         navigationItem.titleView = {
             let label = UILabel()
-            label.text = NSLocalizedString("schedule", comment: "")
+            label.text = Localizable.Other.schedule.localized
             label.font = titleFont
             label.textColor = .ypBlack
             label.textAlignment = .center

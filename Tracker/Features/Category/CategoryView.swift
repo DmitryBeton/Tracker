@@ -42,7 +42,7 @@ final class CategoryView: UIViewController {
     
     private let label: UILabel = {
         let label = UILabel()
-        let text = NSLocalizedString("can_be_combined_into_categories", comment: "")
+        let text = Localizable.Other.canBeCombinedIntoCategories.localized
         label.textAlignment = .center
         label.text = text
         label.font = .systemFont(ofSize: 12, weight: .medium)
@@ -54,7 +54,7 @@ final class CategoryView: UIViewController {
     
     private let addButton: UIButton = {
         let button = UIButton()
-        let text = NSLocalizedString("add_category", comment: "")
+        let text = Localizable.Other.addCategory.localized
         button.setTitle(text, for: .normal)
         button.backgroundColor = .ypBlack
         button.setTitleColor(.ypWhite, for: .normal)
@@ -123,11 +123,11 @@ final class CategoryView: UIViewController {
     private func deleteTapped(index: IndexPath) {
         let alert = UIAlertController(
             title: "",
-            message: "Эта категория точно не нужна?",
+            message: Localizable.Edit.deleteCategory.localized,
             preferredStyle: .actionSheet
         )
-        alert.addAction(UIAlertAction(title: "Удалить", style: .destructive) { [weak self] _ in self?.viewModel.deleteCategory(at: index) })
-        alert.addAction(UIAlertAction(title: "Отменить", style: .default))
+        alert.addAction(UIAlertAction(title: Localizable.Edit.delete.localized, style: .destructive) { [weak self] _ in self?.viewModel.deleteCategory(at: index) })
+        alert.addAction(UIAlertAction(title: Localizable.Other.cancel.localized, style: .default))
         
         present(alert, animated: true)
         
@@ -135,7 +135,7 @@ final class CategoryView: UIViewController {
     
     // MARK: - UI Setup
     private func setupUI() {
-        let text = NSLocalizedString("category", comment: "")
+        let text = Localizable.Other.category.localized
         if let navigationController = navigationController {
             let appearance = UINavigationBarAppearance()
             appearance.configureWithOpaqueBackground()
@@ -265,14 +265,14 @@ extension CategoryView: UITableViewDataSource, UITableViewDelegate {
             actionProvider: { suggestedActions in
                 
                 let deleteAction = UIAction(
-                    title: NSLocalizedString("delete", comment: ""),
+                    title: NSLocalizedString(Localizable.Edit.delete.localized, comment: ""),
                     attributes: .destructive
                 ) { _ in
                     self.deleteTapped(index: indexPath)
                 }
                 
                 let editAction = UIAction(
-                    title: NSLocalizedString("edit", comment: ""),
+                    title: NSLocalizedString(Localizable.Edit.edit.localized, comment: ""),
                 ) { _ in
                     if let cell = tableView.cellForRow(at: indexPath) as? CategoryTableViewCell {
                         let categoryTitle = cell.getCategory()

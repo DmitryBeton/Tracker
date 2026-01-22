@@ -72,6 +72,7 @@
 
 "wanna_delete_tracker" = "Уверены что хотите удалить трекер?";
 
+"delete_category" = "Эта категория точно не нужна?";
 // Filters
 "all_trackers" = "Все трекеры";
 "today" = "Трекеры на сегодня";

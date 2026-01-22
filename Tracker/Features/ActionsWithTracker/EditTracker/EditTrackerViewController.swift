@@ -65,7 +65,7 @@ final class EditTrackerViewController: UIViewController {
     
     private lazy var textField: UITextField = {
         let textField = UITextField()
-        let text = NSLocalizedString("enter_name_of_tracker", comment: "")
+        let text = Localizable.Other.enterNameOfTracker.localized
         textField.placeholder = text
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.backgroundColor = .ypBackground
@@ -84,7 +84,7 @@ final class EditTrackerViewController: UIViewController {
     
     private lazy var warningLabel: UILabel = {
         let label = UILabel()
-        let text = NSLocalizedString("symbol_limit", comment: "")
+        let text = Localizable.Other.symbolLimit.localized
         label.text = text
         label.textColor = .ypRed
         label.font = UIFont.systemFont(ofSize: 17, weight: .regular)
@@ -121,7 +121,7 @@ final class EditTrackerViewController: UIViewController {
     
     private lazy var cancelButton: UIButton = {
         let button = UIButton()
-        let text = NSLocalizedString("cancel", comment: "")
+        let text = Localizable.Other.cancel.localized
         button.setTitle(text, for: .normal)
         button.setTitleColor(UIColor.ypRed, for: .normal)
         button.layer.borderWidth = 1
@@ -135,7 +135,7 @@ final class EditTrackerViewController: UIViewController {
     
     private lazy var addButton: UIButton = {
         let button = UIButton()
-        let text = NSLocalizedString("save", comment: "")
+        let text = Localizable.Edit.save.localized
         button.setTitle(text, for: .normal)
         button.setTitleColor(.ypWhite, for: .normal)
         button.backgroundColor = .ypGray
@@ -252,7 +252,7 @@ final class EditTrackerViewController: UIViewController {
     
     // MARK: - Setup UI
     private func setupUI() {
-        let titleText = NSLocalizedString("edit_tracker", comment: "")
+        let titleText = Localizable.Edit.editTracker.localized
         title = titleText
         view.backgroundColor = .ypWhite
         

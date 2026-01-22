@@ -16,7 +16,7 @@ final class EditCategoryView: UIViewController {
     // MARK: - UI
     private lazy var textField: UITextField = {
         let textField = UITextField()
-        let text = NSLocalizedString("enter_name_of_category", comment: "")
+        let text = Localizable.Other.enterNameOfCategory.localized
         textField.placeholder = text
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.backgroundColor = .ypBackground
@@ -34,7 +34,7 @@ final class EditCategoryView: UIViewController {
     
     private lazy var button: UIButton = {
         let button = UIButton()
-        let text = NSLocalizedString("ready", comment: "")
+        let text = Localizable.Other.ready.localized
         button.setTitle(text, for: .normal)
         button.layer.cornerRadius = 16
         button.isEnabled = false
@@ -101,7 +101,7 @@ final class EditCategoryView: UIViewController {
     
     // MARK: - UI Setup
     private func setupUI() {
-        let text = NSLocalizedString("edit_category", comment: "")
+        let text = Localizable.Edit.editCategory.localized
         title = text
         if let navigationController = navigationController {
             let appearance = UINavigationBarAppearance()

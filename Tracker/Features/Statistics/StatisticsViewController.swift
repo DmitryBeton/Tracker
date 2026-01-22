@@ -28,7 +28,7 @@ final class StatisticsViewController: UIViewController {
     private let noDataLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = NSLocalizedString("no_data_for_analysis", comment: "")
+        label.text = Localizable.Statistics.noDataForAnalysis.localized
         label.textColor = .ypBlack
         return label
     }()
@@ -71,7 +71,7 @@ final class StatisticsViewController: UIViewController {
     
     // MARK: - Setup
     private func setupUI() {
-        title = NSLocalizedString("statistics", comment: "")
+        title = Localizable.Statistics.statistics.localized
         navigationController?.navigationBar.prefersLargeTitles = true
         
         let appearance = UINavigationBarAppearance()

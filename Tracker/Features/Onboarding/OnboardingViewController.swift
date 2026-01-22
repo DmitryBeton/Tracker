@@ -20,7 +20,7 @@ final class OnboardingViewController: UIPageViewController {
     // MARK: - UI Elements
     private lazy var button: UIButton = {
         let button = UIButton()
-        let text = NSLocalizedString("technologies", comment: "")
+        let text = Localizable.Onboarding.technologies.localized
         button.setTitle(text, for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)

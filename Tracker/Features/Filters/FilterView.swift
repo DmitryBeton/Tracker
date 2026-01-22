@@ -39,7 +39,7 @@ final class FilterViewController: UIViewController {
     }
     // MARK: - Setup
     private func setupUI() {
-        let text = NSLocalizedString("title_filters", comment: "")
+        let text = Localizable.Filters.titleFilters.localized
         title = text
         
         view.backgroundColor = .ypWhite

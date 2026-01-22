@@ -29,7 +29,7 @@ final class CreateTrackerModel {
             return .failure(.nameTooLong)
         }
         
-        trackerData.name = name
+        trackerData = trackerData.withName(name)
         return .success(name)
     }
     
@@ -38,7 +38,7 @@ final class CreateTrackerModel {
             return .failure(.categoryNotSelected)
         }
         
-        trackerData.category = category
+        trackerData = trackerData.withCategory(category)
         return .success(())
     }
     
@@ -47,7 +47,7 @@ final class CreateTrackerModel {
             return .failure(.scheduleNotSelected)
         }
         
-        trackerData.schedule = schedule
+        trackerData = trackerData.withSchedule(schedule)
         return .success(())
     }
     
@@ -56,7 +56,7 @@ final class CreateTrackerModel {
             return .failure(.emojiNotSelected)
         }
         
-        trackerData.emoji = emoji
+        trackerData = trackerData.withEmoji(emoji)
         return .success(())
     }
     
@@ -65,7 +65,7 @@ final class CreateTrackerModel {
             return .failure(.colorNotSelected)
         }
         
-        trackerData.color = color
+        trackerData = trackerData.withColor(color)
         return .success(())
     }
     
